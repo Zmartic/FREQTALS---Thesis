@@ -104,12 +104,12 @@ class FreqT:
          * read input data
         """
         try:
-            readXML_int = ReadXMLInt()
+            readXML = ReadXMLInt()
             # remove black labels when reading ASTs
             if self._config.get2Class():
-                readXML_int.readDatabase(self._transaction_list, 1,
+                readXML.readDatabase(self._transaction_list, 1,
                         self._config.getInputFiles1(), self._labelIndex_dict, self.__transactionClassID_list, self._config.getWhiteLabelFile())
-                readXML_int.readDatabase(self._transaction_list, 0,
+                readXML.readDatabase(self._transaction_list, 0,
                         self._config.getInputFiles2(), self._labelIndex_dict, self.__transactionClassID_list, self._config.getWhiteLabelFile())
                 self.sizeClass1 = sum(self.__transactionClassID_list)
                 self.sizeClass2 = len(self.__transactionClassID_list) - self.sizeClass1
@@ -117,7 +117,7 @@ class FreqT:
                 initGrammar_Str(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict, self._config.buildGrammar())
                 initGrammar_Int2(self._grammarInt_dict, self._grammar_dict, self._labelIndex_dict)
             else:
-                readXML_int.readDatabase(self._transaction_list, 1,
+                readXML.readDatabase(self._transaction_list, 1,
                         self._config.getInputFiles(), self._labelIndex_dict, self.__transactionClassID_list, self._config.getWhiteLabelFile())
                 # create grammar (labels are strings) which is used to print patterns
                 initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict, self._config.buildGrammar())
@@ -135,12 +135,12 @@ class FreqT:
             trace = traceback.format_exc()
             print(trace)
 
-    """
-     * run the 2nd step to find maximal patterns from groups of root occurrences
-     * @param: _rootIDs_dict, a dictionary with Projected as keys and FTArray as value
-     * @param: report, a open file ready to be writting
-    """
     def expandPatternFromRootIDs(self, _rootIDs_dict, report):
+        """
+         * run the 2nd step to find maximal patterns from groups of root occurrences
+         * @param: _rootIDs_dict, a dictionary with Projected as keys and FTArray as value
+         * @param: report, a open file ready to be writting
+        """
         try:
             print("Mining maximal frequent subtrees ... \n")
             self.log(report, "")
@@ -167,14 +167,14 @@ class FreqT:
             e = sys.exc_info()[0]
             print("expand pattern from root IDs error " + str(e) + "\n")
 
-    """
-     * build subtrees of size 1 based on root labels
-       -> return a dictionary with FTArray as keys and Projected as value
-     * @param: trans_list, a list of list of NodeFreqT
-     * @param: _rootLabels_set, a list of String
-     * @param: _transactionClassID_list, a list of Integer
-    """
     def buildFP1(self, trans_list, _rootLabels_set, _transactionClassID_list):
+        """
+         * build subtrees of size 1 based on root labels
+           -> return a dictionary with FTArray as keys and Projected as value
+         * @param: trans_list, a list of list of NodeFreqT
+         * @param: _rootLabels_set, a list of String
+         * @param: _transactionClassID_list, a list of Integer
+        """
         freq1_ord_dict = collections.OrderedDict()  # ordered dictionaray with FTArray as keys and Projected as value
         try:
             for i in range(len(trans_list)):
@@ -196,11 +196,11 @@ class FreqT:
             print(trace)
         return freq1_ord_dict
 
-    """
-     * expand FP1 to find frequent subtrees based on input constraints
-     * @param: freq1_dict, a dictionary with FTArray as keys and Projected as value
-    """
     def expandFP1(self, freq1_dict):
+        """
+         * expand FP1 to find frequent subtrees based on input constraints
+         * @param: freq1_dict, a dictionary with FTArray as keys and Projected as value
+        """
         # for each label found in FP1, expand it to find maximal patterns
         for key in freq1_dict:
             pattern = FTArray()
@@ -208,12 +208,12 @@ class FreqT:
             # recursively expand pattern
             self.expandPattern(pattern, freq1_dict[key])
 
-    """
-     * expand pattern
-     * @param: pattern, FTArray
-     * @param: projected, Projected
-    """
     def expandPattern(self, pattern, projected):
+        """
+         * expand pattern
+         * @param: pattern, FTArray
+         * @param: projected, Projected
+        """
         try:
             # if it is timeout then stop expand the pattern;
             if self.is_timeout():
@@ -261,13 +261,13 @@ class FreqT:
             print(trace)
             raise
 
-    """
-     * generate candidates for a pattern
-      -> return a dictionary with FTArray as key and Projected as value
-     * @param: projected, Projected
-     * @param: _transaction_list, list of list of NodeFreqT
-    """
     def generateCandidates(self, projected, _transaction_list):
+        """
+         * generate candidates for a pattern
+          -> return a dictionary with FTArray as key and Projected as value
+         * @param: projected, Projected
+         * @param: _transaction_list, list of list of NodeFreqT
+        """
         # use oredered dictionary to keep the order of the candidates
         candidates_dict = collections.OrderedDict()  # an ordored dictionary with FTArray as keys and Projected as values
         try:
@@ -303,18 +303,18 @@ class FreqT:
             raise
         return candidates_dict
 
-    """
-     * update candidate locations for two-class data
-     * @param: freq1_dict, a dictionary with FTArray as keys and Projected as values
-     * @param: candidate, Integer
-     * @param: classId, Integer
-     * @param: id, Integer
-     * @param: rightmostPos, Integer
-     * @param: depth, Integer
-     * @param: prefixInt, FTArray
-     * @param: initLocations, Location
-    """
     def updateCandidates(self, freq1_dict, candidate, classID, id, rightmostPos, depth, prefixInt, initLocations):
+        """
+         * update candidate locations for two-class data
+         * @param: freq1_dict, a dictionary with FTArray as keys and Projected as values
+         * @param: candidate, Integer
+         * @param: classId, Integer
+         * @param: id, Integer
+         * @param: rightmostPos, Integer
+         * @param: depth, Integer
+         * @param: prefixInt, FTArray
+         * @param: initLocations, Location
+        """
         try:
             newTree = FTArray()
             newTree.addAll(prefixInt)
@@ -338,22 +338,22 @@ class FreqT:
             e = sys.exc_info()[0]
             print("update projected location error " + str(e) + "\n")
 
-    """
-    * keep track the pattern which has the right-most node is a leaf
-    * @param: pat, FTArray
-    * @param: projected, Projected
-    """
     def keepLeafPattern(self, pat, projected):
+        """
+         * keep track the pattern which has the right-most node is a leaf
+         * @param: pat, FTArray
+         * @param: projected, Projected
+        """
         self.leafPattern = FTArray()
         self.leafPattern.ftarray(pat)
         self.leafProjected = projected
 
-    """
-     * add the tree to the root IDs or the MFP
-     * @param: pat FTArray
-     * @param: projected, Projected
-    """
     def addTree(self, pat, projected):
+        """
+         * add the tree to the root IDs or the MFP
+         * @param: pat FTArray
+         * @param: projected, Projected
+        """
         # check minsize constraints and right mandatory children
         constraint = Constraint()
         if constraint.checkOutput(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not constraint.missingRightObligatoryChild(pat, self._grammarInt_dict):
@@ -373,13 +373,13 @@ class FreqT:
                     # add pattern to maximal pattern list
                     self.addMaximalPattern(pat, projected, self.MFP_dict)
 
-    """
-     * add root occurrences of pattern to rootIDs
-     * @param: pat, FTArray
-     * @param: projected, Projected
-     * @param: _rootIDs_dict, a dictionary with Projected as keys and FTArray as values
-    """
     def addRootIDs(self, pat, projected, _rootIDs_dict):
+        """
+         * add root occurrences of pattern to rootIDs
+         * @param: pat, FTArray
+         * @param: projected, Projected
+         * @param: _rootIDs_dict, a dictionary with Projected as keys and FTArray as values
+        """
         try:
             # find root occurrences of current pattern
             util = Util()
@@ -412,13 +412,14 @@ class FreqT:
             print("Error: adding rootIDs " + str(e) + "\n")
             trace = traceback.format_exc()
             print(trace)
-    """
-     * add maximal patterns
-     * @param: pat, FTArray
-     * @param: projected, Projected
-     * @param: _MFP_dict, a dictionary with FTArray as keys and String as values
-    """
+
     def addMaximalPattern(self, pat, projected, _MFP_dict):
+        """
+         * add maximal patterns
+         * @param: pat, FTArray
+         * @param: projected, Projected
+         * @param: _MFP_dict, a dictionary with FTArray as keys and String as values
+        """
         if len(_MFP_dict) != 0:
             for key in self.notF_set:
                 if pat.equals(key):
@@ -451,12 +452,12 @@ class FreqT:
             patternSupport = self.getSupportString(pat, projected)
             _MFP_dict[pat] = patternSupport
 
-    """
-     * get a string of support, score, size for a pattern
-     * @param: pat, FTArray
-     * @param: projected, Projected
-    """
     def getSupportString(self, pat, projected):
+        """
+         * get a string of support, score, size for a pattern
+         * @param: pat, FTArray
+         * @param: projected, Projected
+        """
         constraint = Constraint()
         pattern_Int = PatternInt()
         if self._config.get2Class():
@@ -472,24 +473,24 @@ class FreqT:
             result = str(support) + "," + str(wsupport) + "," + str(size)
         return result
 
-    """
-     * group root occurrences from 1000 patterns in HSP
-      -> return a dictionary with Projected as keys and FTArray as values
-     * @param: _HSP_dict, a dictionary with FTArray as keys and Projected as value
-    """
     def groupRootOcc(self, _HSP_dict):
+        """
+         * group root occurrences from 1000 patterns in HSP
+          -> return a dictionary with Projected as keys and FTArray as values
+         * @param: _HSP_dict, a dictionary with FTArray as keys and Projected as value
+        """
         _rootIDs_dict = dict()
         for key in _HSP_dict:
             self.addRootIDs(key, _HSP_dict[key], _rootIDs_dict)
         return _rootIDs_dict
 
-    """
-     * add pattern to the list of 1000-highest chi-square score patterns
-     * @param: pat, FTArray
-     * @param: projected, Projected
-     * @param: _HSP_dict, dictionary with FTArray as keys and Projected as values
-    """
     def addHighScorePattern(self, pat, projected, _HSP_dict):
+        """
+         * add pattern to the list of 1000-highest chi-square score patterns
+         * @param: pat, FTArray
+         * @param: projected, Projected
+         * @param: _HSP_dict, dictionary with FTArray as keys and Projected as values
+        """
         constraint = Constraint()
         patPresent = False
         for key in _HSP_dict:
@@ -510,11 +511,11 @@ class FreqT:
                 # add new pattern
                 _HSP_dict[pat] = projected
 
-    """
-     * get minimum score of pattern in HSP_dict
-     * @param: _HSP_dict: dictionary with FTArray as keys and Projected as values
-    """
     def getMinScore(self, _HSP_dict):
+        """
+         * get minimum score of pattern in HSP_dict
+         * @param: _HSP_dict: dictionary with FTArray as keys and Projected as values
+        """
         score = 1000.0
         constraint = Constraint()
         for key in _HSP_dict:
@@ -523,11 +524,11 @@ class FreqT:
                 score = scoreTmp
         return score
 
-    """
-     * get a pattern which has minimum chi-square score in the list of patterns
-     * @param: _HSP_dict: dictionary with FTArray as key and Projected as values
-    """
     def getMinScorePattern(self, _HSP_dict):
+        """
+         * get a pattern which has minimum chi-square score in the list of patterns
+         * @param: _HSP_dict: dictionary with FTArray as key and Projected as values
+        """
         score = 1000.0
         constraint = Constraint()
         minScorerPattern = FTArray()
@@ -538,16 +539,16 @@ class FreqT:
                 minScorerPattern.ftarray(key)
         return minScorerPattern
 
-    """
-     * print patterns found in the first step
-     * @param: MFP_dict, a dictionary with FTArray as keys and String as value
-     * @param: config, Config
-     * @param: grammar_dict, dictionary with String as keys and list of String as value
-     * @param: labelIndex_dict, dictionary with Integer as keys and String as values
-     * @param: xmlCharacters_dict, dictionary with String as keys and Sting as values
-     * @param: report, a link to a file ready to be written
-    """
     def outputPatternInTheFirstStep(self, MFP_dict, config, grammar_dict, labelIndex_dict, xmlCharacters_dict, report):
+        """
+         * print patterns found in the first step
+         * @param: MFP_dict, a dictionary with FTArray as keys and String as value
+         * @param: config, Config
+         * @param: grammar_dict, dictionary with String as keys and list of String as value
+         * @param: labelIndex_dict, dictionary with Integer as keys and String as values
+         * @param: xmlCharacters_dict, dictionary with String as keys and Sting as values
+         * @param: report, a link to a file ready to be written
+        """
         self.log(report, "OUTPUT")
         self.log(report, "===================")
         if self.finished:
@@ -563,15 +564,15 @@ class FreqT:
         self.log(report, "+ Running times = " + str(diff1) + " s")
         report.close()
 
-    """
-     * print maximal patterns to XML file
-     * @param: MFP_dict, dictionary with FTArray as key and String as values
-     * @param: config, Config
-     * @param: grammar_dict, dictionary with String as keys and list of String as values
-     * @param: labelIndex_dict, dictionary with Integer as keys and String as values
-     * @param: xmlCharacters_dict, dictionary with String as keys et String as values
-    """
     def outputPatterns(self, MFP_dict, config, grammar_dict, labelIndex_dict, xmlCharacters_dict):
+        """
+         * print maximal patterns to XML file
+         * @param: MFP_dict, dictionary with FTArray as key and String as values
+         * @param: config, Config
+         * @param: grammar_dict, dictionary with String as keys and list of String as values
+         * @param: labelIndex_dict, dictionary with Integer as keys and String as values
+         * @param: xmlCharacters_dict, dictionary with String as keys et String as values
+        """
         try:
             outFile = config.getOutputFile()
             # create output file to store patterns for mining common patterns

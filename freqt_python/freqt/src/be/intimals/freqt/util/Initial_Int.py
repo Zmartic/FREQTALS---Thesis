@@ -6,7 +6,7 @@ from freqt.src.be.intimals.freqt.util.Variables import *
 
 import sys
 
-
+## UNUSED
 def initGrammar_Int(path, gram_dict, labelIndex_dict):
     """
      * build grammar from a set of ASTs
@@ -139,7 +139,7 @@ def find_index(label, labelIndex_dict):
         if labelIndex_dict[key] == label:
             index = key
     return index
-
+## UNUSED
 def readWhiteLabel(path, _grammar_dict, _whiteLabels_dict, _blackLabels_dict, labelIndex_dict):
     """
      * read whitelist and create blacklist

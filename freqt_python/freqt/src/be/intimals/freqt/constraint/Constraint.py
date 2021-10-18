@@ -16,11 +16,25 @@ class Constraint:
         else:
             return False
 
-    """
-     * return number of occurrences of a pattern in two classes
-    """
+    def chiSquare(self, projected, sizeClass1, sizeClass2, weighted):
+        """
+         * return chiSquare value of a pattern in two classes
+        """
+        ac = self.get2ClassSupport(projected, weighted)
+
+        a = ac[0]  # occurrences in the first class data
+        c = ac[1]  # occurrences in the second class data
+
+        yaminxb = sizeClass2 * a - sizeClass1 * c
+        one = yaminxb / ((a+c) * (sizeClass1 + sizeClass2 - a - c))
+        two = yaminxb / (sizeClass1 * sizeClass2)
+
+        return one * two * (sizeClass1 + sizeClass2)
 
     def get2ClassSupport(self, projected, weighted):
+        """
+         * return number of occurrences of a pattern in two classes
+        """
         a = 0
         c = 0
         if weighted:
@@ -33,10 +47,10 @@ class Constraint:
             c = self.getSupport(projected) - a
         return [a, c]
 
-    """
-     * count support of pattern in the class 1
-    """
     def getSupportClass1(self, projected):
+        """
+         * count support of pattern in the class 1
+        """
         a = 0
         old = - 1
         for i in range(projected.getProjectLocationSize()):
@@ -45,10 +59,10 @@ class Constraint:
                 old = projected.getProjectLocation(i).getLocationId()
         return a
 
-    """
-     * count root support of pattern in the class 1
-    """
     def getRootSupportClass1(self, projected):
+        """
+         * count root support of pattern in the class 1
+        """
         rootSup = 0
         oldLocationID = - 1
         oldRootID = -1
@@ -63,37 +77,22 @@ class Constraint:
                 oldRootID = rootID1
         return rootSup
 
-    """
-     * return chiSquare value of a pattern in two classes
-    """
-    def chiSquare(self, projected, sizeClass1, sizeClass2, weighted):
-        ac = self.get2ClassSupport(projected, weighted)
-
-        a = ac[0]  # occurrences in the first class data
-        c = ac[1]  # occurrences in the second class data
-
-        yaminxb = sizeClass2 * a - sizeClass1 * c
-        one = yaminxb / ((a+c) * (sizeClass1 + sizeClass2 - a - c))
-        two = yaminxb / (sizeClass1 * sizeClass2)
-
-        return one * two * (sizeClass1 + sizeClass2)
-
-    """
-     * check output constraints: minLeaf and minNode
-     * @param pat
-     * @return
-    """
     def checkOutput(self, pat, minLeaf, minNode):
+        """
+         * check output constraints: minLeaf and minNode
+         * @param pat
+         * @return
+        """
         if self.satisfyMinLeaf(pat, minLeaf) and self.satisfyMinNode(pat, minNode):
             return True
         return False
 
-    """
-     * calculate the support of a pattern = number of files
-     * @param projected
-     * @return
-    """
     def getSupport(self, projected):
+        """
+         * calculate the support of a pattern = number of files
+         * @param projected
+         * @return
+        """
         old = -1
         sup = 0
         for i in range(projected.getProjectLocationSize()):
@@ -102,12 +101,12 @@ class Constraint:
             old = projected.getProjectLocation(i).getLocationId()
         return sup
 
-    """
-     * calculate the root support of a pattern = number of occurrences
-     * @param projected
-     * @return
-    """
     def getRootSupport(self, projected):
+        """
+         * calculate the root support of a pattern = number of occurrences
+         * @param projected
+         * @return
+        """
         rootSup = 0
         oldLocationID = -1
         oldRootID = -1
@@ -120,13 +119,13 @@ class Constraint:
             oldRootID = rootID1
         return rootSup
 
-    """
-     * prune candidates based on minimal support
-     * @param: candidates, dictionary with FTArray as key and Projected as value
-     * @param: minSup, int
-     * @param: weighted, boolean
-    """
     def prune(self, candidates, minSup, weighted):
+        """
+         * prune candidates based on minimal support
+         * @param: candidates, dictionary with FTArray as key and Projected as value
+         * @param: minSup, int
+         * @param: weighted, boolean
+        """
         to_remove_list = list()
         for elem in candidates:
             sup = self.getSupport(candidates[elem])
@@ -143,12 +142,12 @@ class Constraint:
         for elem in to_remove_list:
             candidates.pop(elem, -1)
 
-    """
-     * return true if the label_int is in the set of black labels
-     * @param: label_int, an integer
-     * @param: _blackLabels, une liste de liste d'Integer
-    """
     def checkBlackListLabel(self, label_int, _blackLabels):
+        """
+         * return true if the label_int is in the set of black labels
+         * @param: label_int, an integer
+         * @param: _blackLabels, une liste de liste d'Integer
+        """
         for labels in _blackLabels:
             if label_int in labels:
                 return True
@@ -167,49 +166,49 @@ class Constraint:
         return self.checkBlackListLabel(candidateLabel_int, _blackLabels_dict.values()) and pattern_Int.checkBlackLabels(pat, key, _blackLabels_dict, candidateLabel_int)
     """
 
-    """
-     * return true if the number of nodes is larger or equal to minNode
-     * @param pat
-     * @return
-    """
     def satisfyMinNode(self, pat, minNode):
+        """
+         * return true if the number of nodes is larger or equal to minNode
+         * @param pat
+         * @return
+        """
         pattern_Int = PatternInt()
         return pattern_Int.countNode(pat) >= minNode
 
-    """
-     * return true if the number of leafs is larger or equal to minLeaf
-     * @param pat
-     * @return
-    """
     def satisfyMinLeaf(self, pat, minLeaf):
+        """
+         * return true if the number of leafs is larger or equal to minLeaf
+         * @param pat
+         * @return
+        """
         pattern_Int = PatternInt()
         return pattern_Int.countLeafNode(pat) >= minLeaf
 
-    """
-     * return true if the number of leafs of the pattern is larger than maxLeaf
-     * @param pattern
-     * @return
-    """
     def satisfyMaxLeaf(self, pattern, maxLeaf):
+        """
+         * return true if the number of leafs of the pattern is larger than maxLeaf
+         * @param pattern
+         * @return
+        """
         pattern_Int = PatternInt()
         return pattern_Int.countLeafNode(pattern) >= maxLeaf
 
-    """
-     * return true if the pattern misses leaf
-     * @param pattern
-     * @return
-    """
     def isNotFullLeaf(self, pattern):
+        """
+         * return true if the pattern misses leaf
+         * @param pattern
+         * @return
+        """
         pattern_Int = PatternInt()
         return pattern_Int.checkMissingLeaf(pattern)
 
-    """
-     * return true if pattern misses obligatory child at the left side of the current node
-     * @param: pat, FTArray
-     * @param: candidate, FTArray
-     * @param: _grammarInt_dict, dictionary with Integer as keys and list of String as values
-    """
     def missingLeftObligatoryChild(self, pat, candidate, _grammarInt):
+        """
+         * return true if pattern misses obligatory child at the left side of the current node
+         * @param: pat, FTArray
+         * @param: candidate, FTArray
+         * @param: _grammarInt_dict, dictionary with Integer as keys and list of String as values
+        """
         missMandatoryChild = False
         try:
             pattern_Int = PatternInt()
@@ -247,16 +246,16 @@ class Constraint:
 
         return missMandatoryChild
 
-    """
-     *  return true if the pattern misses the obligatory child at right side of the current node
-        for each node in the pattern do
-      1. find children of the current node in the pattern
-      2. find children of the current node in the grammar
-      3. compare two set of children to determine the pattern missing mandatory child or not
-     * @param: pat, FTArray
-     * @param: _grammerInt_dict, dictionary with Integer as keys and list of String as values
-    """
     def missingRightObligatoryChild(self, pat, _grammarInt_dict):
+        """
+         *  return true if the pattern misses the obligatory child at right side of the current node
+            for each node in the pattern do
+          1. find children of the current node in the pattern
+          2. find children of the current node in the grammar
+          3. compare two set of children to determine the pattern missing mandatory child or not
+         * @param: pat, FTArray
+         * @param: _grammerInt_dict, dictionary with Integer as keys and list of String as values
+        """
         missMandatoryChild = False
         try:
             pattern_Int = PatternInt()
@@ -303,14 +302,14 @@ class Constraint:
 
 
     # /////////// specific functions for COBOL source code //////////////////
-    """
-     * @param: pattern, FTArray
-     * @param: entry_dict, dictionary with FTArray as keys and Projected as values
-     * @param: key, FTArray, a key of entry_dict
-     * @param: labelIndex_dict, dictionary with Integer as keys and String as values
-     * @param: transaction_list, list of list of NodeFreqT 
-    """
     def checkCobolConstraints(self, pattern, entry_dict, key, labelIndex_dict, transaction_list):
+        """
+         * @param: pattern, FTArray
+         * @param: entry_dict, dictionary with FTArray as keys and Projected as values
+         * @param: key, FTArray, a key of entry_dict
+         * @param: labelIndex_dict, dictionary with Integer as keys and String as values
+         * @param: transaction_list, list of list of NodeFreqT
+        """
         # check continuous paragraphs
         # if potential candidate = SectionStatementBlock then check if candidate belongs to black-section or not
         candidateLabel = labelIndex_dict[key.get(key.size() - 1)]
@@ -321,13 +320,13 @@ class Constraint:
         if candidateLabel == "ParagraphStatementBlock":
             self.checkContinuousParagraph(pattern, entry_dict, key, transaction_list)
 
-    """
-     * @param: pat, FTArray
-     * @param: entry_dict, dictionary with FTArray as keys and Projected as values
-     * @param: key, FTArray, a key of entry_dict
-     * @param: _transaction_list, list of list of NodeFreqT
-    """
     def checkContinuousParagraph(self, pat, entry_dict, key, _transaction_list):
+        """
+         * @param: pat, FTArray
+         * @param: entry_dict, dictionary with FTArray as keys and Projected as values
+         * @param: key, FTArray, a key of entry_dict
+         * @param: _transaction_list, list of list of NodeFreqT
+        """
         try:
             pattern_Int = PatternInt()
             projected = entry_dict[key]
@@ -365,13 +364,13 @@ class Constraint:
             e = sys.exc_info()[0]
             print("checkContinuousParagraph " + str(e) + "\n")
 
-    """
-     * delete locations of a label that belongs to black-section?
-     * @param: entry, dictionary with FTArray as keys and Projected as values
-     * @param: key, FTArray, a key of entry_dict
-     * @param: _transaction_list, list of list of NodeFreqT
-    """
     def checkBlackSection(self, entry_dict, key, _transaction_list):
+        """
+         * delete locations of a label that belongs to black-section?
+         * @param: entry, dictionary with FTArray as keys and Projected as values
+         * @param: key, FTArray, a key of entry_dict
+         * @param: _transaction_list, list of list of NodeFreqT
+        """
         #TODO: read black-section from file
         blackSectionList_set = set()
         blackSectionList_set.add("*CCVS1")
