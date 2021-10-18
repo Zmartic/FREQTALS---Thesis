@@ -3,7 +3,7 @@
 from freqt.src.be.intimals.freqt.structure.FTArray import *
 from freqt.src.be.intimals.freqt.config.Config import *
 from freqt.src.be.intimals.freqt.core.FreqT_subtree import *
-from freqt.src.be.intimals.freqt.constraint.Constraint import *
+#from freqt.src.be.intimals.freqt.constraint.Constraint import *
 
 
 

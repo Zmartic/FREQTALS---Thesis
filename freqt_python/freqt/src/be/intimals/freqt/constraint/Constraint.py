@@ -5,7 +5,7 @@ from freqt.src.be.intimals.freqt.structure.Location import *
 from freqt.src.be.intimals.freqt.structure.NodeFreqT import *
 from freqt.src.be.intimals.freqt.structure.PatternInt import *
 from freqt.src.be.intimals.freqt.structure.Projected import *
-from freqt.src.be.intimals.freqt.util.Util import *
+#from freqt.src.be.intimals.freqt.util.Util import *
 from freqt.src.be.intimals.freqt.util.Variables import *
 
 import sys

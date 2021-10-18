@@ -189,7 +189,7 @@ def parseConfig(args_list):
         prop.setProperty("xmlCharacterFile", xmlCharacfile)
 
         # save new properties in the final configuration
-        prop.store(open(finalConfig, 'w'))
+        prop.store(open(finalConfig, 'w', encoding='utf-8'))
 
         return finalConfig
 

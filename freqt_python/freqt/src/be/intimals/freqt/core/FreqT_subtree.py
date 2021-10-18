@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 from freqt.src.be.intimals.freqt.config.Config import *
-import freqt.src.be.intimals.freqt.constraint.Constraint as Con
-import freqt.src.be.intimals.freqt.util.Util as Ut
+from freqt.src.be.intimals.freqt.constraint.Constraint import Constraint
+from freqt.src.be.intimals.freqt.util.Util import *
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import *
 from freqt.src.be.intimals.freqt.output.AoutFormatter import *
 from freqt.src.be.intimals.freqt.output.XMLOutput import *
@@ -85,7 +85,7 @@ class FreqT_subtree:
             # find all candidates of the current subtree
             candidate_dict = self.generateCandidates(projected)  # output dict of with FTArray as key and Projected as value
 
-            constraint = Con.Constraint()
+            constraint = Constraint()
             constraint.prune(candidate_dict, 2, False)  # pq 2 comme minsup?
 
             if len(candidate_dict) == 0:
@@ -113,7 +113,7 @@ class FreqT_subtree:
      * @param: minSup, the minimal support value
     """
     def prune(self, candidates_dict, minSup):
-        constraint = Con.Constraint()
+        constraint = Constraint()
         to_remove_list = list()
         for keys in candidates_dict:
             sup = constraint.getSupport(candidates_dict[keys])
