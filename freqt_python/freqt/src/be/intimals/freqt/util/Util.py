@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 
-from freqt.src.be.intimals.freqt.config.Config import *
 from freqt.src.be.intimals.freqt.core.CheckSubtree import *
-from freqt.src.be.intimals.freqt.structure.FTArray import *
-from freqt.src.be.intimals.freqt.structure.Projected import *
-from freqt.src.be.intimals.freqt.structure.NodeFreqT import *
 
 
 class Util:

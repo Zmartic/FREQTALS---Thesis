@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from freqt.src.be.intimals.freqt.config.Config import *
 from freqt.src.be.intimals.freqt.structure.Pattern import *
-from freqt.src.be.intimals.freqt.structure.Projected import *
 from freqt.src.be.intimals.freqt.util.Util import *
 from freqt.src.be.intimals.freqt.output.AoutFormatter import *
+
+import sys
 
 
 class XMLOutput(AOutputFormatter):

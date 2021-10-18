@@ -1,15 +1,7 @@
 #!/usr/bin/env python3
 
-from freqt.src.be.intimals.freqt.config.Config import *
 from freqt.src.be.intimals.freqt.constraint.Constraint import Constraint
-from freqt.src.be.intimals.freqt.util.Util import *
-from freqt.src.be.intimals.freqt.input.ReadXMLInt import *
-from freqt.src.be.intimals.freqt.output.AoutFormatter import *
 from freqt.src.be.intimals.freqt.output.XMLOutput import *
-from freqt.src.be.intimals.freqt.structure import *
-from freqt.src.be.intimals.freqt.util.Initial_Int import *
-from freqt.src.be.intimals.freqt.structure.FTArray import *
-from freqt.src.be.intimals.freqt.structure.Pattern import *
 from freqt.src.be.intimals.freqt.input.ReadFileInt import *
 from freqt.src.be.intimals.freqt.structure.Projected import *
 

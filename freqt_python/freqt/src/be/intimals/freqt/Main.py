@@ -10,7 +10,6 @@ python implementation: 12 June 2021
 
 from freqt.src.be.intimals.freqt.config.Config import *
 from freqt.src.be.intimals.freqt.core.FreqT import *
-from freqt.src.be.intimals.freqt.structure.FTArray import *
 from freqt.src.be.intimals.freqt.core.FreqT_common import *
 
 import sys

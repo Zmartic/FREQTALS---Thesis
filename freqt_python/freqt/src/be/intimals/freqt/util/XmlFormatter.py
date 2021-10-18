@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import xml.parsers
-import xml.dom
+#import xml.parsers
+#import xml.dom
 import sys
-import xml.dom.minidom
+#import xml.dom.minidom
 
 
 """

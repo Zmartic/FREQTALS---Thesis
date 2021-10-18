@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from freqt.src.be.intimals.freqt.config.Config import *
-from freqt.src.be.intimals.freqt.structure.PatternInt import *
 
 from abc import ABC, abstractmethod
 import collections

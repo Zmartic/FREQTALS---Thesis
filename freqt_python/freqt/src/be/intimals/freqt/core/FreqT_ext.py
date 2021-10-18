@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
-from freqt.src.be.intimals.freqt.constraint.Constraint import *
 from freqt.src.be.intimals.freqt.util.Util import *
 import freqt.src.be.intimals.freqt.core.FreqT as freqt
-from freqt.src.be.intimals.freqt.structure.FTArray import *
 from freqt.src.be.intimals.freqt.structure.Projected import *
 from freqt.src.be.intimals.freqt.structure.Location import *
 
