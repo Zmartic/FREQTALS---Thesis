@@ -53,8 +53,7 @@ def singleRun(args_list):
         config = Config()
         config.config(finalConfig)
 
-        freqt = FreqT()
-        freqt.FreqTInit(config)
+        freqt = FreqT(config)
         freqt.run()
 
         # run forestmatcher to find matches of patterns in source code
@@ -62,7 +61,7 @@ def singleRun(args_list):
 
         if not config.get2Class():
             # find common patterns in each cluster
-            findCommonPattern(config, freqt.getGrammar(), freqt.getXmlCharacters())
+            findCommonPattern(config, freqt.get_grammar(), freqt.get_xml_characters())
             # clean up files
             cleanUp(config)
 

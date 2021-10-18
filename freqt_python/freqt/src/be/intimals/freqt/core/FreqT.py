@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from freqt.src.be.intimals.freqt.config.Config import *
 from freqt.src.be.intimals.freqt.output.XMLOutput import *
 from freqt.src.be.intimals.freqt.util.Initial_Int import *
 from freqt.src.be.intimals.freqt.util.Util import *
@@ -13,66 +12,65 @@ import collections
 
 class FreqT:
 
-    _config = Config()
+    def __init__(self, _config):
 
-    _transaction_list = list()  # list of list of NodeFreqT
-    _grammar_dict = dict()  # dictionary with String as keys and List of String as value
-    _xmlCharacters_dict = dict()  # dictionary with String as keys and String as value
+        self._config = _config
 
-    # new variables for Integer
-    _labelIndex_dict = dict()  # dictionary with Integer as keys and String as value
-    _grammarInt_dict = dict()  # dictionary with Integer as keys and List of String as value
-    _blackLabelsInt_dict = dict()  # dictionary with Integer as keys and List of Integer as value
-    _whiteLabelsInt_dict = dict()  # dictionary with Integer as keys and List of Integer as value
+        self._transaction_list = list()  # list of list of NodeFreqT
+        self._grammar_dict = dict()  # dictionary with String as keys and List of String as value
+        self._xmlCharacters_dict = dict()  # dictionary with String as keys and String as value
 
-    # store root labels
-    rootLabels_set = set()  # set of string
-    # store root occurrences of patterns
-    rootIDs_dict = dict()  # dictionary with Projected as keys and FTArray as value
-    # store file ids of patterns
-    fileIDs_dict = dict()  # dictionary with String as keys and String as value
-    # int nbInputFiles;
-    lineNrs_list = list()  # list of Integer
+        # new variables for Integer
+        self._labelIndex_dict = dict()  # dictionary with Integer as keys and String as value
+        self._grammarInt_dict = dict()  # dictionary with Integer as keys and List of String as value
+        self._blackLabelsInt_dict = dict()  # dictionary with Integer as keys and List of Integer as value
+        self._whiteLabelsInt_dict = dict()  # dictionary with Integer as keys and List of Integer as value
 
-    timeStart = -1
-    timeout = -1
-    finished = False
+        # store root labels
+        self.rootLabels_set = set()  # set of string
+        # store root occurrences of patterns
+        self.rootIDs_dict = dict()  # dictionary with Projected as keys and FTArray as value
+        # store file ids of patterns
+        self.fileIDs_dict = dict()  # dictionary with String as keys and String as value
+        # int nbInputFiles;
+        self.lineNrs_list = list()  # list of Integer
 
-    # store maximal patterns
-    MFP_dict = dict()  # dictionary with FTArray as keys and String as value
+        self.time_start = -1
+        self.timeout = -1
+        self.finished = False
 
-    # store k-highest chi-square score patterns
-    __HSP_dict = dict()  # dictionary with FTArray as keys and Projected as value
+        # store maximal patterns
+        self.MFP_dict = dict()  # dictionary with FTArray as keys and String as value
 
-    # store transaction ids and their correspond class ids
-    __transactionClassID_list = list()  # list of Integer
-    sizeClass1 = -1
-    sizeClass2 = 1
+        # store k-highest chi-square score patterns
+        self.__HSP_dict = dict()  # dictionary with FTArray as keys and Projected as value
 
-    leafPattern = FTArray()
-    leafProjected = Projected()
-    notF_set = set()  # set of FTArray
+        # store transaction ids and their correspond class ids
+        self.__transactionClassID_list = list()  # list of Integer
+        self.sizeClass1 = -1
+        self.sizeClass2 = 1
+
+        self.leafPattern = FTArray()
+        self.leafProjected = Projected()
+        self.notF_set = set()  # set of FTArray
 
     # ////////////////////////////////////////////////////////////
-
-    def FreqTInit(self, _config):
-        self._config = _config
 
     # run Freqt with file config.properties
     def run(self):
         try:
             # read input data
-            self.initData()
+            self.init_data()
             # set starting time
-            self.setStartingTime()
+            self.set_starting_time()
             # init report file
-            report = self.initReport(self._config, len(self._transaction_list))
+            report = self.init_report()
             print("Mining frequent subtrees ...")
             # build FP1: all labels are frequent
             # FP1_dict, dictionary with FTArray as keys and Projected as values
             FP1_dict = self.buildFP1(self._transaction_list, self.rootLabels_set, self.__transactionClassID_list)
 
-            # remove node SourceFile because it is not AST node
+            # remove node SourceFile because it is not AST node ## <- TODO
             notASTNode = FTArray()
             notASTNode.add(0)
 
@@ -101,11 +99,12 @@ class FreqT:
             trace = traceback.format_exc()
             print(trace)
 
-    # read input data
-    def initData(self):
+    def init_data(self):
+        """
+         * read input data
+        """
         try:
             readXML_int = ReadXMLInt()
-            initial_Int = Initial_Int()
             # remove black labels when reading ASTs
             if self._config.get2Class():
                 readXML_int.readDatabase(self._transaction_list, 1,
@@ -114,21 +113,21 @@ class FreqT:
                         self._config.getInputFiles2(), self._labelIndex_dict, self.__transactionClassID_list, self._config.getWhiteLabelFile())
                 self.sizeClass1 = sum(self.__transactionClassID_list)
                 self.sizeClass2 = len(self.__transactionClassID_list) - self.sizeClass1
-                initial_Int.initGrammar_Str(self._config.getInputFiles1(), self._config.getWhiteLabelFile(), self._grammar_dict, self._config.buildGrammar())
-                initial_Int.initGrammar_Str(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict, self._config.buildGrammar())
-                initial_Int.initGrammar_Int2(self._grammarInt_dict, self._grammar_dict, self._labelIndex_dict)
+                initGrammar_Str(self._config.getInputFiles1(), self._config.getWhiteLabelFile(), self._grammar_dict, self._config.buildGrammar())
+                initGrammar_Str(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict, self._config.buildGrammar())
+                initGrammar_Int2(self._grammarInt_dict, self._grammar_dict, self._labelIndex_dict)
             else:
                 readXML_int.readDatabase(self._transaction_list, 1,
                         self._config.getInputFiles(), self._labelIndex_dict, self.__transactionClassID_list, self._config.getWhiteLabelFile())
                 # create grammar (labels are strings) which is used to print patterns
-                initial_Int.initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict, self._config.buildGrammar())
+                initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict, self._config.buildGrammar())
                 # create grammar (labels are integers) which is used in the mining process
-                initial_Int.initGrammar_Int2(self._grammarInt_dict, self._grammar_dict, self._labelIndex_dict)
+                initGrammar_Int2(self._grammarInt_dict, self._grammar_dict, self._labelIndex_dict)
 
             # read root labels (AST Nodes)
-            initial_Int.readRootLabel(self._config.getRootLabelFile(), self.rootLabels_set)
+            readRootLabel(self._config.getRootLabelFile(), self.rootLabels_set)
             # read list of special XML characters
-            initial_Int.readXMLCharacter(self._config.getXmlCharacterFile(), self._xmlCharacters_dict)
+            readXMLCharacter(self._config.getXmlCharacterFile(), self._xmlCharacters_dict)
 
         except:
             e = sys.exc_info()[0]
@@ -148,7 +147,7 @@ class FreqT:
             self.log(report, "OUTPUT")
             self.log(report, "===================")
 
-            diff1 = time.time() - self.timeStart
+            diff1 = time.time() - self.time_start
             # report the phase 1
             self.log(report, "- Step 1: Mining frequent patterns with max size constraints")
             self.log(report, "\t + running time = " + str(diff1) + "s")
@@ -202,15 +201,12 @@ class FreqT:
      * @param: freq1_dict, a dictionary with FTArray as keys and Projected as value
     """
     def expandFP1(self, freq1_dict):
-        # init a pattern
-        pattern = FTArray()
         # for each label found in FP1, expand it to find maximal patterns
         for key in freq1_dict:
+            pattern = FTArray()
             pattern.addAll(key)
             # recursively expand pattern
             self.expandPattern(pattern, freq1_dict[key])
-            # reset pattern
-            pattern = FTArray()
 
     """
      * expand pattern
@@ -220,7 +216,7 @@ class FreqT:
     def expandPattern(self, pattern, projected):
         try:
             # if it is timeout then stop expand the pattern;
-            if self.isTimeout():
+            if self.is_timeout():
                 return
             # find candidates of the current pattern
             candidates_dict = self.generateCandidates(projected, self._transaction_list)  # dictionary with FTArray as keys and Projected as values
@@ -562,7 +558,7 @@ class FreqT:
         self.outputPatterns(MFP_dict, config, grammar_dict, labelIndex_dict, xmlCharacters_dict)
 
         end1 = time.time()
-        diff1 = end1 - self.timeStart
+        diff1 = end1 - self.time_start
         self.log(report, "+ Maximal patterns = " + str(len(MFP_dict)))
         self.log(report, "+ Running times = " + str(diff1) + " s")
         report.close()
@@ -599,59 +595,60 @@ class FreqT:
             trace = traceback.format_exc()
             print(trace)
 
-
-    """
-     * set time to begin a run
-    """
-    def setStartingTime(self):
-        self.timeStart = time.time()
-        self.timeout = self._config.getTimeout()*60
+    def set_starting_time(self):
+        """
+         * set time to begin a run
+        """
+        self.time_start = time.time()
+        self.timeout = self.time_start + self._config.getTimeout()*60 ### add start time to timeout ?
         self.finished = True
 
-    """
-     * check running time of the algorithm
-    """
-    def isTimeout(self):
-        currentTime = time.time()
+    def is_timeout(self):
+        """
+         * check running time of the algorithm
+        """
         if not self._config.getTwoStep():
-            if (currentTime - self.timeStart) > self.timeout:
+            if time.time() > self.timeout: ### add start time to timeout ?
                 self.finished = False
                 return True
         return False
 
-    """
-     * create a report
-     * @param: config, Config
-     * @param: dataSize, Integer
-    """
-    def initReport(self, _config, dataSize):
-        reportFile = _config.getOutputFile().replace("\"", "") + "_report.txt"
-        report = open(reportFile, 'w+')
+    def init_report(self):
+        """
+         * create a report
+         * @param: config, Config
+         * @param: dataSize, Integer
+        """
+        data_size = len(self._transaction_list)
+        report_file = self._config.getOutputFile().replace("\"", "") + "_report.txt"
+        report = open(report_file, 'w+')
+
         self.log(report, "INPUT")
         self.log(report, "===================")
-        self.log(report, "- data sources : " + _config.getInputFiles())
-        self.log(report, "- input files : " + str(dataSize))
-        self.log(report, "- minSupport : " + str(_config.getMinSupport()))
+        self.log(report, "- data sources : " + self._config.getInputFiles())
+        self.log(report, "- input files : " + str(data_size))
+        self.log(report, "- minSupport : " + str(self._config.getMinSupport()))
         report.flush()
+
         return report
 
-    """
-     * return input xmlCharacters
-    """
-    def getXmlCharacters(self):
+    def get_xml_characters(self):
+        """
+         * return input xmlCharacters
+        """
         return self._xmlCharacters_dict
 
-    """
-     * return input grammar
-    """
-    def getGrammar(self):
+    def get_grammar(self):
+        """
+         * return input grammar
+        """
         return self._grammar_dict
 
-    """
-     * write a string to report
-     * @param: report, a file ready to be written
-     * @param: msg, String
-    """
     def log(self, report, msg):
+        """
+         * write a string to report
+         * @param: report, a file ready to be written
+         * @param: msg, String
+        """
         report.write(msg + "\n")
         report.flush()

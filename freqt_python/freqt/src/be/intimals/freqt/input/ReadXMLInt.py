@@ -17,17 +17,16 @@ import traceback
 
 class ReadXMLInt:
 
-    _top = 0  #int
-    _id = 0   #int
-    _sr = list()   #list of int
-    _sibling = list()    #list of int
+    def __init__(self):
+        self._top = 0  #int
+        self._id = 0   #int
+        self._sr = list()   #list of int
+        self._sibling = list()    #list of int
 
-    _labels = list()    #list of string
-    lineNrs = list()   #list of int
-    countSection = -1  #int
-    _abstractLeafs = False #boolean
-
-    _sep = "/"  # File.separator
+        self._labels = list()    #list of string
+        self.lineNrs = list()   #list of int
+        self.countSection = -1  #int
+        self._abstractLeafs = False #boolean
 
     """
      * read 2-class ASTs, and remove black labels
@@ -120,7 +119,7 @@ class ReadXMLInt:
                 self._id = self._id + 1
                 # recursively read children
                 nodeList = node.childNodes
-                # only read children labels which are in the white list
+                # only read children labels which are in the white list ### <- NO TODO
                 if node.nodeName in whiteLabels:
                     temp = whiteLabels[node.nodeName]
                     for i in range(len(nodeList)):
