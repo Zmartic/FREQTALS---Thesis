@@ -150,7 +150,7 @@ class FreqT:
 
                     while child_id != -1:
                         child = trans[child_id]
-                        if child.getNodeLabel in white:
+                        if child.getNodeLabel() in white:
                             if previous_child is None:
                                 node.setNodeChild(child_id)
                             else:
