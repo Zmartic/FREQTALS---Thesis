@@ -22,7 +22,7 @@ class CreateGrammar(ReadXMLInt):
      * @param: grammar_dict, dictionary with String as keys and list of String as grammar
     """
     def createGrammar(self, path, white, grammar_dict):
-        self.__whiteLabels_dict = self.readWhiteLabel(white)
+        self.__whiteLabels_dict = self.read_whiteLabel(white)
         self.createGrammar2(path, grammar_dict)
 
     """
@@ -94,7 +94,7 @@ class CreateGrammar(ReadXMLInt):
     """
     def addNewNode(self, node, grammar_dict):
         variables = Variables()
-        nbChildren = self.countNBChildren(node)
+        nbChildren = self.count_children(node)
         childrenList = node.childNodes
         tmp_list = list()
         if nbChildren == 0:  # add leaf node
@@ -127,7 +127,7 @@ class CreateGrammar(ReadXMLInt):
      * @param: grammar_dict, dictionary with String as keys and list of string as values
     """
     def updateNode(self, node, grammar_dict):
-        nbChildren = self.countNBChildren(node)
+        nbChildren = self.count_children(node)
         if nbChildren == 0:  # leaf node
             self.updateLeafNode(node, grammar_dict)
         else:  # internal node

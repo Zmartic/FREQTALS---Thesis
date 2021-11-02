@@ -31,13 +31,13 @@ class MyTestCase(unittest.TestCase):
     def test_countNBChildren(self):
         doc = minidom.parse("../../../../../test/Basic/ast1.xml")
         doc.documentElement.normalize()
-        self.assertEqual(self.RXML.countNBChildren(doc.documentElement), 3)
+        self.assertEqual(self.RXML.count_children(doc.documentElement), 3)
         children = doc.documentElement.childNodes
         i = 0
         correct_output_child = [3, 1, 2]
         for child in children:
             if child.nodeType != Node.TEXT_NODE and child.nodeType == Node.ELEMENT_NODE:
-                self.assertEqual(self.RXML.countNBChildren(child), correct_output_child[i])
+                self.assertEqual(self.RXML.count_children(child), correct_output_child[i])
                 i += 1
 
     def test_readWhiteLabel(self):
@@ -46,7 +46,7 @@ class MyTestCase(unittest.TestCase):
         children.add("B")
         children.add("D")
         correct_output["A"] = children
-        self.assertEqual(self.RXML.readWhiteLabel("../../../../../test/Basic/listWhiteLabel.txt"), correct_output)
+        self.assertEqual(self.RXML.read_whiteLabel("../../../../../test/Basic/listWhiteLabel.txt"), correct_output)
 
     def test_updateLabelIndex(self):
         # cas 1
@@ -83,7 +83,7 @@ class MyTestCase(unittest.TestCase):
         correct_output = ["2", "6", "7"]
         for child in children:
             if child.nodeType != Node.TEXT_NODE and child.nodeType == Node.ELEMENT_NODE:
-                self.assertEqual(self.RXML.findLineNr(child), correct_output[i])
+                self.assertEqual(self.RXML.find_LineNr(child), correct_output[i])
                 i += 1
 
     def test_countSectionStatementBlock(self):
@@ -113,9 +113,9 @@ class MyTestCase(unittest.TestCase):
                                     '../../../../../test/Harder/version1/visitor/ShoppingCartClient.xml',
                                     '../../../../../test/Harder/version1/visitor/ShoppingCartVisitor.xml',
                                     '../../../../../test/Harder/version1/visitor/ShoppingCartVisitorImpl.xml']
-        self.RXML.populateFileListNew(directory2, file2_list)
+        self.RXML.populate_file_list(directory2, file2_list)
         print(file2_list)
-        self.RXML.populateFileListNew(directory, file_list)
+        self.RXML.populate_file_list(directory, file_list)
         self.assertEqual(file_list, correct_output_file_list)
 
     def test_calculatePositions(self):
@@ -154,7 +154,7 @@ class MyTestCase(unittest.TestCase):
             trans.append(nodeTemp)
             self.RXML._sibling.append(-1)
         labelIndex = {}
-        whiteLabel = self.RXML.readWhiteLabel("../../../../../test/Basic/listWhiteLabel.txt")
+        whiteLabel = self.RXML.read_whiteLabel("../../../../../test/Basic/listWhiteLabel.txt")
         self.RXML.readTreeDepthFirst(node, trans, labelIndex, whiteLabel)
         for i in range(len(trans)):
             self.assertEqual(trans[i].getNodeLabel(), correct_output_label[i])

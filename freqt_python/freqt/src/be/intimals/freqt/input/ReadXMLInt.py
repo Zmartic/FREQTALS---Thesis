@@ -18,40 +18,41 @@ import traceback
 class ReadXMLInt:
 
     def __init__(self):
-        self._top = 0  #int
-        self._id = 0   #int
-        self._sr = list()   #list of int
-        self._sibling = list()    #list of int
+        self._top = 0
+        self._id = 0
+        self._sr = list()        # list of int
+        self._sibling = list()   # list of int
 
-        self._labels = list()    #list of string
-        self.lineNrs = list()   #list of int
-        self.countSection = -1  #int
-        self._abstractLeafs = False #boolean
+        self._labels = list()    # list of string
+        self.lineNrs = list()    # list of int
+        self.countSection = -1
+        self._abstractLeafs = False
 
-    """
-     * read 2-class ASTs, and remove black labels
-     * @param database_list, a list of list of NodeFreqT
-     * @param classId, an int
-     * @param rootDirectory, a string    !!!!! File object in java
-     * @param labelIndex, a dictionnary with Interger as Key and String as value
-     * @param classIndex_list, a list of Interger
-     * @param whiteLabelPath, a string
-    """
-    def readDatabase(self, database_list, classId, rootDirectory, labelIndex, classIndex_list, whiteLabelPath):
+    def readDatabase(self, database, class_id, root_directory, labelIndex, classIndex_list, whiteLabelPath):
+        """
+         * read 2-class ASTs, and remove black labels
+         * @param database_list, a list of list of NodeFreqT
+         * @param classId, an int
+         * @param rootDirectory, a string    !!!!! File object in java
+         * @param labelIndex, a dictionnary with Interger as Key and String as value
+         * @param classIndex_list, a list of Interger
+         * @param whiteLabelPath, a string
+        """
         files = list()
-        self.populateFileListNew(rootDirectory, files)
+        self.populate_file_list(root_directory, files)
         files.sort()
-        # read white labels from file
-        whiteLabels = self.readWhiteLabel(whiteLabelPath)  # dictionary with String as Key and set of String as value
+
+        white_labels = self.read_whiteLabel(whiteLabelPath)  # dictionary with String as Key and set of String as value
         try:
             for fi in files:
                 self.countSection = 0
                 # store class label of transaction id
-                classIndex_list.append(classId)
+                classIndex_list.append(class_id)
 
                 # read XML file
                 doc = minidom.parse(fi)
                 doc.documentElement.normalize()
+
                 # get total number of nodes
                 size = self.countNBNodes(doc.documentElement) + 1
                 # initial tree parameters
@@ -66,9 +67,9 @@ class ReadXMLInt:
                     trans.append(nodeTemp)
                     self._sibling.append(-1)
                 # create tree
-                self.readTreeDepthFirst(doc.documentElement, trans, labelIndex, whiteLabels)
+                self.readTreeDepthFirst(doc.documentElement, trans, labelIndex, white_labels)
                 # add tree to database
-                database_list.append(trans)
+                database.append(trans)
 
         except:
             print(" read AST error.")
@@ -76,20 +77,20 @@ class ReadXMLInt:
             print(e)
             raise
 
-    """
-     * collect full file names in a directory
-     * @param directory, a file path
-     * @param listFile, a list of String represented a file path
-    """
-    def populateFileListNew(self, directory, listFile):
+    def populate_file_list(self, directory, file_list):
+        """
+         * collect full file names in a directory
+         * @param directory, a file path
+         * @param listFile, a list of String represented a file path
+        """
         files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
         for elem in files:
             if elem.endswith(".xml"):
-                listFile.append(directory + '/' + elem)
+                file_list.append(directory + '/' + elem)
         directories = [f for f in os.listdir(directory) if os.path.isdir(os.path.join(directory, f))]
         for direc in directories:
-            dir = directory + '/' + direc
-            self.populateFileListNew(dir, listFile)
+            self.populate_file_list(directory + '/' + direc, file_list)
+        return
 
     """
      * ignore black labels when reading tree by breadth first traversal
@@ -108,7 +109,7 @@ class ReadXMLInt:
                 # update index labels
                 self.updateLabelIndex(node.nodeName, trans, labelIndex)
                 # find line number of this node.
-                lineNbTemp = self.findLineNr(node)
+                lineNbTemp = self.find_LineNr(node)
                 # add line number to current node id
                 trans[self._id].setLineNr(lineNbTemp)
                 # count SectionStatementBlock: only using for Cobol
@@ -194,16 +195,15 @@ class ReadXMLInt:
                 self.lineNrs.append(int(lineNbTemp))
                 self.countSection += 1
 
-    """
-     * @param node, a node
-    """
-    def findLineNr(self, node):
-        lineNbTemp = "0"
+    def find_LineNr(self, node):
+        """
+         * @param node, a node
+        """
         nodeMap = node.attributes
         for i in range(len(nodeMap)):
             if nodeMap.item(i).name == "LineNr":
-                lineNbTemp = nodeMap.item(i).value
-        return lineNbTemp
+                return nodeMap.item(i).value
+        return "0"
 
     """
      * @param nodeLabel, a String
@@ -224,12 +224,12 @@ class ReadXMLInt:
             else:
                 trans[self._id].setNode_label_int(self._labels.index(nodeLabel))
 
-    """
-     * read white labels from given file
-     * @param path, a String
-     * return a dictionary containing the whiteLabels with string as Key and a list of String as value.
-    """
-    def readWhiteLabel(self, path):
+    def read_whiteLabel(self, path):
+        """
+         * read white labels from given file
+         * @param path, a String
+         * return a dictionary containing the whiteLabels with string as Key and a list of String as value.
+        """
         _whiteLabels = dict()
         try:
             f = open(path, 'r')
@@ -252,18 +252,17 @@ class ReadXMLInt:
             raise
         return _whiteLabels
 
-    """
-     * count number children of a node
-     * @param node, a node
-     * return the number of children of a given node
-    """
-    def countNBChildren(self, node):
-        nbChildren = 0
-        list = node.childNodes
-        for j in range(len(list)):
-            if list[j].nodeType != Node.TEXT_NODE and list[j].nodeType == Node.ELEMENT_NODE:
-                nbChildren += 1
-        return nbChildren
+    def count_children(self, node):
+        """
+         * count number children of a node
+         * @param node, a node
+         * return the number of children of a given node
+        """
+        nb_children = 0
+        for n in node.childNodes:
+            if n.nodeType != Node.TEXT_NODE and n.nodeType == Node.ELEMENT_NODE:
+                nb_children += 1
+        return nb_children
 
     """
      * count total number of nodes of a Python XML

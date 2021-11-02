@@ -37,6 +37,9 @@ class Projected:
     def getProjectLocation(self, i):
         return self.__locations[i]
 
+    def getProjectLocations(self):
+        return self.__locations
+
     def getProjectedLocationList(self):
         for i in range(len(self.__locations)):
             print("depth: " + str(self.__depth))

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from collections import OrderedDict
+from typing import Any
 
 from freqt.src.be.intimals.freqt.output.XMLOutput import *
 from freqt.src.be.intimals.freqt.util.Initial_Int import *
@@ -56,34 +58,34 @@ class FreqT:
 
     # ////////////////////////////////////////////////////////////
 
-    # run Freqt with file config.properties
     def run(self):
         try:
-            # read input data
+            # initialization
             self.init_data()
-            # set starting time
             self.set_starting_time()
-            # init report file
             report = self.init_report()
+
             print("Mining frequent subtrees ...")
-            # build FP1: all labels are frequent
-            # FP1_dict, dictionary with FTArray as keys and Projected as values
-            FP1_dict = self.buildFP1(self._transaction_list, self.rootLabels_set, self.__transactionClassID_list)
+
+            FP1: OrderedDict[FTArray, Projected] = self.build_FP1()
+
+            self.disconnect_not_whitelisted_node()
 
             # remove node SourceFile because it is not AST node ## <- TODO
             notASTNode = FTArray()
             notASTNode.add(0)
 
-            for elem in FP1_dict:
+            for elem in FP1:
                 if notASTNode.equals(elem):
-                    FP1_dict.pop(elem, -1)
+                    FP1.pop(elem, -1)
 
             # prune FP1 on minimum support
             constrain = Constraint()
-            constrain.prune(FP1_dict, self._config.getMinSupport(), self._config.getWeighted())
+            constrain.prune(FP1, self._config.getMinSupport(), self._config.getWeighted())
 
             # expand FP1 to find maximal patterns
-            self.expandFP1(FP1_dict)
+            self.expandFP1(FP1)
+
             if self._config.getTwoStep():
                 self.notF_set = set()
                 if self._config.get2Class():
@@ -135,6 +137,31 @@ class FreqT:
             trace = traceback.format_exc()
             print(trace)
 
+    def disconnect_not_whitelisted_node(self):
+        white_labels = ReadXMLInt().read_whiteLabel(self._config.getWhiteLabelFile())
+        for trans in self._transaction_list:
+            for node in trans:
+                label = node.getNodeLabel()
+                if label in white_labels:
+                    white = white_labels[label]
+
+                    child_id = node.getNodeChild()
+                    previous_child = None
+
+                    while child_id != -1:
+                        child = trans[child_id]
+                        if child.getNodeLabel in white:
+                            if previous_child is None:
+                                node.setNodeChild(child_id)
+                            else:
+                                previous_child.setNodeSibling(child_id)
+                            previous_child = child
+                        child_id = child.getNodeSibling()
+
+                    if previous_child is None:
+                        node.setNodeChild(-1)
+        return
+
     def expandPatternFromRootIDs(self, _rootIDs_dict, report):
         """
          * run the 2nd step to find maximal patterns from groups of root occurrences
@@ -167,7 +194,7 @@ class FreqT:
             e = sys.exc_info()[0]
             print("expand pattern from root IDs error " + str(e) + "\n")
 
-    def buildFP1(self, trans_list, _rootLabels_set, _transactionClassID_list):
+    def build_FP1(self):
         """
          * build subtrees of size 1 based on root labels
            -> return a dictionary with FTArray as keys and Projected as value
@@ -175,38 +202,39 @@ class FreqT:
          * @param: _rootLabels_set, a list of String
          * @param: _transactionClassID_list, a list of Integer
         """
-        freq1_ord_dict = collections.OrderedDict()  # ordered dictionaray with FTArray as keys and Projected as value
+        FP1: OrderedDict[FTArray, Projected] = collections.OrderedDict()
+        trans = self._transaction_list
         try:
-            for i in range(len(trans_list)):
+            for i in range(len(trans)):
                 # get transaction label
-                classID = _transactionClassID_list[i]
-                for j in range(len(trans_list[i])):
-                    node_label = trans_list[i][j].getNodeLabel()
-                    node_label_id = trans_list[i][j].getNode_label_int()
-                    if node_label in _rootLabels_set or len(_rootLabels_set) == 0:
+                class_id = self.__transactionClassID_list[i]
+
+                for j in range(len(trans[i])):
+                    node_label = trans[i][j].getNodeLabel()
+                    node_label_id = trans[i][j].getNode_label_int()
+
+                    if node_label in self.rootLabels_set or len(self.rootLabels_set) == 0:
                         if node_label != "" and node_label[0] != '*' and node_label[0].isupper():
-                            # update the locations
-                            prefix = FTArray()
-                            initLocation = Location()
-                            self.updateCandidates(freq1_ord_dict, node_label_id, classID, i, j, 0, prefix, initLocation)
+                            self.updateCandidates(FP1, node_label_id, class_id, i, j, 0, FTArray(), Location())
         except:
             e = sys.exc_info()[0]
             print("build FP1 error " + str(e) + "\n")
             trace = traceback.format_exc()
             print(trace)
-        return freq1_ord_dict
 
-    def expandFP1(self, freq1_dict):
+        return FP1
+
+    def expandFP1(self, freq1):
         """
          * expand FP1 to find frequent subtrees based on input constraints
          * @param: freq1_dict, a dictionary with FTArray as keys and Projected as value
         """
         # for each label found in FP1, expand it to find maximal patterns
-        for key in freq1_dict:
+        for key in freq1:
             pattern = FTArray()
             pattern.addAll(key)
             # recursively expand pattern
-            self.expandPattern(pattern, freq1_dict[key])
+            self.expandPattern(pattern, freq1[key])
 
     def expandPattern(self, pattern, projected):
         """
@@ -269,17 +297,17 @@ class FreqT:
          * @param: _transaction_list, list of list of NodeFreqT
         """
         # use oredered dictionary to keep the order of the candidates
-        candidates_dict = collections.OrderedDict()  # an ordored dictionary with FTArray as keys and Projected as values
+        candidates_dict: OrderedDict[FTArray, Projected] = collections.OrderedDict()
         try:
             # find candidates for each location
             depth = projected.getProjectedDepth()
-            for i in range(projected.getProjectLocationSize()):
-                classID = projected.getProjectLocation(i).getClassID()
-                id = projected.getProjectLocation(i).getLocationId()
-                root = projected.getProjectLocation(i).getRoot()
-                pos = projected.getProjectLocation(i).getLocationPos()
+            for occurrences in projected.getProjectLocations():
                 # store all locations of the labels in the pattern: this uses more memory but need for checking continuous paragraphs
-                occurrences = projected.getProjectLocation(i)
+                #occurrences = projected.getProjectLocation(i)
+
+                classID = occurrences.getClassID()
+                id = occurrences.getLocationId()
+                pos = occurrences.getLocationPos()
                 prefixInt = FTArray()
                 # find candidates from left to right
                 for d in range(-1, depth):
