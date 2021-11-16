@@ -42,7 +42,7 @@ class CheckSubtree:
     """
     def fastCheckSubTree(self, pat1, pat2):
         if pat1.size() == pat2.size():
-            if pat1.equals(pat2):
+            if pat1 == pat2:
                 return 1
             else:
                 return 0
@@ -91,7 +91,7 @@ class CheckSubtree:
     """
     def treeIncludes(self, big, small):
         if big.size() == small.size():
-            return big.equals(small)
+            return big == small
 
         smallSize = small.size()
         bigSize = big.size()

@@ -136,11 +136,7 @@ class FTArray:
                     return False
         return True
 
-    """
-     * @param: other, FTArray
-     return True if the two FTArray is the same
-    """
-    def equals(self, other):
+    def __eq__(self, other):
         if not isinstance(other, FTArray):
             return False
         if self._firstFree != other._firstFree:
@@ -159,7 +155,7 @@ class FTArray:
                     return False
         return True
 
-    def hashCode(self):     # cannot hash a list so transform it into a string before
+    def __hash__(self):     # cannot hash a list so transform it into a string before
         if self._memory is not None:
             return hash(str(self._memory))
         return hash(str(self._intMemory))

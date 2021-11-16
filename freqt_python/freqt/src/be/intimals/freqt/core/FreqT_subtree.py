@@ -48,12 +48,8 @@ class FreqT_subtree:
                         itemInt = FTArray()
                         itemInt.addAll(prefixInt)
                         itemInt.add(self.__newTransaction_list[id][l].getNode_label_int())
-                        value = None
-                        for key in candidate_dict:
-                            if key.equals(itemInt):
-                                value = candidate_dict[key]
-                        if value is not None:
-                            value.setProjectLocation(id, l)  # store right most positions
+                        if itemInt in candidate_dict:
+                            candidate_dict[itemInt].setProjectLocation(id, l)  # store right most positions
                         else:
                             tmp = Projected()
                             tmp.setProjectedDepth(newdepth)
@@ -81,7 +77,7 @@ class FreqT_subtree:
             constraint.prune(candidate_dict, 2, False)  # pq 2 comme minsup?
 
             if len(candidate_dict) == 0:
-                if self.__maximalPattern.equals(self.__inputPattern):
+                if self.__maximalPattern == self.__inputPattern:
                     self.__outputPattern = "found subtree"
                 # not found and stop
                 self.__found = True

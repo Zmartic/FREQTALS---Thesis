@@ -75,9 +75,11 @@ class FreqT:
             notASTNode = FTArray()
             notASTNode.add(0)
 
-            for elem in FP1:
+            '''for elem in FP1:
                 if notASTNode.equals(elem):
-                    FP1.pop(elem, -1)
+                    FP1.pop(elem, -1)'''
+            if notASTNode in FP1:
+                del FP1[notASTNode]
 
             # prune FP1 on minimum support
             constrain = Constraint()
@@ -348,13 +350,9 @@ class FreqT:
             newTree.addAll(prefixInt)
             newTree.add(candidate)
 
-            value = None
-            for key in freq1_dict:
-                if newTree.equals(key):
-                    value = freq1_dict[key]
             # if candidate existed in the freq1 then add its location to projected
-            if value is not None:
-                value.addProjectLocation(classID, id, rightmostPos, initLocations)
+            if newTree in freq1_dict:
+                freq1_dict[newTree].addProjectLocation(classID, id, rightmostPos, initLocations)
             else:
                 # add new location
                 projected = Projected()
@@ -450,10 +448,10 @@ class FreqT:
         """
         if len(_MFP_dict) != 0:
             for key in self.notF_set:
-                if pat.equals(key):
+                if pat == key:
                     return
             for key in _MFP_dict:
-                if pat.equals(key):
+                if pat == key:
                     return
 
             checkSubtree = CheckSubtree()
@@ -520,11 +518,7 @@ class FreqT:
          * @param: _HSP_dict, dictionary with FTArray as keys and Projected as values
         """
         constraint = Constraint()
-        patPresent = False
-        for key in _HSP_dict:
-            if pat.equals(key):
-                patPresent = True
-        if not patPresent:
+        if pat not in _HSP_dict:
             score = constraint.chiSquare(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
             if len(_HSP_dict) >= self._config.getNumPatterns():
                 minScore = self.getMinScore(_HSP_dict)

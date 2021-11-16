@@ -130,7 +130,7 @@ class Pattern:
         result = ""
         n = 0
         for i in range(0, len(patListOfStr)):
-            if patListOfStr[i].equals(")"):
+            if patListOfStr[i] == ")":
                 result += patListOfStr[i]
                 n += 1
             else:
@@ -165,7 +165,7 @@ class Pattern:
         try:
             p = candidateStr.split(Variables.uniChar)
             for i in range(0, len(p)):
-                if p[i].equals(")"):
+                if p[i] == ")":
                     nodeLevel += 1
                 if len(p[i]) != 0:
                     candidateSize += 1
@@ -175,7 +175,7 @@ class Pattern:
                 parentPos = size - 1
             else:
                 for i in range(size - 1, 0, -1):
-                    if patListOfStr[i].equals(")"):
+                    if patListOfStr[i] == ")":
                         nodeLevel += 1
                     else:
                         nodeLevel -= 1

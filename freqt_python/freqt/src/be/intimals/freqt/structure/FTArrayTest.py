@@ -83,8 +83,8 @@ class MyTestCase(unittest.TestCase):
         self.fta.add(3)
         self.fta.add(4)
         self.fta.add(5)
-        self.assertEqual(self.fta.equals(self.fta1), True)
-        self.assertEqual(self.fta.equals(self.other), False)
+        self.assertEqual(self.fta == self.fta1, True)
+        self.assertEqual(self.fta == self.other, False)
 
     def test_migrate(self):
         copy = self.other.getMemory()
