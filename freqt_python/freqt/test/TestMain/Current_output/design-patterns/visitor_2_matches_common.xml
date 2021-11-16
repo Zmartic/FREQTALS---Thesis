@@ -1,114 +1,114 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <matches>
-  <match PatternID="1" FullName="/Users/user/Working/INTIMALS/softs-gitlab/tree-miner/sample_data/src/visitor/Book.java">
+  <match PatternID="1" FullName="/Users/user/Working/INTIMALS/softs-gitlab/tree-miner/sample_data/src/visitor/Fruit.java">
     <node ID="10" Name="?_root" />
-    <node ID="143" Name="?_visited" />
-    <node ID="53" Name="?_visited" />
-    <node ID="151" Name="?_visited" />
-    <node ID="153" Name="?_visited" />
-    <node ID="117" Name="?_visited" />
-    <node ID="66" Name="?_visited" />
-    <node ID="115" Name="?_visited" />
-    <node ID="141" Name="?_visited" />
-    <node ID="163" Name="?_visited" />
-    <node ID="165" Name="?_visited" />
-    <node ID="79" Name="?_visited" />
-    <node ID="40" Name="?_visited" />
+    <node ID="84" Name="?_visited" />
+    <node ID="71" Name="?_visited" />
+    <node ID="58" Name="?_visited" />
+    <node ID="97" Name="?_visited" />
+    <node ID="198" Name="?_visited" />
+    <node ID="196" Name="?_visited" />
+    <node ID="210" Name="?_visited" />
+    <node ID="188" Name="?_visited" />
+    <node ID="144" Name="?_visited" />
+    <node ID="45" Name="?_visited" />
+    <node ID="142" Name="?_visited" />
+    <node ID="178" Name="?_visited" />
+    <node ID="186" Name="?_visited" />
+    <node ID="208" Name="?_visited" />
+    <node ID="176" Name="?_visited" />
   </match>
-  <match PatternID="1" FullName="/Users/user/Working/INTIMALS/softs-gitlab/tree-miner/sample_data/src/visitor/ShoppingCartVisitorImpl.java">
+  <match PatternID="1" FullName="/Users/user/Working/INTIMALS/softs-gitlab/tree-miner/sample_data/src/visitor/ShoppingCartVisitor.java">
     <node ID="10" Name="?_root" />
-    <node ID="30" Name="?_visited" />
-    <node ID="88" Name="?_visited" />
-    <node ID="43" Name="?_visited" />
-    <node ID="86" Name="?_visited" />
-    <node ID="68" Name="?_visited" />
-    <node ID="66" Name="?_visited" />
+    <node ID="27" Name="?_visited" />
+    <node ID="56" Name="?_visited" />
+    <node ID="70" Name="?_visited" />
+    <node ID="58" Name="?_visited" />
+    <node ID="40" Name="?_visited" />
+    <node ID="72" Name="?_visited" />
   </match>
   <match PatternID="1" FullName="/Users/user/Working/INTIMALS/softs-gitlab/tree-miner/sample_data/src/visitor/ShoppingCartClient.java">
     <node ID="10" Name="?_root" />
     <node ID="62" Name="?_visited" />
+    <node ID="40" Name="?_visited" />
     <node ID="80" Name="?_visited" />
     <node ID="27" Name="?_visited" />
     <node ID="60" Name="?_visited" />
-    <node ID="40" Name="?_visited" />
     <node ID="82" Name="?_visited" />
   </match>
-  <match PatternID="1" FullName="/Users/user/Working/INTIMALS/softs-gitlab/tree-miner/sample_data/src/visitor/ShoppingCartVisitor.java">
+  <match PatternID="1" FullName="/Users/user/Working/INTIMALS/softs-gitlab/tree-miner/sample_data/src/visitor/Book.java">
     <node ID="10" Name="?_root" />
-    <node ID="70" Name="?_visited" />
-    <node ID="27" Name="?_visited" />
-    <node ID="58" Name="?_visited" />
-    <node ID="56" Name="?_visited" />
     <node ID="40" Name="?_visited" />
-    <node ID="72" Name="?_visited" />
+    <node ID="141" Name="?_visited" />
+    <node ID="151" Name="?_visited" />
+    <node ID="79" Name="?_visited" />
+    <node ID="165" Name="?_visited" />
+    <node ID="153" Name="?_visited" />
+    <node ID="53" Name="?_visited" />
+    <node ID="115" Name="?_visited" />
+    <node ID="143" Name="?_visited" />
+    <node ID="66" Name="?_visited" />
+    <node ID="117" Name="?_visited" />
+    <node ID="163" Name="?_visited" />
   </match>
-  <match PatternID="1" FullName="/Users/user/Working/INTIMALS/softs-gitlab/tree-miner/sample_data/src/visitor/Fruit.java">
+  <match PatternID="1" FullName="/Users/user/Working/INTIMALS/softs-gitlab/tree-miner/sample_data/src/visitor/ShoppingCartVisitorImpl.java">
     <node ID="10" Name="?_root" />
-    <node ID="144" Name="?_visited" />
-    <node ID="45" Name="?_visited" />
-    <node ID="142" Name="?_visited" />
-    <node ID="186" Name="?_visited" />
-    <node ID="176" Name="?_visited" />
-    <node ID="210" Name="?_visited" />
-    <node ID="71" Name="?_visited" />
-    <node ID="97" Name="?_visited" />
-    <node ID="208" Name="?_visited" />
-    <node ID="178" Name="?_visited" />
-    <node ID="84" Name="?_visited" />
-    <node ID="198" Name="?_visited" />
-    <node ID="58" Name="?_visited" />
-    <node ID="196" Name="?_visited" />
-    <node ID="188" Name="?_visited" />
+    <node ID="86" Name="?_visited" />
+    <node ID="88" Name="?_visited" />
+    <node ID="30" Name="?_visited" />
+    <node ID="66" Name="?_visited" />
+    <node ID="43" Name="?_visited" />
+    <node ID="68" Name="?_visited" />
   </match>
   <match PatternID="1" FullName="/Users/user/Working/INTIMALS/softs-gitlab/tree-miner/sample_data/src/visitor/ItemElement.java">
     <node ID="10" Name="?_root" />
+    <node ID="45" Name="?_visited" />
     <node ID="27" Name="?_visited" />
     <node ID="47" Name="?_visited" />
-    <node ID="45" Name="?_visited" />
   </match>
   <match PatternID="2" FullName="/Users/user/Working/INTIMALS/softs-gitlab/tree-miner/sample_data/src/visitor/ShoppingCartVisitorImpl.java">
     <node ID="97" Name="?_root" />
-    <node ID="224" Name="?_visited" />
-    <node ID="133" Name="?_visited" />
-    <node ID="276" Name="?_visited" />
+    <node ID="277" Name="?_visited" />
+    <node ID="280" Name="?_visited" />
+    <node ID="174" Name="?_visited" />
     <node ID="223" Name="?_visited" />
     <node ID="279" Name="?_visited" />
-    <node ID="277" Name="?_visited" />
-    <node ID="219" Name="?_visited" />
-    <node ID="281" Name="?_visited" />
-    <node ID="174" Name="?_visited" />
-    <node ID="280" Name="?_visited" />
+    <node ID="276" Name="?_visited" />
     <node ID="222" Name="?_visited" />
+    <node ID="224" Name="?_visited" />
+    <node ID="281" Name="?_visited" />
+    <node ID="219" Name="?_visited" />
     <node ID="278" Name="?_visited" />
+    <node ID="133" Name="?_visited" />
   </match>
   <match PatternID="2" FullName="/Users/user/Working/INTIMALS/softs-gitlab/tree-miner/sample_data/src/visitor/ShoppingCartVisitorImpl.java">
     <node ID="77" Name="?_root" />
+    <node ID="253" Name="?_visited" />
+    <node ID="204" Name="?_visited" />
+    <node ID="203" Name="?_visited" />
+    <node ID="252" Name="?_visited" />
+    <node ID="205" Name="?_visited" />
+    <node ID="249" Name="?_visited" />
+    <node ID="156" Name="?_visited" />
     <node ID="250" Name="?_visited" />
     <node ID="200" Name="?_visited" />
     <node ID="248" Name="?_visited" />
     <node ID="251" Name="?_visited" />
-    <node ID="205" Name="?_visited" />
-    <node ID="249" Name="?_visited" />
-    <node ID="156" Name="?_visited" />
-    <node ID="252" Name="?_visited" />
-    <node ID="253" Name="?_visited" />
-    <node ID="204" Name="?_visited" />
-    <node ID="203" Name="?_visited" />
     <node ID="116" Name="?_visited" />
   </match>
   <match PatternID="2" FullName="/Users/user/Working/INTIMALS/softs-gitlab/tree-miner/sample_data/src/visitor/ShoppingCartClient.java">
     <node ID="71" Name="?_root" />
-    <node ID="148" Name="?_visited" />
-    <node ID="265" Name="?_visited" />
-    <node ID="269" Name="?_visited" />
     <node ID="211" Name="?_visited" />
-    <node ID="107" Name="?_visited" />
-    <node ID="267" Name="?_visited" />
-    <node ID="216" Name="?_visited" />
-    <node ID="264" Name="?_visited" />
     <node ID="266" Name="?_visited" />
-    <node ID="214" Name="?_visited" />
+    <node ID="269" Name="?_visited" />
     <node ID="215" Name="?_visited" />
     <node ID="268" Name="?_visited" />
+    <node ID="265" Name="?_visited" />
+    <node ID="148" Name="?_visited" />
+    <node ID="264" Name="?_visited" />
+    <node ID="107" Name="?_visited" />
+    <node ID="214" Name="?_visited" />
+    <node ID="216" Name="?_visited" />
+    <node ID="267" Name="?_visited" />
   </match>
 </matches>

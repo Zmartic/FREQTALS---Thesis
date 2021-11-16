@@ -71,15 +71,11 @@ class FreqT:
 
             self.disconnect_not_whitelisted_node()
 
-            # remove node SourceFile because it is not AST node ## <- TODO
-            notASTNode = FTArray()
-            notASTNode.add(0)
-
-            '''for elem in FP1:
-                if notASTNode.equals(elem):
-                    FP1.pop(elem, -1)'''
-            if notASTNode in FP1:
-                del FP1[notASTNode]
+            # remove node SourceFile because it is not AST node ##
+            not_ast_node = FTArray()
+            not_ast_node.add(0)
+            if not_ast_node in FP1:
+                del FP1[not_ast_node]
 
             # prune FP1 on minimum support
             constrain = Constraint()
@@ -185,9 +181,8 @@ class FreqT:
             self.log(report, "- Step 2: Mining maximal patterns WITHOUT max size constraint:")
 
             # run the second step
-            import freqt.src.be.intimals.freqt.core.FreqT_ext as freqtext
-            freqT_ext = freqtext.FreqT_ext()
-            freqT_ext.FreqT_ext(self._config, self._grammar_dict, self._grammarInt_dict, self._blackLabelsInt_dict,
+            from freqt.src.be.intimals.freqt.core.FreqT_ext import FreqT_ext
+            freqT_ext = FreqT_ext(self._config, self._grammar_dict, self._grammarInt_dict, self._blackLabelsInt_dict,
                                   self._whiteLabelsInt_dict, self._xmlCharacters_dict, self._labelIndex_dict,
                                   self._transaction_list, self.sizeClass1, self.sizeClass2)
             freqT_ext.run_ext(_rootIDs_dict, report)

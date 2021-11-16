@@ -38,9 +38,9 @@ class FreqT_ext(freqt.FreqT):
      * @parm: _sizeClass1, Integer
      * @param: _sizeClass2, Integer
     """
-    def FreqT_ext(self, _config, _grammar_dict, _grammarInt_dict, _blackLabelsInt_dict, _whiteLabelsInt_dict,
+    def __init__(self, _config, _grammar_dict, _grammarInt_dict, _blackLabelsInt_dict, _whiteLabelsInt_dict,
                   _xmlCharacters_dict, _labelIndex_dict, _transaction_list, _sizeClass1, _sizeClass2):
-        super().FreqTInit(_config)
+        super().__init__(_config)
         self._grammar_dict = _grammar_dict
         self._grammarInt_dict = _grammarInt_dict
         self._blackLabelsInt_dict = _blackLabelsInt_dict

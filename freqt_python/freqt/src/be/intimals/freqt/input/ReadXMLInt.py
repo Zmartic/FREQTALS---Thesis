@@ -121,14 +121,16 @@ class ReadXMLInt:
                 # recursively read children
                 nodeList = node.childNodes
                 # only read children labels which are in the white list ### <- NO TODO
-                if node.nodeName in whiteLabels:
+                '''if node.nodeName in whiteLabels:
                     temp = whiteLabels[node.nodeName]
                     for i in range(len(nodeList)):
                         if nodeList[i].nodeName in temp:
                             self.readTreeDepthFirst(nodeList[i], trans, labelIndex, whiteLabels)
                 else:
                     for i in range(len(nodeList)):
-                        self.readTreeDepthFirst(nodeList.item(i), trans, labelIndex, whiteLabels)
+                        self.readTreeDepthFirst(nodeList.item(i), trans, labelIndex, whiteLabels)'''
+                for i in range(len(nodeList)):
+                    self.readTreeDepthFirst(nodeList.item(i), trans, labelIndex, whiteLabels)
                 # calculate parent, child, sibling of internal node
                 self.calculatePositions(trans)
             else:
