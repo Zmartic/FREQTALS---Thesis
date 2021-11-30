@@ -16,7 +16,6 @@ class ReadGrammar(ReadXMLInt):
      * @param: grammar_dict, dictionary with String as keys and list of String as values
     """
     def readAttribute1(self, child, grammar_dict):
-        variables = Variables()
         # add this child to grammar
         mandatory = "true"
         tmp_list = list()  # list of String without repetition
@@ -47,8 +46,8 @@ class ReadGrammar(ReadXMLInt):
                     for i in range(2, len(grammar_dict[child.nodeName])):
                         if grammar_dict[child.nodeName][i] not in tmp_list:
                             tmp_list.append(grammar_dict[child.nodeName][i])
-                if n.value + variables.uniChar + "false" not in tmp_list:
-                    tmp_list.append(n.value + variables.uniChar + "false")
+                if n.value + UNICHAR + "false" not in tmp_list:
+                    tmp_list.append(n.value + UNICHAR + "false")
                 grammar_dict[child.nodeName] = tmp_list
             elif n.name == "ordered-nodelist":
                 if "ordered" not in tmp_list:
@@ -59,8 +58,8 @@ class ReadGrammar(ReadXMLInt):
                     for i in range(2, len(grammar_dict[child.nodeName])):
                         if grammar_dict[child.nodeName][i] not in tmp_list:
                             tmp_list.append(grammar_dict[child.nodeName][i])
-                if n.value + variables.uniChar + "false" not in tmp_list:
-                    tmp_list.append(n.value + variables.uniChar + "false")
+                if n.value + UNICHAR + "false" not in tmp_list:
+                    tmp_list.append(n.value + UNICHAR + "false")
                 grammar_dict[child.nodeName] = tmp_list
 
             elif n.name == "unordered-nodelist":
@@ -72,8 +71,8 @@ class ReadGrammar(ReadXMLInt):
                     for i in range(2, len(grammar_dict[child.nodeName])):
                         if grammar_dict[child.nodeName][i] not in tmp_list:
                             tmp_list.append(grammar_dict[child.nodeName][i])
-                if n.value + variables.uniChar + "false" not in tmp_list:
-                    tmp_list.append(n.value + variables.uniChar + "false")
+                if n.value + UNICHAR + "false" not in tmp_list:
+                    tmp_list.append(n.value + UNICHAR + "false")
                 grammar_dict[child.nodeName] = tmp_list
 
             elif n.name == "simplevalue":
@@ -81,8 +80,8 @@ class ReadGrammar(ReadXMLInt):
                     tmp_list.append("unordered")
                 if "1" not in tmp_list:
                     tmp_list.append("1")
-                if n.value + variables.uniChar + "false" not in tmp_list:
-                    tmp_list.append(n.value + variables.uniChar + "false")
+                if n.value + UNICHAR + "false" not in tmp_list:
+                    tmp_list.append(n.value + UNICHAR + "false")
                     grammar_dict[child.nodeName] = tmp_list
         return mandatory
 
@@ -92,7 +91,6 @@ class ReadGrammar(ReadXMLInt):
      * @param: grammar_dict, dictionary with String as keys and list of String as values
     """
     def addAttribute(self, child, abstractNodes_dict, grammar_dict):
-        variables = Variables()
         nodeMap = child.attributes  # get attributes
         tmp_list = list()  # list of string without repetition
         for j in range(len(nodeMap)):  # for each attribute
@@ -108,8 +106,8 @@ class ReadGrammar(ReadXMLInt):
                             tmp_list.append(abstractNodes_dict[n.value][i])
                     grammar_dict[child.nodeName] = tmp_list.copy()
                 else:
-                    if n.value + variables.uniChar+"false" not in tmp_list:
-                        tmp_list.append(n.value + variables.uniChar + "false")
+                    if n.value + UNICHAR + "false" not in tmp_list:
+                        tmp_list.append(n.value + UNICHAR + "false")
                     grammar_dict[child.nodeName] = tmp_list.copy()
 
             if n.name == "ordered-nodelist":
@@ -123,8 +121,8 @@ class ReadGrammar(ReadXMLInt):
                             tmp_list.append(abstractNodes_dict[n.value][i])
                     grammar_dict[child.nodeName] = tmp_list.copy()
                 else:
-                    if n.value + variables.uniChar + "false" not in tmp_list:
-                        tmp_list.append(n.value + variables.uniChar + "false")
+                    if n.value + UNICHAR + "false" not in tmp_list:
+                        tmp_list.append(n.value + UNICHAR + "false")
                     grammar_dict[child.nodeName] = tmp_list.copy()
 
             if n.name == "unordered-nodelist":
@@ -138,8 +136,8 @@ class ReadGrammar(ReadXMLInt):
                             tmp_list.append(abstractNodes_dict[n.value][i])
                     grammar_dict[child.nodeName] = tmp_list.copy()
                 else:
-                    if n.value + variables.uniChar + "false" not in tmp_list:
-                        tmp_list.append(n.value + variables.uniChar + "false")
+                    if n.value + UNICHAR + "false" not in tmp_list:
+                        tmp_list.append(n.value + UNICHAR + "false")
                     grammar_dict[child.nodeName] = tmp_list.copy()
 
             if n.name == "simplevalue":
@@ -157,7 +155,6 @@ class ReadGrammar(ReadXMLInt):
      * @param: grammar_dict, dictionary with String as keys and list of String as values
     """
     def updateAttribute(self, child, abstractNodes_dict, grammar_dict):
-        variables = Variables()
         # check if old children == new children
         oldChildren_list = grammar_dict[child.nodeName].copy()  # list without repetition
 
@@ -172,8 +169,8 @@ class ReadGrammar(ReadXMLInt):
                         newChildren_list.append(abstractNodes_dict[n.value][i])
             else:
                 if n.name == "node" or n.name == "ordered-nodelist" or n.name == "unordered-nodelist":
-                    if n.value + variables.uniChar + "false" not in newChildren_list:
-                        newChildren_list.append(n.value + variables.uniChar + "false")
+                    if n.value + UNICHAR + "false" not in newChildren_list:
+                        newChildren_list.append(n.value + UNICHAR + "false")
         for elem in newChildren_list:
             if elem not in oldChildren_list:
                 oldChildren_list.append(newChildren_list)
@@ -209,11 +206,10 @@ class ReadGrammar(ReadXMLInt):
      * @param: grammar_dict, dictionary with String as keys and list of String as values
     """
     def findIndex(self, node, grammar_dict):
-        variables = Variables()
         index = 0
         keySet = grammar_dict.keys()  # list des keys can't contain repetition
         for s in keySet:
-            ss = s.split(variables.uniChar)
+            ss = s.split(UNICHAR)
             if ss[0] == node:
                 if len(ss) == 2:
                     index = int(ss[1]) + 1
@@ -228,7 +224,6 @@ class ReadGrammar(ReadXMLInt):
      * @return a dictionary with String as keys and list of String as values
     """
     def readAbstractNodes(self, root):
-        variables = Variables()
         abstractNodes_dict = collections.OrderedDict()  # dictionary with String as keys and list of String as values
         try:
             childrenNodes_list = root.childNodes
@@ -243,10 +238,10 @@ class ReadGrammar(ReadXMLInt):
                             for k in range(len(childrenList_list)):  # for each child of Abstract
                                 if childrenList_list[k].nodeType == Node.ELEMENT_NODE:
                                     if childrenNodes_list[i].nodeName not in abstractNodes_dict:
-                                        tmp1_list.append(childrenList_list[k].nodeName + variables.uniChar + "false")
+                                        tmp1_list.append(childrenList_list[k].nodeName + UNICHAR + "false")
                                         abstractNodes_dict[childrenNodes_list[i].nodeName] = tmp1_list
                                     else:
-                                        abstractNodes_dict[childrenNodes_list[i].nodeName].append(childrenList_list[k].nodeName + variables.uniChar + "false")
+                                        abstractNodes_dict[childrenNodes_list[i].nodeName].append(childrenList_list[k].nodeName + UNICHAR + "false")
         except:
             e = sys.exc_info()[0]
             print("read abstract nodes error " + str(e))
@@ -261,7 +256,6 @@ class ReadGrammar(ReadXMLInt):
      * @return a dictionary with String as keys and list of String as values
     """
     def readSyntheticNodes(self, root, abstractNodes_dict, grammar_dict):
-        variables = Variables()
         # find abstract/synthetic nodes
         syntheticNodes_dict = collections.OrderedDict()  # dictionary with String as keys and list of String as values
         childrenNodes_list = root.childNodes
@@ -277,14 +271,14 @@ class ReadGrammar(ReadXMLInt):
                         for k in range(len(childrenList_list)):  # for each child of Synthetic node
                             if childrenList_list[k].nodeType == Node.ELEMENT_NODE:
                                 mandatory = self.readMandatoryAttribute(childrenList_list[k])
-                                if childrenList_list[k].nodeName + variables.uniChar + mandatory not in syntheticChildren_set:
-                                    syntheticChildren_set.add(childrenList_list[k].nodeName + variables.uniChar + mandatory)
+                                if childrenList_list[k].nodeName + UNICHAR + mandatory not in syntheticChildren_set:
+                                    syntheticChildren_set.add(childrenList_list[k].nodeName + UNICHAR + mandatory)
                                 self.readAttribute(childrenList_list[k], abstractNodes_dict, grammar_dict)
 
                         if childrenNodes_list[i].nodeName in syntheticNodes_dict:
                             # find the index of rule, # create new synthetic rule
                             index = self.findIndex(childrenNodes_list[i].nodeName, syntheticNodes_dict)
-                            syntheticNodes_dict[childrenNodes_list[i].nodeName + variables.uniChar + str(index)] = list(syntheticChildren_set.copy())
+                            syntheticNodes_dict[childrenNodes_list[i].nodeName + UNICHAR + str(index)] = list(syntheticChildren_set.copy())
                         else:
                             syntheticNodes_dict[childrenNodes_list[i].nodeName] = list(syntheticChildren_set.copy())
         return syntheticNodes_dict
@@ -308,7 +302,6 @@ class ReadGrammar(ReadXMLInt):
      * @param: grammar_dict, dictionary with String as keys and list of String as values
     """
     def readSimpleNode(self, node, abstractNodes_dict, grammar_dict):
-        variables = Variables()
         childrenListTmp_list = list()  # list without repetition # find all its children
         childrenList_list = node.childNodes  # create grammar for each child
 
@@ -316,8 +309,8 @@ class ReadGrammar(ReadXMLInt):
             if childrenList_list[i].hasAttributes() and childrenList_list[i].nodeType == Node.ELEMENT_NODE:
                 mandatory = self.readMandatoryAttribute(childrenList_list[i])
                 currentChildLabel = childrenList_list[i].nodeName
-                if currentChildLabel + variables.uniChar + str(mandatory) not in childrenListTmp_list:
-                    childrenListTmp_list.append(currentChildLabel + variables.uniChar + str(mandatory))
+                if currentChildLabel + UNICHAR + str(mandatory) not in childrenListTmp_list:
+                    childrenListTmp_list.append(currentChildLabel + UNICHAR + str(mandatory))
                 self.readAttribute(childrenList_list[i], abstractNodes_dict, grammar_dict)
         # add the current node to grammar
         if len(childrenListTmp_list) != 0:
@@ -327,7 +320,7 @@ class ReadGrammar(ReadXMLInt):
             # if this node exists in grammar then increase index
             if node.nodeName in grammar_dict:
                 index = self.findIndex(node.nodeName, grammar_dict)
-                grammar_dict[node.nodeName + variables.uniChar + str(index)] = childrenListTmpVector_list.copy()
+                grammar_dict[node.nodeName + UNICHAR + str(index)] = childrenListTmpVector_list.copy()
             else:
                 grammar_dict[node.nodeName] = childrenListTmpVector_list.copy()
 
@@ -337,11 +330,10 @@ class ReadGrammar(ReadXMLInt):
      * return a dictionary with String as keys and list of String as values
     """
     def getRules(self, label, maps_dict):
-        variables = Variables()
         rules = collections.OrderedDict()  # dictionary with String as keys and list of String as values
         keyList_list = maps_dict.keys()  # list of keys (a keys is unique)
         for s in keyList_list:
-            ss = s.split(variables.uniChar)
+            ss = s.split(UNICHAR)
             if ss[0] == label:
                 rules[s] = maps_dict[s].copy()
 
@@ -353,7 +345,6 @@ class ReadGrammar(ReadXMLInt):
      * @param: grammar_dict, dictionary with String as keys and list of String as value
     """
     def readSpecialNode(self, node, syntheticNodes_dict, grammar_dict):
-        variables = Variables()
         # get the set of children
         childrenNodes_list = node.childNodes
         # find normal children
@@ -372,7 +363,7 @@ class ReadGrammar(ReadXMLInt):
                     syntheticChildren_dict[childrenNodes_list[i].nodeName] = self.getRules(syntheticLabel, syntheticNodes_dict)
                 else: # normal child
                     mandatory = self.readMandatoryAttribute(childrenNodes_list[i])
-                    normalChildren_list.append(childrenNodes_list[i].nodeName + variables.uniChar + mandatory)
+                    normalChildren_list.append(childrenNodes_list[i].nodeName + UNICHAR + mandatory)
 
         # create all cases of synthetic nodes,
         # i.e, node A has 3 synthetic child, and
@@ -399,7 +390,7 @@ class ReadGrammar(ReadXMLInt):
                     if index == 0:
                         grammar_dict[node.nodeName] = allChildren_list.copy()
                     else:
-                        grammar_dict[node.nodeName + variables.uniChar + str(index)] = allChildren_list.copy()
+                        grammar_dict[node.nodeName + UNICHAR + str(index)] = allChildren_list.copy()
                     index += 1
 
     """

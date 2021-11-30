@@ -3,7 +3,7 @@
 create grammar for ASTs
 """
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import *
-from freqt.src.be.intimals.freqt.util.Variables import *
+from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 
 from xml.dom import minidom
 from xml.dom import Node
@@ -93,7 +93,6 @@ class CreateGrammar(ReadXMLInt):
      * @param: grammar_dict, dictionary with String as keys and list of string as values
     """
     def addNewNode(self, node, grammar_dict):
-        variables = Variables()
         nbChildren = self.count_children(node)
         childrenList = node.childNodes
         tmp_list = list()
@@ -102,7 +101,7 @@ class CreateGrammar(ReadXMLInt):
                 tmp_list.append("ordered")
                 tmp_list.append("1")
                 # keep leaf node in grammar if necessary
-                tmp_list.append("leaf-node" + variables.uniChar + "false")
+                tmp_list.append("leaf-node" + UNICHAR + "false")
         else: # add internal node
             # 1 - find children
             childrenTemp_dict = collections.OrderedDict()  # ordered dictionary with Strong as keys and values
@@ -113,12 +112,12 @@ class CreateGrammar(ReadXMLInt):
                 tmp_list.append("unordered")
                 tmp_list.append("1..*")
                 for key in childrenTemp_dict:
-                    tmp_list.append(key + variables.uniChar + "false")
+                    tmp_list.append(key + UNICHAR + "false")
             else:
                 tmp_list.append("ordered")
                 tmp_list.append(str(len(childrenTemp_dict)))
                 for key in childrenTemp_dict:
-                    tmp_list.append(key + variables.uniChar + childrenTemp_dict[key])
+                    tmp_list.append(key + UNICHAR + childrenTemp_dict[key])
         grammar_dict[node.nodeName] = tmp_list
 
     """
@@ -139,14 +138,13 @@ class CreateGrammar(ReadXMLInt):
      * @param: grammar_dict, dictionary with String as keys and list of string as values
     """
     def updateInternalNode(self, node, grammar_dict):
-        variables = Variables()
         # find grammar of this current node
         oldGrammar_list = grammar_dict[node.nodeName]
         oldDegree = oldGrammar_list[1]
         # find children of the current node in grammar
         oldChildren_dict = collections.OrderedDict()  # dictionary with String as keys and values
         for i in range(2, len(oldGrammar_list)):
-            temp_list = oldGrammar_list[i].split(variables.uniChar)
+            temp_list = oldGrammar_list[i].split(UNICHAR)
             oldChildren_dict[temp_list[0]] = temp_list[1]
         # find children of the current node
         childrenList_list = node.childNodes  # list of Node
@@ -159,7 +157,7 @@ class CreateGrammar(ReadXMLInt):
             tmp_list.append("1..*")
             newChildren_dict.update(oldChildren_dict)
             for key in newChildren_dict:
-                tmp_list.append(key + variables.uniChar + "false")
+                tmp_list.append(key + UNICHAR + "false")
         else:
             if len(newChildren_dict) == 1 and oldDegree == "1":
                 tmp_list.append("ordered")
@@ -167,17 +165,17 @@ class CreateGrammar(ReadXMLInt):
                 newChildren_dict.update(oldChildren_dict)
                 if len(newChildren_dict) > 1:
                     for key in newChildren_dict:
-                        tmp_list.append(key + variables.uniChar + "false")
+                        tmp_list.append(key + UNICHAR + "false")
                 else:
                     for key in newChildren_dict:
-                        tmp_list.append(key + variables.uniChar + "true")
+                        tmp_list.append(key + UNICHAR + "true")
             else:
                 if oldDegree == "1..*":
                     tmp_list.append("unordered")
                     tmp_list.append("1..*")
                     newChildren_dict.update(oldChildren_dict)
                     for key in newChildren_dict:
-                        tmp_list.append(key + variables.uniChar + "false")
+                        tmp_list.append(key + UNICHAR + "false")
                 else:  # update grammar [unordered, N..M, list of children]
                     # calculate intersection of old and new children
                     inter = self.inter(oldChildren_dict, newChildren_dict)  # dictionary with String as keys and values
@@ -189,15 +187,15 @@ class CreateGrammar(ReadXMLInt):
                         # update children
                         for key in newChildren_dict:
                             if key in inter:
-                                tmp_list.append(key + variables.uniChar + "true")
+                                tmp_list.append(key + UNICHAR + "true")
                             else:
-                                tmp_list.append(key + variables.uniChar + "false")
+                                tmp_list.append(key + UNICHAR + "false")
                     else:
                         # update degree
                         tmp_list.append(str(len(inter)))
                         # update children
                         for key in newChildren_dict:
-                            tmp_list.append(key + variables.uniChar + newChildren_dict[key])
+                            tmp_list.append(key + UNICHAR + newChildren_dict[key])
         grammar_dict[node.nodeName] = tmp_list
 
     """
@@ -235,11 +233,10 @@ class CreateGrammar(ReadXMLInt):
      * @param: grammar_dict, dictionary with String as keys and list of string as values
     """
     def updateLeafNode(self, node, grammar_dict):
-        variables = Variables()
         tmp_list = list()  # list of String
         tmp_list.append("ordered")
         tmp_list.append("1")
-        tmp_list.append("leaf-node" + variables.uniChar + "false")
+        tmp_list.append("leaf-node" + UNICHAR + "false")
         grammar_dict[node.nodeName] = tmp_list
 
     """

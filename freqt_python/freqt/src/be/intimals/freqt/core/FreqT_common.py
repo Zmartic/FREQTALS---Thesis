@@ -5,7 +5,9 @@ import freqt.src.be.intimals.freqt.structure.Projected as proj
 from freqt.src.be.intimals.freqt.structure.Pattern import *
 from freqt.src.be.intimals.freqt.input.ReadFile import *
 from freqt.src.be.intimals.freqt.output.XMLOutput import *
+
 from freqt.src.be.intimals.freqt.constraint.Constraint import prune
+from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 
 
 import collections
@@ -48,7 +50,6 @@ class FreqT_common:
     def project(self, projected):
         if self.__found:
             return
-        variables = Variables()
         # find all candidates of the current subtree
         depth = projected.getProjectedDepth()
         candidate_dict = collections.OrderedDict()  # ordered dictionary with String as keys and Projected as values
@@ -65,7 +66,7 @@ class FreqT_common:
                     newdepth = depth - d
                     l = start
                     while l != -1:
-                        item = prefix + variables.uniChar + self.__newTransaction_list[id][l].getNodeLabel()
+                        item = prefix + UNICHAR + self.__newTransaction_list[id][l].getNodeLabel()
                         if item in candidate_dict:
                             candidate_dict[item].setProjectLocation(id, l)  # store right most positions
                         else:
@@ -89,7 +90,7 @@ class FreqT_common:
             for keys in candidate_dict:
                 oldSize = len(self.__maximalPattern_list)
                 # add new candidate to current pattern
-                p = keys.split(variables.uniChar)
+                p = keys.split(UNICHAR)
                 for i in range(len(p)):
                     if len(p[i]) != 0:
                         self.__maximalPattern_list.append(p[i])

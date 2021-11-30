@@ -2,7 +2,7 @@
 
 from freqt.src.be.intimals.freqt.grammar.CreateGrammar import *
 from freqt.src.be.intimals.freqt.grammar.ReadGrammar import *
-from freqt.src.be.intimals.freqt.util.Variables import *
+from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 
 import sys
 
@@ -14,7 +14,6 @@ def initGrammar_Int2(gramInt_dict, gramStr_dict, labelIndex_dict):
      * @param: labelIndex_dict, a dictionary with Integer as keys and String as values
     """
     try:
-        variables = Variables()
         for key in gramStr_dict:
             nodeChildren_list = gramStr_dict[key]  # list of string
             # find index of the current label
@@ -25,13 +24,13 @@ def initGrammar_Int2(gramInt_dict, gramStr_dict, labelIndex_dict):
             newChildren_list.append(nodeChildren_list[1])
             # find new int children
             for i in range(2, len(nodeChildren_list)):
-                temp = nodeChildren_list[i].split(variables.uniChar)
+                temp = nodeChildren_list[i].split(UNICHAR)
                 if temp[0] != "leaf-node":
                     childIndex = find_index(temp[0], labelIndex_dict)
-                    newChild = str(childIndex) + variables.uniChar + str(temp[1])
+                    newChild = str(childIndex) + UNICHAR + str(temp[1])
                     newChildren_list.append(newChild)
                 else:
-                    newChild = str(0) + variables.uniChar + str(temp[1])
+                    newChild = str(0) + UNICHAR + str(temp[1])
                     newChildren_list.append(newChild)
             # add current int label and int children into gramInt
             gramInt_dict[index] = newChildren_list

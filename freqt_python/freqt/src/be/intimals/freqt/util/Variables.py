@@ -1,4 +1,3 @@
 #!/usr/bin/env python3
 
-class Variables:
-    uniChar = u"\u00A5"
+UNICHAR = u"\u00A5"

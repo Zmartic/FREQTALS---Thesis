@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from freqt.src.be.intimals.freqt.util.Variables import *
+from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 
 
 class Pattern:
@@ -163,7 +163,7 @@ class Pattern:
         nodeLevel = 0
         candidateSize = 0
         try:
-            p = candidateStr.split(Variables.uniChar)
+            p = candidateStr.split(UNICHAR)
             for i in range(0, len(p)):
                 if p[i] == ")":
                     nodeLevel += 1

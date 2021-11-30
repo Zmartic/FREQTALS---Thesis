@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import freqt.src.be.intimals.freqt.structure.NodeFreqT as NodeFreqT
-from freqt.src.be.intimals.freqt.util.Variables import *
+from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 
 from xml.dom import minidom
 from xml.dom import Node
@@ -101,7 +101,6 @@ class ReadXMLInt:
     """
     def readTreeDepthFirst(self, node, trans, labelIndex, whiteLabels):
         try:
-            variables = Variables()
             # if this is an internal node
             if node.nodeType == Node.ELEMENT_NODE:
                 # add node label to trans
@@ -144,7 +143,7 @@ class ReadXMLInt:
                         if self._abstractLeafs:
                             leafLabel = "**"
                         else:
-                            leafLabel = "*" + node.data.replace(",", variables.uniChar).strip()
+                            leafLabel = "*" + node.data.replace(",", UNICHAR).strip()
                         # add leaf node label to trans
                         trans[self._id].setNodeLabel(leafLabel)
                         # update labelIndex for leaf labels

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from freqt.src.be.intimals.freqt.structure.PatternInt import *
-from freqt.src.be.intimals.freqt.util.Variables import *
+from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 
 import sys
 import traceback
@@ -224,7 +224,6 @@ def missingLeftObligatoryChild(pat, candidate, _grammarInt):
     missMandatoryChild = False
     try:
         pattern_Int = PatternInt()
-        variables = Variables()
         # find parent's position of candidate in the patterns
         parentPos = pattern_Int.findParentPosition(pat, candidate)
 
@@ -238,7 +237,7 @@ def missingLeftObligatoryChild(pat, candidate, _grammarInt):
             i = 0
             j = 2
             while i < childrenP.size() and j < len(childrenG_list) and not missMandatoryChild:
-                childGrammarTemp = childrenG_list[j].split(Variables.uniChar)
+                childGrammarTemp = childrenG_list[j].split(UNICHAR)
                 label_int = int(childGrammarTemp[0])
                 if pat.get(childrenP.get(i)) == label_int:
                     i += 1
@@ -272,7 +271,6 @@ def missingRightObligatoryChild(pat, _grammarInt_dict):
     missMandatoryChild = False
     try:
         pattern_Int = PatternInt()
-        variables = Variables()
         for pos in range(pat.size()):
             currentLabel = pat.get(pos)
             if currentLabel >= 0: # consider only internal label
@@ -287,7 +285,7 @@ def missingRightObligatoryChild(pat, _grammarInt_dict):
                         i = 0
                         j = 2
                         while i < childrenP.size() and j < len(childrenG_list) and not missMandatoryChild:
-                            childGrammarTemp = childrenG_list[j].split(variables.uniChar)
+                            childGrammarTemp = childrenG_list[j].split(UNICHAR)
                             label_int = int(childGrammarTemp[0])
 
                             if pat.get(childrenP.get(i)) == label_int:
@@ -302,7 +300,7 @@ def missingRightObligatoryChild(pat, _grammarInt_dict):
                         # check right children
                         if j < len(childrenG_list):
                             while j < len(childrenG_list) and not missMandatoryChild:
-                                childGrammarTemp = childrenG_list[j].split(variables.uniChar)
+                                childGrammarTemp = childrenG_list[j].split(UNICHAR)
                                 if childGrammarTemp[1] == "true":
                                     missMandatoryChild = True
                                 j += 1
