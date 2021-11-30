@@ -8,6 +8,8 @@ from freqt.src.be.intimals.freqt.util.Util import *
 from freqt.src.be.intimals.freqt.structure.FTArray import *
 from freqt.src.be.intimals.freqt.structure.Pattern import *
 
+from freqt.src.be.intimals.freqt.constraint import Constraint
+
 import time
 import collections
 
@@ -78,8 +80,7 @@ class FreqT:
                 del FP1[not_ast_node]
 
             # prune FP1 on minimum support
-            constrain = Constraint()
-            constrain.prune(FP1, self._config.getMinSupport(), self._config.getWeighted())
+            Constraint.prune(FP1, self._config.getMinSupport(), self._config.getWeighted())
 
             # expand FP1 to find maximal patterns
             self.expandFP1(FP1)
@@ -246,8 +247,7 @@ class FreqT:
             # find candidates of the current pattern
             candidates_dict = self.generateCandidates(projected, self._transaction_list)  # dictionary with FTArray as keys and Projected as values
             # prune candidate based on minSup
-            constrain = Constraint()
-            constrain.prune(candidates_dict, self._config.getMinSupport(), self._config.getWeighted())
+            Constraint.prune(candidates_dict, self._config.getMinSupport(), self._config.getWeighted())
             # if there is no candidate then report the pattern and then stop
             if len(candidates_dict) == 0:
                 if self.leafPattern.size() > 0:
@@ -265,12 +265,12 @@ class FreqT:
                 oldLeafPattern = self.leafPattern
                 oldLeafProjected = self.leafProjected
                 # check obligatory children constraint
-                if constrain.missingLeftObligatoryChild(pattern, key, self._grammarInt_dict):
+                if Constraint.missingLeftObligatoryChild(pattern, key, self._grammarInt_dict):
                     # do nothing = don't store pattern
                     pass
                 else:
                     # check constraints on maximal number of leafs and real leaf
-                    if constrain.satisfyMaxLeaf(pattern, self._config.getMaxLeaf()) or constrain.isNotFullLeaf(pattern):
+                    if Constraint.satisfyMaxLeaf(pattern, self._config.getMaxLeaf()) or Constraint.isNotFullLeaf(pattern):
                         # store the pattern
                         if self.leafPattern.size() > 0:
                             self.addTree(self.leafPattern, self.leafProjected)
@@ -376,11 +376,10 @@ class FreqT:
          * @param: projected, Projected
         """
         # check minsize constraints and right mandatory children
-        constraint = Constraint()
-        if constraint.checkOutput(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not constraint.missingRightObligatoryChild(pat, self._grammarInt_dict):
+        if Constraint.checkOutput(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not Constraint.missingRightObligatoryChild(pat, self._grammarInt_dict):
             if self._config.get2Class():
                 # check chi-square score
-                if constraint.satisfyChiSquare(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):
+                if Constraint.satisfyChiSquare(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):
                     if self._config.getTwoStep():
                         # add pattern to the list of 1000-highest chi-square score patterns
                         self.addHighScorePattern(pat, projected, self.__HSP_dict)
@@ -479,11 +478,10 @@ class FreqT:
          * @param: pat, FTArray
          * @param: projected, Projected
         """
-        constraint = Constraint()
         pattern_Int = PatternInt()
         if self._config.get2Class():
-            score = constraint.chiSquare(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
-            ac = constraint.get2ClassSupport(projected, self._config.getWeighted())
+            score = Constraint.chiSquare(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
+            ac = Constraint.get2ClassSupport(projected, self._config.getWeighted())
             support = str(ac[0]) + "-" + str(ac[1])
             size = pattern_Int.countNode(pat)
             result = support + "," + str(score) + "," + str(size)
@@ -512,9 +510,8 @@ class FreqT:
          * @param: projected, Projected
          * @param: _HSP_dict, dictionary with FTArray as keys and Projected as values
         """
-        constraint = Constraint()
         if pat not in _HSP_dict:
-            score = constraint.chiSquare(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
+            score = Constraint.chiSquare(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
             if len(_HSP_dict) >= self._config.getNumPatterns():
                 minScore = self.getMinScore(_HSP_dict)
                 if score > minScore:
@@ -534,9 +531,8 @@ class FreqT:
          * @param: _HSP_dict: dictionary with FTArray as keys and Projected as values
         """
         score = 1000.0
-        constraint = Constraint()
         for key in _HSP_dict:
-            scoreTmp = constraint.chiSquare(_HSP_dict[key], self.sizeClass1, self.sizeClass2, self._config.getWeighted())
+            scoreTmp = Constraint.chiSquare(_HSP_dict[key], self.sizeClass1, self.sizeClass2, self._config.getWeighted())
             if score > scoreTmp:
                 score = scoreTmp
         return score
@@ -547,10 +543,9 @@ class FreqT:
          * @param: _HSP_dict: dictionary with FTArray as key and Projected as values
         """
         score = 1000.0
-        constraint = Constraint()
         minScorerPattern = FTArray()
         for key in _HSP_dict:
-            scoreTmp = constraint.chiSquare(_HSP_dict[key], self.sizeClass1, self.sizeClass2, self._config.getWeighted())
+            scoreTmp = Constraint.chiSquare(_HSP_dict[key], self.sizeClass1, self.sizeClass2, self._config.getWeighted())
             if score > scoreTmp:
                 score = scoreTmp
                 minScorerPattern.ftarray(key)

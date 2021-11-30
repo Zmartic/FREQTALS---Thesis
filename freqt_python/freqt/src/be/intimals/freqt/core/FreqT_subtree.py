@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from freqt.src.be.intimals.freqt.constraint.Constraint import Constraint
 from freqt.src.be.intimals.freqt.output.XMLOutput import *
 from freqt.src.be.intimals.freqt.input.ReadFileInt import *
 from freqt.src.be.intimals.freqt.structure.Projected import *
+from freqt.src.be.intimals.freqt.constraint import Constraint
 
 import collections
 import traceback
@@ -73,8 +73,7 @@ class FreqT_subtree:
             # find all candidates of the current subtree
             candidate_dict = self.generateCandidates(projected)  # output dict of with FTArray as key and Projected as value
 
-            constraint = Constraint()
-            constraint.prune(candidate_dict, 2, False)  # pq 2 comme minsup?
+            Constraint.prune(candidate_dict, 2, False)  # pq 2 comme minsup?
 
             if len(candidate_dict) == 0:
                 if self.__maximalPattern == self.__inputPattern:
@@ -101,11 +100,10 @@ class FreqT_subtree:
      * @param: minSup, the minimal support value
     """
     def prune(self, candidates_dict, minSup):
-        constraint = Constraint()
         to_remove_list = list()
         for keys in candidates_dict:
-            sup = constraint.getSupport(candidates_dict[keys])
-            wsup = constraint.getRootSupport(candidates_dict[keys])
+            sup = Constraint.getSupport(candidates_dict[keys])
+            wsup = Constraint.getRootSupport(candidates_dict[keys])
             if sup < minSup:
                 to_remove_list.append(keys)
             else:

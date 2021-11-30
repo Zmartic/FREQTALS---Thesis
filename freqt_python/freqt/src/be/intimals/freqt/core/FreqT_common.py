@@ -5,7 +5,7 @@ import freqt.src.be.intimals.freqt.structure.Projected as proj
 from freqt.src.be.intimals.freqt.structure.Pattern import *
 from freqt.src.be.intimals.freqt.input.ReadFile import *
 from freqt.src.be.intimals.freqt.output.XMLOutput import *
-from freqt.src.be.intimals.freqt.constraint.Constraint import *
+from freqt.src.be.intimals.freqt.constraint.Constraint import prune
 
 
 import collections
@@ -79,8 +79,7 @@ class FreqT_common:
                     if d != -1:
                         pos = self.__newTransaction_list[id][pos].getNodeParent()
                     prefix += Variables.uniChar + ")"
-        constraint = Constraint()
-        constraint.prune(candidate_dict, self.__minsup, False)
+        prune(candidate_dict, self.__minsup, False)
 
         if len(candidate_dict) == 0:
             self.addCommonPattern(self.__maximalPattern_list, projected)
@@ -111,7 +110,6 @@ class FreqT_common:
      * @param: outCommonFile, String
     """
     def run(self, inPatterns, inClusters, outCommonFile):
-        constrain = Constraint()
         self.__commonOutputPatterns_dict = collections.OrderedDict()  # ordered dictionary with String as keys and String as values
         clusters_list = self.readClusters(inClusters)  # list of list of Integer
         patterns_list = self.readPatterns(inPatterns)  # list of String
@@ -131,7 +129,7 @@ class FreqT_common:
                 self.initDatabase(tempDatabase)
                 self.__minsup = len(tempDatabase)
                 FP1_dict = self.buildFP1Set(self.__newTransaction_list)  # dictionary with String as keys and Projected as values
-                constrain.prune(FP1_dict, self.__minsup, False)
+                prune(FP1_dict, self.__minsup, False)
                 self.__maximalPattern_list = list()  # list of String
                 for keys in FP1_dict:
                     if keys is not None and keys[0] != '*':

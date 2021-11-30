@@ -5,6 +5,8 @@ import freqt.src.be.intimals.freqt.core.FreqT as freqt
 from freqt.src.be.intimals.freqt.structure.Projected import *
 from freqt.src.be.intimals.freqt.structure.Location import *
 
+from freqt.src.be.intimals.freqt.constraint import Constraint
+
 import time
 
 
@@ -124,8 +126,7 @@ class FreqT_ext(freqt.FreqT):
             # find candidates for the current pattern
             candidates_dict = self.generateCandidates(projected, self._transaction_list)  # dictionary with FTArray as keys and Projected as values
             # prune on minimum support
-            constraint = Constraint()
-            constraint.prune(candidates_dict, self._config.getMinSupport(), self._config.getWeighted())
+            Constraint.prune(candidates_dict, self._config.getMinSupport(), self._config.getWeighted())
             # if there is no candidate then report pattern --> stop
             if len(candidates_dict) == 0:
                 if self.leafPattern.size() > 0:
@@ -142,13 +143,13 @@ class FreqT_ext(freqt.FreqT):
                 oldLeafPattern = self.leafPattern
                 oldLeafProjected = self.leafProjected
                 # check section and paragraphs in COBOL
-                constraint.checkCobolConstraints(largestPattern, candidates_dict, keys, self._labelIndex_dict, self._transaction_list)
+                Constraint.checkCobolConstraints(largestPattern, candidates_dict, keys, self._labelIndex_dict, self._transaction_list)
                 # check constraints
-                if constraint.missingLeftObligatoryChild(largestPattern, keys, self._grammarInt_dict):
+                if Constraint.missingLeftObligatoryChild(largestPattern, keys, self._grammarInt_dict):
                     # do nothing = don't store pattern to MFP
                     continue
                 else:
-                    if constraint.isNotFullLeaf(largestPattern):
+                    if Constraint.isNotFullLeaf(largestPattern):
                         if self.leafPattern.size() > 0:
                             # store the pattern
                             self.addPattern(self.leafPattern, self.leafProjected)
@@ -170,11 +171,10 @@ class FreqT_ext(freqt.FreqT):
     """
     def addPattern(self, pat, projected):
         # check output constraints and right mandatory children before storing pattern
-        constraint = Constraint()
-        if constraint.checkOutput(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not constraint.missingRightObligatoryChild(pat, self._grammarInt_dict):
+        if Constraint.checkOutput(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not Constraint.missingRightObligatoryChild(pat, self._grammarInt_dict):
             if self._config.get2Class():
                 # check chi-square score
-                if constraint.satisfyChiSquare(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):
+                if Constraint.satisfyChiSquare(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):
                     self.addMaximalPattern(pat, projected, self.MFP_dict)
             else:
                 self.addMaximalPattern(pat, projected, self.MFP_dict)
