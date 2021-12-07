@@ -187,13 +187,13 @@ class FreqT_ext(freqt.FreqT):
     def getProjected(self, projected):
         # create location for the current pattern
         ouputProjected = Projected()
-        ouputProjected.setProjectedDepth(0)
+        ouputProjected.set_depth(0)
         for i in range(projected.getProjectLocationSize()):
             classID = projected.getProjectLocation(i).getClassID()
             locationID = projected.getProjectLocation(i).getLocationId()
             rootID = projected.getProjectLocation(i).getRoot()
             temp = Location()
-            ouputProjected.addProjectLocation(classID, locationID, rootID, temp)
+            ouputProjected.add_location(classID, locationID, rootID, temp)
         return ouputProjected
 
     def reportResult(self, _report):

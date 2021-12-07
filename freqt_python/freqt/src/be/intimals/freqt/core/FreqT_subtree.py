@@ -49,11 +49,11 @@ class FreqT_subtree:
                         itemInt.addAll(prefixInt)
                         itemInt.add(self.__newTransaction_list[id][l].getNode_label_int())
                         if itemInt in candidate_dict:
-                            candidate_dict[itemInt].setProjectLocation(id, l)  # store right most positions
+                            candidate_dict[itemInt].set_location(id, l)  # store right most positions
                         else:
                             tmp = Projected()
-                            tmp.setProjectedDepth(newdepth)
-                            tmp.setProjectLocation(id, l)  # store right most positions
+                            tmp.set_depth(newdepth)
+                            tmp.set_location(id, l)  # store right most positions
                             candidate_dict[itemInt] = tmp
                         l = self.__newTransaction_list[id][l].getNodeSibling()
                     if d != -1:
@@ -144,12 +144,12 @@ class FreqT_subtree:
             self.__maximalPattern.add(rootLabel_int)
             # init locations of pattern
             projected = Projected()
-            projected.setProjectedDepth(0)
+            projected.set_depth(0)
             for i in range(0, len(self.__newTransaction_list)):
                 for j in range(0, len(self.__newTransaction_list[i])):
                     node_label = self.__newTransaction_list[i][j].getNode_label_int()
                     if node_label == rootLabel_int:
-                        projected.setProjectLocation(i, j)
+                        projected.set_location(i, j)
             # expand the pattern
             self.expandPattern(projected)
 

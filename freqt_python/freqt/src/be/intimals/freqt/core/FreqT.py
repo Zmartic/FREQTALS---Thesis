@@ -299,7 +299,7 @@ class FreqT:
         try:
             # find candidates for each location
             depth = projected.getProjectedDepth()
-            for occurrences in projected.getProjectLocations():
+            for occurrences in projected.get_locations():
                 # store all locations of the labels in the pattern: this uses more memory but need for checking continuous paragraphs
                 #occurrences = projected.getProjectLocation(i)
 
@@ -352,8 +352,8 @@ class FreqT:
             else:
                 # add new location
                 projected = Projected()
-                projected.setProjectedDepth(depth)
-                projected.addProjectLocation(classID, id, rightmostPos, initLocations)
+                projected.set_depth(depth)
+                projected.add_location(classID, id, rightmostPos, initLocations)
                 freq1_dict[newTree] = projected
 
         except:

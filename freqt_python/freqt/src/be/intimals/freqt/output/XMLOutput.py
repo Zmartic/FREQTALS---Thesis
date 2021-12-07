@@ -68,8 +68,8 @@ class XMLOutput(AOutputFormatter):
             pat_list = patterns.removeMissingLeaf(pat_list)
 
             projected = Projected()
-            projected.setProjectedSupport(int(supports[1]))
-            projected.setProjectedRootSupport(int(supports[2]))
+            projected.set_support(int(supports[1]))
+            projected.set_root_support(int(supports[2]))
 
             self.report_Str(pat_list, projected)
         except:

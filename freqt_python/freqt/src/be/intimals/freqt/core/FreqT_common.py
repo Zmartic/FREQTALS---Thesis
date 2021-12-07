@@ -68,11 +68,11 @@ class FreqT_common:
                     while l != -1:
                         item = prefix + UNICHAR + self.__newTransaction_list[id][l].getNodeLabel()
                         if item in candidate_dict:
-                            candidate_dict[item].setProjectLocation(id, l)  # store right most positions
+                            candidate_dict[item].set_location(id, l)  # store right most positions
                         else:
                             tmp = proj.Projected()
-                            tmp.setProjectedDepth(newdepth)
-                            tmp.setProjectLocation(id, l)  # store right most positions
+                            tmp.set_depth(newdepth)
+                            tmp.set_location(id, l)  # store right most positions
                             candidate_dict[item] = tmp
 
                         l = self.__newTransaction_list[id][l].getNodeSibling()
@@ -134,7 +134,7 @@ class FreqT_common:
                 self.__maximalPattern_list = list()  # list of String
                 for keys in FP1_dict:
                     if keys is not None and keys[0] != '*':
-                        FP1_dict[keys].setProjectedDepth(0)
+                        FP1_dict[keys].set_depth(0)
                         self.__maximalPattern_list.append(keys)
                         self.project(FP1_dict[keys])
                         self.__maximalPattern_list.pop(len(self.__maximalPattern_list) - 1)
@@ -156,10 +156,10 @@ class FreqT_common:
                 if len(node_label) != 0:
                     # if node_label already exists
                     if node_label in freq1_dict:
-                        freq1_dict[node_label].setProjectLocation(i, j)
+                        freq1_dict[node_label].set_location(i, j)
                     else:
                         projected = proj.Projected()
-                        projected.setProjectLocation(i, j)
+                        projected.set_location(i, j)
                         freq1_dict[node_label] = projected
         return freq1_dict
 

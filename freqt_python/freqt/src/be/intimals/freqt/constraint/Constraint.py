@@ -51,7 +51,7 @@ def get_support_class1(projected):
     sup = 0
     old_loc_id = -1
 
-    for loc in projected.getProjectLocations():
+    for loc in projected.get_locations():
         loc_id = loc.getLocationId()
 
         if loc.getClassID() == 1 and loc_id != old_loc_id:
@@ -69,7 +69,7 @@ def get_root_support_class1(projected):
     old_loc_id = - 1
     old_root_id = -1
 
-    for loc in projected.getProjectLocations():
+    for loc in projected.get_locations():
         class_id = loc.getClassID()
         loc_id = loc.getLocationId()
         root_id = loc.getRoot()
@@ -92,7 +92,7 @@ def get_support(projected):
     sup = 0
     old_loc_id = -1
 
-    for loc in projected.getProjectLocations():
+    for loc in projected.get_locations():
         loc_id = loc.getLocationId()
 
         if loc_id != old_loc_id:
@@ -110,7 +110,7 @@ def get_root_support(projected):
     root_sup = 0
     old_loc_id = -1
     old_root_id = -1
-    for loc in projected.getProjectLocations():
+    for loc in projected.get_locations():
         loc_id = loc.getLocationId()
         root_id = loc.getRoot()
 
