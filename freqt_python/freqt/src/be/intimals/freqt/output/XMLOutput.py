@@ -223,8 +223,8 @@ class XMLOutput(AOutputFormatter):
                 self.out.write("<subtree id=\"" + str(self.nbPattern) + "\" support=\"" + str(sup[1]) +
                         "\" wsupport=\"" + str(sup[2]) + "\" size=\"" + str(size) + "\">\n")
             else:
-                sup = projected.getProjectedSupport()
-                wsup = projected.getProjectedRootSupport()
+                sup = projected.get_support()
+                wsup = projected.get_root_support()
                 size = pattern.getPatternSize(pat_list)
                 self.out.write("<subtree id=\"" + str(self.nbPattern) + "\" support=\"" + str(sup) +
                         "\" wsupport=\"" + str(wsup) + "\" size=\"" + str(size) + "\">\n")

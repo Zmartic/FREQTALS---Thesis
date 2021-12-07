@@ -51,11 +51,11 @@ class FreqT_common:
         if self.__found:
             return
         # find all candidates of the current subtree
-        depth = projected.getProjectedDepth()
+        depth = projected.get_depth()
         candidate_dict = collections.OrderedDict()  # ordered dictionary with String as keys and Projected as values
-        for i in range(projected.getProjectLocationSize()):
-            id = projected.getProjectLocation(i).getLocationId()
-            pos = projected.getProjectLocation(i).getLocationPos()
+        for i in range(projected.size()):
+            id = projected.get_location(i).getLocationId()
+            pos = projected.get_location(i).getLocationPos()
             prefix = ""
             for d in range(-1, depth):
                 if pos != -1:
@@ -170,8 +170,8 @@ class FreqT_common:
     def addCommonPattern(self, pat_list, projected):
 
         pattern = Pattern()
-        support = projected.getProjectedSupport()
-        wsupport = projected.getProjectedRootSupport()  # => root location
+        support = projected.get_support()
+        wsupport = projected.get_root_support()  # => root location
         size = pattern.getPatternSize(pat_list)
 
         # replace "," in the leafs by uniChar

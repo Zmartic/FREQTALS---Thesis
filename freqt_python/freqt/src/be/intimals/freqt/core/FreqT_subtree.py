@@ -30,11 +30,11 @@ class FreqT_subtree:
      * @param projected, a projected object
     """
     def generateCandidates(self, projected):
-        depth = projected.getProjectedDepth()
+        depth = projected.get_depth()
         candidate_dict = collections.OrderedDict()
-        for i in range(projected.getProjectLocationSize()):
-            id = projected.getProjectLocation(i).getLocationId()
-            pos = projected.getProjectLocation(i).getLocationPos()
+        for i in range(projected.size()):
+            id = projected.get_location(i).getLocationId()
+            pos = projected.get_location(i).getLocationPos()
             prefixInt = FTArray()
             for d in range(-1, depth):
                 if pos != -1:

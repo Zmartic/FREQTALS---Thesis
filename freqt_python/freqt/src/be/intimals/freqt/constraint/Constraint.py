@@ -66,7 +66,7 @@ def get_root_support_class1(projected):
      * count root support of pattern in the class 1
     """
     root_sup = 0
-    old_loc_id = - 1
+    old_loc_id = -1
     old_root_id = -1
 
     for loc in projected.get_locations():
@@ -139,8 +139,8 @@ def prune(candidates, min_sup, weighted):
         if limit < min_sup:
             del candidates[elem]
         else:
-            proj.setProjectedSupport(sup)
-            proj.setProjectedRootSupport(wsup)
+            proj.set_support(sup)
+            proj.set_root_support(wsup)
 
 
 def check_black_list_label(label, black_labels):  # UNUSED

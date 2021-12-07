@@ -298,7 +298,7 @@ class FreqT:
         candidates_dict: OrderedDict[FTArray, Projected] = collections.OrderedDict()
         try:
             # find candidates for each location
-            depth = projected.getProjectedDepth()
+            depth = projected.get_depth()
             for occurrences in projected.get_locations():
                 # store all locations of the labels in the pattern: this uses more memory but need for checking continuous paragraphs
                 #occurrences = projected.getProjectLocation(i)
@@ -348,7 +348,7 @@ class FreqT:
 
             # if candidate existed in the freq1 then add its location to projected
             if newTree in freq1_dict:
-                freq1_dict[newTree].addProjectLocation(classID, id, rightmostPos, initLocations)
+                freq1_dict[newTree].add_location(classID, id, rightmostPos, initLocations)
             else:
                 # add new location
                 projected = Projected()
@@ -359,6 +359,7 @@ class FreqT:
         except:
             e = sys.exc_info()[0]
             print("update projected location error " + str(e) + "\n")
+            raise
 
     def keepLeafPattern(self, pat, projected):
         """
@@ -481,13 +482,13 @@ class FreqT:
         """
         if self._config.get2Class():
             score = Constraint.chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
-            ac = Constraint.get2ClassSupport(projected, self._config.getWeighted())
+            ac = Constraint.get_2class_support(projected, self._config.getWeighted())
             support = str(ac[0]) + "-" + str(ac[1])
             size = countNode(pat)
             result = support + "," + str(score) + "," + str(size)
         else:
-            support = projected.getProjectedSupport()
-            wsupport = projected.getProjectedRootSupport()
+            support = projected.get_support()
+            wsupport = projected.get_root_support()
             size = countNode(pat)
             result = str(support) + "," + str(wsupport) + "," + str(size)
         return result
