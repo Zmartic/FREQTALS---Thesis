@@ -24,12 +24,12 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(self.RXML.getlineNrs(), [])
 
     def test_countNBNode(self):
-        doc = minidom.parse("../../../../../test/Basic/ast1.xml")
+        doc = minidom.parse("../Basic/ast1.xml")
         doc.documentElement.normalize()
         self.assertEqual(self.RXML.countNBNodes(doc.documentElement) + 1, 17)
 
     def test_countNBChildren(self):
-        doc = minidom.parse("../../../../../test/Basic/ast1.xml")
+        doc = minidom.parse("../Basic/ast1.xml")
         doc.documentElement.normalize()
         self.assertEqual(self.RXML.count_children(doc.documentElement), 3)
         children = doc.documentElement.childNodes
@@ -76,7 +76,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(labelIndex, output_labelIndex)
 
     def test_findLineNr(self):
-        doc = minidom.parse("../../../../../test/Basic/ast1.xml")
+        doc = minidom.parse("../Basic/ast1.xml")
         doc.documentElement.normalize()
         children = doc.documentElement.childNodes
         i = 0
@@ -87,7 +87,7 @@ class MyTestCase(unittest.TestCase):
                 i += 1
 
     def test_countSectionStatementBlock(self):
-        doc = minidom.parse("../../../../../test/Basic/ast1.xml")
+        doc = minidom.parse("../Basic/ast1.xml")
         doc.documentElement.normalize()
         self.RXML.countSectionStatementBlock(doc.documentElement, "0")
         self.assertEqual(self.RXML.countSection, -1)
@@ -121,7 +121,7 @@ class MyTestCase(unittest.TestCase):
     def test_calculatePositions(self):
         trans = []
         self.RXML._sr = [0, 1, 2, 3, 4, 5, 6]
-        doc = minidom.parse("../../../../../test/Basic/ast1.xml")
+        doc = minidom.parse("../Basic/ast1.xml")
         doc.documentElement.normalize()
         size = self.RXML.countNBNodes(doc.documentElement) + 1
         correct_output_parent = [-1, -1, -1, -1, -1, -1, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
@@ -139,7 +139,7 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual(self.RXML._sibling[i], correct_output_sibling[i])
 
     def test_readTreeDepthFirst(self):
-        doc = minidom.parse("../../../../../test/Basic/ast1.xml")
+        doc = minidom.parse("../Basic/ast1.xml")
         doc.documentElement.normalize()
         size = self.RXML.countNBNodes(doc.documentElement) + 1
         node = doc.documentElement
