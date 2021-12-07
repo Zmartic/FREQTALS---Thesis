@@ -43,6 +43,7 @@ class FreqT_ext(freqt.FreqT):
     def __init__(self, _config, _grammar_dict, _grammarInt_dict, _blackLabelsInt_dict, _whiteLabelsInt_dict,
                   _xmlCharacters_dict, _labelIndex_dict, _transaction_list, _sizeClass1, _sizeClass2):
         super().__init__(_config)
+        #self._config = _config
         self._grammar_dict = _grammar_dict
         self._grammarInt_dict = _grammarInt_dict
         self._blackLabelsInt_dict = _blackLabelsInt_dict
@@ -171,10 +172,10 @@ class FreqT_ext(freqt.FreqT):
     """
     def addPattern(self, pat, projected):
         # check output constraints and right mandatory children before storing pattern
-        if Constraint.checkOutput(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not Constraint.missingRightObligatoryChild(pat, self._grammarInt_dict):
+        if Constraint.check_output(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not Constraint.missingRightObligatoryChild(pat, self._grammarInt_dict):
             if self._config.get2Class():
                 # check chi-square score
-                if Constraint.satisfyChiSquare(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):
+                if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):
                     self.addMaximalPattern(pat, projected, self.MFP_dict)
             else:
                 self.addMaximalPattern(pat, projected, self.MFP_dict)

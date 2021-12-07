@@ -102,8 +102,8 @@ class FreqT_subtree:
     def prune(self, candidates_dict, minSup):
         to_remove_list = list()
         for keys in candidates_dict:
-            sup = Constraint.getSupport(candidates_dict[keys])
-            wsup = Constraint.getRootSupport(candidates_dict[keys])
+            sup = Constraint.get_support(candidates_dict[keys])
+            wsup = Constraint.get_root_support(candidates_dict[keys])
             if sup < minSup:
                 to_remove_list.append(keys)
             else:

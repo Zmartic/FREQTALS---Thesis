@@ -376,10 +376,10 @@ class FreqT:
          * @param: projected, Projected
         """
         # check minsize constraints and right mandatory children
-        if Constraint.checkOutput(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not Constraint.missingRightObligatoryChild(pat, self._grammarInt_dict):
+        if Constraint.check_output(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not Constraint.missingRightObligatoryChild(pat, self._grammarInt_dict):
             if self._config.get2Class():
                 # check chi-square score
-                if Constraint.satisfyChiSquare(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):
+                if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):
                     if self._config.getTwoStep():
                         # add pattern to the list of 1000-highest chi-square score patterns
                         self.addHighScorePattern(pat, projected, self.__HSP_dict)
@@ -480,7 +480,7 @@ class FreqT:
         """
         pattern_Int = PatternInt()
         if self._config.get2Class():
-            score = Constraint.chiSquare(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
+            score = Constraint.chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
             ac = Constraint.get2ClassSupport(projected, self._config.getWeighted())
             support = str(ac[0]) + "-" + str(ac[1])
             size = pattern_Int.countNode(pat)
@@ -511,7 +511,7 @@ class FreqT:
          * @param: _HSP_dict, dictionary with FTArray as keys and Projected as values
         """
         if pat not in _HSP_dict:
-            score = Constraint.chiSquare(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
+            score = Constraint.chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
             if len(_HSP_dict) >= self._config.getNumPatterns():
                 minScore = self.getMinScore(_HSP_dict)
                 if score > minScore:
@@ -532,7 +532,7 @@ class FreqT:
         """
         score = 1000.0
         for key in _HSP_dict:
-            scoreTmp = Constraint.chiSquare(_HSP_dict[key], self.sizeClass1, self.sizeClass2, self._config.getWeighted())
+            scoreTmp = Constraint.chi_square(_HSP_dict[key], self.sizeClass1, self.sizeClass2, self._config.getWeighted())
             if score > scoreTmp:
                 score = scoreTmp
         return score
@@ -545,7 +545,7 @@ class FreqT:
         score = 1000.0
         minScorerPattern = FTArray()
         for key in _HSP_dict:
-            scoreTmp = Constraint.chiSquare(_HSP_dict[key], self.sizeClass1, self.sizeClass2, self._config.getWeighted())
+            scoreTmp = Constraint.chi_square(_HSP_dict[key], self.sizeClass1, self.sizeClass2, self._config.getWeighted())
             if score > scoreTmp:
                 score = scoreTmp
                 minScorerPattern.ftarray(key)

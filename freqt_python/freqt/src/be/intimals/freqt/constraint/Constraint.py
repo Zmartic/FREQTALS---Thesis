@@ -7,191 +7,181 @@ import sys
 import traceback
 
 
-def satisfyChiSquare(projected, sizeClass1, sizeClass2, chiSquareThreshold, weighted):
-    score = chiSquare(projected, sizeClass1, sizeClass2, weighted)
-    if score >= chiSquareThreshold:
-        return True
-    else:
-        return False
+def satisfy_chi_square(projected, size_class1, size_class2, chi_square_threshold, weighted):
+    score = chi_square(projected, size_class1, size_class2, weighted)
+    return score >= chi_square_threshold
 
 
-def chiSquare(projected, sizeClass1, sizeClass2, weighted):
+def chi_square(projected, size_class1, size_class2, weighted):
     """
      * return chiSquare value of a pattern in two classes
     """
-    ac = get2ClassSupport(projected, weighted)
+    a, c = get_2class_support(projected, weighted)
 
-    a = ac[0]  # occurrences in the first class data
-    c = ac[1]  # occurrences in the second class data
+    # a: occurrences in the first class data
+    # c: occurrences in the second class data
 
-    yaminxb = sizeClass2 * a - sizeClass1 * c
-    one = yaminxb / ((a+c) * (sizeClass1 + sizeClass2 - a - c))
-    two = yaminxb / (sizeClass1 * sizeClass2)
+    yaminxb = size_class2 * a - size_class1 * c
+    one = yaminxb / ((a+c) * (size_class1 + size_class2 - a - c))
+    two = yaminxb / (size_class1 * size_class2)
 
-    return one * two * (sizeClass1 + sizeClass2)
+    return one * two * (size_class1 + size_class2)
 
 
-def get2ClassSupport(projected, weighted):
+def get_2class_support(projected, weighted):
     """
      * return number of occurrences of a pattern in two classes
     """
-    a = 0
-    c = 0
     if weighted:
         # count support by occurrences
-        a = getRootSupportClass1(projected)
-        c = getRootSupport(projected) - a
+        a = get_root_support_class1(projected)
+        c = get_root_support(projected) - a
     else:
         # count support by files
-        a = getSupportClass1(projected)
-        c = getSupport(projected) - a
-    return [a, c]
+        a = get_support_class1(projected)
+        c = get_support(projected) - a
+
+    return a, c
 
 
-def getSupportClass1(projected):
+def get_support_class1(projected):
     """
      * count support of pattern in the class 1
     """
-    a = 0
-    old = - 1
-    for i in range(projected.getProjectLocationSize()):
-        if projected.getProjectLocation(i).getClassID() == 1 and projected.getProjectLocation(i).getLocationId() != old:
-            a += 1
-            old = projected.getProjectLocation(i).getLocationId()
-    return a
+    sup = 0
+    old_loc_id = -1
+
+    for loc in projected.getProjectLocations():
+        loc_id = loc.getLocationId()
+
+        if loc.getClassID() == 1 and loc_id != old_loc_id:
+            sup += 1
+            old_loc_id = loc_id
+
+    return sup
 
 
-def getRootSupportClass1(projected):
+def get_root_support_class1(projected):
     """
      * count root support of pattern in the class 1
     """
-    rootSup = 0
-    oldLocationID = - 1
-    oldRootID = -1
-    for i in range(projected.getProjectLocationSize()):
-        classID1 = projected.getProjectLocation(i).getClassID()
-        locationID1 = projected.getProjectLocation(i).getLocationId()
-        rootID1 = projected.getProjectLocation(i).getRoot()
-        if classID1 == 1:
-            if locationID1 == oldLocationID and rootID1 != oldRootID or locationID1 != oldLocationID:
-                rootSup += 1
-            oldLocationID = locationID1
-            oldRootID = rootID1
-    return rootSup
+    root_sup = 0
+    old_loc_id = - 1
+    old_root_id = -1
+
+    for loc in projected.getProjectLocations():
+        class_id = loc.getClassID()
+        loc_id = loc.getLocationId()
+        root_id = loc.getRoot()
+
+        if class_id == 1:
+            if loc_id != old_loc_id or (loc_id == old_loc_id and root_id != old_root_id):
+                root_sup += 1
+            old_loc_id = loc_id
+            old_root_id = root_id
+
+    return root_sup
 
 
-def checkOutput(pat, minLeaf, minNode):
-    """
-     * check output constraints: minLeaf and minNode
-     * @param pat
-     * @return
-    """
-    if satisfyMinLeaf(pat, minLeaf) and satisfyMinNode(pat, minNode):
-        return True
-    return False
-
-
-def getSupport(projected):
+def get_support(projected):
     """
      * calculate the support of a pattern = number of files
      * @param projected
      * @return
     """
-    old = -1
     sup = 0
-    for i in range(projected.getProjectLocationSize()):
-        if projected.getProjectLocation(i).getLocationId() != old:
+    old_loc_id = -1
+
+    for loc in projected.getProjectLocations():
+        loc_id = loc.getLocationId()
+
+        if loc_id != old_loc_id:
             sup += 1
-        old = projected.getProjectLocation(i).getLocationId()
+            old_loc_id = loc_id
     return sup
 
 
-def getRootSupport(projected):
+def get_root_support(projected):
     """
      * calculate the root support of a pattern = number of occurrences
      * @param projected
      * @return
     """
-    rootSup = 0
-    oldLocationID = -1
-    oldRootID = -1
-    for i in range(projected.getProjectLocationSize()):
-        locationID1 = projected.getProjectLocation(i).getLocationId()
-        rootID1 = projected.getProjectLocation(i).getRoot()
-        if locationID1 == oldLocationID and rootID1 != oldRootID or locationID1 != oldLocationID:
-            rootSup += 1
-        oldLocationID = locationID1
-        oldRootID = rootID1
-    return rootSup
+    root_sup = 0
+    old_loc_id = -1
+    old_root_id = -1
+    for loc in projected.getProjectLocations():
+        loc_id = loc.getLocationId()
+        root_id = loc.getRoot()
+
+        if loc_id != old_loc_id or (loc_id == old_loc_id and root_id != old_root_id):
+            root_sup += 1
+            old_loc_id = loc_id
+            old_root_id = root_id
+    return root_sup
 
 
-def prune(candidates, minSup, weighted):
+def prune(candidates, min_sup, weighted):
     """
      * prune candidates based on minimal support
      * @param: candidates, dictionary with FTArray as key and Projected as value
      * @param: minSup, int
      * @param: weighted, boolean
     """
-    to_remove_list = list()
-    for elem in candidates:
-        sup = getSupport(candidates[elem])
-        wsup = getRootSupport(candidates[elem])
-        if weighted:
-            limit = wsup
+    keys = list(candidates.keys())
+    for elem in keys:
+        proj = candidates[elem]
+
+        sup = get_support(proj)
+        wsup = get_root_support(proj)
+        limit = wsup if weighted else sup
+
+        if limit < min_sup:
+            del candidates[elem]
         else:
-            limit = sup
-        if limit < minSup:
-            to_remove_list.append(elem)
-        else:
-            candidates[elem].setProjectedSupport(sup)
-            candidates[elem].setProjectedRootSupport(wsup)
-    for elem in to_remove_list:
-        candidates.pop(elem, -1)
+            proj.setProjectedSupport(sup)
+            proj.setProjectedRootSupport(wsup)
 
 
-def checkBlackListLabel(label_int, _blackLabels):
+def check_black_list_label(label, black_labels):  # UNUSED
     """
      * return true if the label_int is in the set of black labels
      * @param: label_int, an integer
      * @param: _blackLabels, une liste de liste d'Integer
     """
-    for labels in _blackLabels:
-        if label_int in labels:
+    for labels in black_labels:
+        if label in labels:
             return True
     return False
 
-"""
- * return True if the candidates are in the black label list
- * @param: pat, a FTArray
- * @param: key, a FTArray
- * @param: _blackLabels_dict, a dictionary with Integer as Key and List of Integer as Value
-"""
-"""
-def isBlacklisted(pat, key, _blackLabels_dict):
-    pattern_Int = PatternInt()
-    candidateLabel_int = key.get(key.size() - 1)
-    return checkBlackListLabel(candidateLabel_int, _blackLabels_dict.values()) and pattern_Int.checkBlackLabels(pat, key, _blackLabels_dict, candidateLabel_int)
-"""
+
+def check_output(pat, min_leaf, min_node):
+    """
+     * check output constraints: minLeaf and minNode
+     * @param pat
+     * @return
+    """
+    return satisfy_min_leaf(pat, min_leaf) and satisfy_min_node(pat, min_node)
 
 
-def satisfyMinNode(pat, minNode):
+def satisfy_min_node(pat, min_node):
     """
      * return true if the number of nodes is larger or equal to minNode
      * @param pat
      * @return
     """
     pattern_Int = PatternInt()
-    return pattern_Int.countNode(pat) >= minNode
+    return pattern_Int.countNode(pat) >= min_node
 
 
-def satisfyMinLeaf(pat, minLeaf):
+def satisfy_min_leaf(pat, min_leaf):
     """
      * return true if the number of leafs is larger or equal to minLeaf
      * @param pat
      * @return
     """
     pattern_Int = PatternInt()
-    return pattern_Int.countLeafNode(pat) >= minLeaf
+    return pattern_Int.countLeafNode(pat) >= min_leaf
 
 
 def satisfyMaxLeaf(pattern, maxLeaf):

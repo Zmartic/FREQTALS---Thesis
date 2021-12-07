@@ -79,7 +79,7 @@ class FreqT_common:
 
                     if d != -1:
                         pos = self.__newTransaction_list[id][pos].getNodeParent()
-                    prefix += Variables.uniChar + ")"
+                    prefix += UNICHAR + ")"
         prune(candidate_dict, self.__minsup, False)
 
         if len(candidate_dict) == 0:
