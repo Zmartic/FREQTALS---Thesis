@@ -266,12 +266,12 @@ class FreqT:
                 oldLeafPattern = self.leafPattern
                 oldLeafProjected = self.leafProjected
                 # check obligatory children constraint
-                if Constraint.missingLeftObligatoryChild(pattern, key, self._grammarInt_dict):
+                if Constraint.missing_left_obligatory_child(pattern, key, self._grammarInt_dict):
                     # do nothing = don't store pattern
                     pass
                 else:
                     # check constraints on maximal number of leafs and real leaf
-                    if Constraint.satisfyMaxLeaf(pattern, self._config.getMaxLeaf()) or Constraint.isNotFullLeaf(pattern):
+                    if Constraint.satisfy_max_leaf(pattern, self._config.getMaxLeaf()) or Constraint.is_not_full_leaf(pattern):
                         # store the pattern
                         if self.leafPattern.size() > 0:
                             self.addTree(self.leafPattern, self.leafProjected)
@@ -377,7 +377,7 @@ class FreqT:
          * @param: projected, Projected
         """
         # check minsize constraints and right mandatory children
-        if Constraint.check_output(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not Constraint.missingRightObligatoryChild(pat, self._grammarInt_dict):
+        if Constraint.check_output(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not Constraint.missing_right_obligatory_child(pat, self._grammarInt_dict):
             if self._config.get2Class():
                 # check chi-square score
                 if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):

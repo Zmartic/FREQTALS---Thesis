@@ -144,13 +144,13 @@ class FreqT_ext(freqt.FreqT):
                 oldLeafPattern = self.leafPattern
                 oldLeafProjected = self.leafProjected
                 # check section and paragraphs in COBOL
-                Constraint.checkCobolConstraints(largestPattern, candidates_dict, keys, self._labelIndex_dict, self._transaction_list)
+                Constraint.check_cobol_constraints(largestPattern, candidates_dict, keys, self._labelIndex_dict, self._transaction_list)
                 # check constraints
-                if Constraint.missingLeftObligatoryChild(largestPattern, keys, self._grammarInt_dict):
+                if Constraint.missing_left_obligatory_child(largestPattern, keys, self._grammarInt_dict):
                     # do nothing = don't store pattern to MFP
                     continue
                 else:
-                    if Constraint.isNotFullLeaf(largestPattern):
+                    if Constraint.is_not_full_leaf(largestPattern):
                         if self.leafPattern.size() > 0:
                             # store the pattern
                             self.addPattern(self.leafPattern, self.leafProjected)
@@ -172,7 +172,7 @@ class FreqT_ext(freqt.FreqT):
     """
     def addPattern(self, pat, projected):
         # check output constraints and right mandatory children before storing pattern
-        if Constraint.check_output(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not Constraint.missingRightObligatoryChild(pat, self._grammarInt_dict):
+        if Constraint.check_output(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not Constraint.missing_right_obligatory_child(pat, self._grammarInt_dict):
             if self._config.get2Class():
                 # check chi-square score
                 if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):

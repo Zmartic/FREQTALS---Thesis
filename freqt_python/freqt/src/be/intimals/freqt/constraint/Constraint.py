@@ -182,16 +182,16 @@ def satisfy_min_leaf(pat, min_leaf):
     return countLeafNode(pat) >= min_leaf
 
 
-def satisfyMaxLeaf(pattern, maxLeaf):
+def satisfy_max_leaf(pattern, max_leaf):
     """
      * return true if the number of leafs of the pattern is larger than maxLeaf
      * @param pattern
      * @return
     """
-    return countLeafNode(pattern) >= maxLeaf
+    return countLeafNode(pattern) >= max_leaf
 
 
-def isNotFullLeaf(pattern):
+def is_not_full_leaf(pattern):
     """
      * return true if the pattern misses leaf
      * @param pattern
@@ -200,39 +200,38 @@ def isNotFullLeaf(pattern):
     return checkMissingLeaf(pattern)
 
 
-def missingLeftObligatoryChild(pat, candidate, _grammarInt):
+def missing_left_obligatory_child(pat, candidate, grammar):
     """
      * return true if pattern misses obligatory child at the left side of the current node
      * @param: pat, FTArray
      * @param: candidate, FTArray
      * @param: _grammarInt_dict, dictionary with Integer as keys and list of String as values
     """
-    missMandatoryChild = False
     try:
         # find parent's position of candidate in the patterns
-        parentPos = findParentPosition(pat, candidate)
+        parent_pos = findParentPosition(pat, candidate)
 
         # find all children of patternLabel in grammar
-        childrenG_list = _grammarInt[pat.get(parentPos)]
+        childrenG_list = grammar[pat.get(parent_pos)]
 
         if childrenG_list[0] == "ordered" and not childrenG_list[1] == "1":
             # find all children of parentPos in pattern
-            childrenP = findChildrenPosition(pat, parentPos)
+            children_pos = findChildrenPosition(pat, parent_pos)
             # compare children in pattern and children in grammar
             i = 0
             j = 2
-            while i < childrenP.size() and j < len(childrenG_list) and not missMandatoryChild:
-                childGrammarTemp = childrenG_list[j].split(UNICHAR)
-                label_int = int(childGrammarTemp[0])
-                if pat.get(childrenP.get(i)) == label_int:
+            while i < children_pos.size() and j < len(childrenG_list):
+                child_grammar_temp = childrenG_list[j].split(UNICHAR)
+                label_int = int(child_grammar_temp[0])
+                if pat.get(children_pos.get(i)) == label_int:
                     i += 1
                     j += 1
                 else:
                     # if this child is optional
-                    if childGrammarTemp[1] == "false":
+                    if child_grammar_temp[1] == "false":
                         j += 1
-                    elif childGrammarTemp[1] == "true":
-                        missMandatoryChild = True
+                    elif child_grammar_temp[1] == "true":
+                        return True
 
     except:
         e = sys.exc_info()[0]
@@ -240,10 +239,10 @@ def missingLeftObligatoryChild(pat, candidate, _grammarInt):
         trace = traceback.format_exc()
         print(trace)
 
-    return missMandatoryChild
+    return False
 
 
-def missingRightObligatoryChild(pat, _grammarInt_dict):
+def missing_right_obligatory_child(pat, grammar):
     """
      *  return true if the pattern misses the obligatory child at right side of the current node
         for each node in the pattern do
@@ -253,51 +252,50 @@ def missingRightObligatoryChild(pat, _grammarInt_dict):
      * @param: pat, FTArray
      * @param: _grammerInt_dict, dictionary with Integer as keys and list of String as values
     """
-    missMandatoryChild = False
     try:
         for pos in range(pat.size()):
-            currentLabel = pat.get(pos)
-            if currentLabel >= 0: # consider only internal label
+            current_label = pat.get(pos)
+            if current_label >= 0:  # consider only internal label
                 # find all children of patternLabel in grammar
-                childrenG_list = _grammarInt_dict[currentLabel]
+                childrenG_list = grammar[current_label]
                 if childrenG_list[0] == "ordered" and not childrenG_list[1] == "1":
                     # get all children of the current pos in pattern
-                    childrenP = findChildrenPosition(pat, pos)
-                    if childrenP.size() > 0:
+                    children_pos = findChildrenPosition(pat, pos)
+                    if children_pos.size() > 0:
                         # check leaf children
                         # compare two sets of children to determine this pattern misses mandatory child or not
                         i = 0
                         j = 2
-                        while i < childrenP.size() and j < len(childrenG_list) and not missMandatoryChild:
-                            childGrammarTemp = childrenG_list[j].split(UNICHAR)
-                            label_int = int(childGrammarTemp[0])
+                        while i < children_pos.size() and j < len(childrenG_list):
+                            child_grammar_temp = childrenG_list[j].split(UNICHAR)
+                            label_int = int(child_grammar_temp[0])
 
-                            if pat.get(childrenP.get(i)) == label_int:
+                            if pat.get(children_pos.get(i)) == label_int:
                                 i += 1
                                 j += 1
                             else:
-                                if childGrammarTemp[1] == "false":
+                                if child_grammar_temp[1] == "false":
                                     j += 1
-                                elif childGrammarTemp[1] == "true":
-                                    missMandatoryChild = True
+                                elif child_grammar_temp[1] == "true":
+                                    return True
 
                         # check right children
                         if j < len(childrenG_list):
-                            while j < len(childrenG_list) and not missMandatoryChild:
-                                childGrammarTemp = childrenG_list[j].split(UNICHAR)
-                                if childGrammarTemp[1] == "true":
-                                    missMandatoryChild = True
+                            while j < len(childrenG_list):
+                                child_grammar_temp = childrenG_list[j].split(UNICHAR)
+                                if child_grammar_temp[1] == "true":
+                                    return True
                                 j += 1
 
     except:
         e = sys.exc_info()[0]
         print("check Right Obligatory Children error: " + str(e) + "\n")
 
-    return missMandatoryChild
+    return False
 
 
 # /////////// specific functions for COBOL source code //////////////////
-def checkCobolConstraints(pattern, entry_dict, key, labelIndex_dict, transaction_list):
+def check_cobol_constraints(pattern, entry_dict, key, label_index, transaction_list):
     """
      * @param: pattern, FTArray
      * @param: entry_dict, dictionary with FTArray as keys and Projected as values
@@ -307,16 +305,16 @@ def checkCobolConstraints(pattern, entry_dict, key, labelIndex_dict, transaction
     """
     # check continuous paragraphs
     # if potential candidate = SectionStatementBlock then check if candidate belongs to black-section or not
-    candidateLabel = labelIndex_dict[key.get(key.size() - 1)]
-    if candidateLabel == "SectionStatementBlock":
-        checkBlackSection(entry_dict, key, transaction_list)
+    candidate_label = label_index[key.get(key.size() - 1)]
+    if candidate_label == "SectionStatementBlock":
+        check_black_section(entry_dict, key, transaction_list)
 
     # expand the pattern if all paragraphs are continuous
-    if candidateLabel == "ParagraphStatementBlock":
-        checkContinuousParagraph(pattern, entry_dict, key, transaction_list)
+    if candidate_label == "ParagraphStatementBlock":
+        check_continuous_paragraph(pattern, entry_dict, key, transaction_list)
 
 
-def checkContinuousParagraph(pat, entry_dict, key, _transaction_list):
+def check_continuous_paragraph(pat, entry_dict, key, _transaction_list):
     """
      * @param: pat, FTArray
      * @param: entry_dict, dictionary with FTArray as keys and Projected as values
@@ -326,11 +324,11 @@ def checkContinuousParagraph(pat, entry_dict, key, _transaction_list):
     try:
         projected = entry_dict[key]
         # find parent's location of Paragraph
-        parentPos = findParentPosition(pat, key)
+        parent_pos = findParentPosition(pat, key)
         # find Paragraph locations
-        childrenPos = findChildrenPosition(pat, parentPos)
+        children_pos = findChildrenPosition(pat, parent_pos)
 
-        if childrenPos.size() == 1:
+        if children_pos.size() == 1:
             return
         # check continuous paragraphs
         # find the first position in pos --> compare to the last position
@@ -338,15 +336,15 @@ def checkContinuousParagraph(pat, entry_dict, key, _transaction_list):
         i = 0
         while i < projected.getProjectLocationSize():
             pos = projected.getProjectLocation(i)
-            id = pos.getLocationId()
+            pos_id = pos.getLocationId()
 
-            firstPos = 0
-            for j in range(pos.size() - 2 , 0, -1):
-                if _transaction_list[id][pos.get(j)].getNode_label_int() == pat.get(childrenPos.get(childrenPos.size() - 2)):
-                    firstPos = pos.get(j)
+            first_pos = 0
+            for j in range(pos.size() - 2, 0, -1):
+                if _transaction_list[pos_id][pos.get(j)].getNode_label_int() == pat.get(children_pos.get(children_pos.size() - 2)):
+                    first_pos = pos.get(j)
                     break
-            lastPos = pos.get(pos.size() - 1)
-            if _transaction_list[id][firstPos].getNodeSibling() != lastPos:
+            last_pos = pos.get(pos.size() - 1)
+            if _transaction_list[pos_id][first_pos].getNodeSibling() != last_pos:
                 # remove paragraph location
                 projected.deleteProjectLocation(i)
                 i -= 1
@@ -360,34 +358,34 @@ def checkContinuousParagraph(pat, entry_dict, key, _transaction_list):
         print("checkContinuousParagraph " + str(e) + "\n")
 
 
-def checkBlackSection(entry_dict, key, _transaction_list):
+def check_black_section(entry_dict, key, _transaction_list):
     """
      * delete locations of a label that belongs to black-section?
      * @param: entry, dictionary with FTArray as keys and Projected as values
      * @param: key, FTArray, a key of entry_dict
      * @param: _transaction_list, list of list of NodeFreqT
     """
-    #TODO: read black-section from file
-    blackSectionList_set = set()
-    blackSectionList_set.add("*CCVS1")
-    blackSectionList_set.add("*CCVS-EXIT")
+    # TODO: read black-section from file
+    black_section_list_set = set()
+    black_section_list_set.add("*CCVS1")
+    black_section_list_set.add("*CCVS-EXIT")
 
     try:
         projected = entry_dict[key]
         i = 0
         while i < projected.getProjectLocationSize():
             # get position of the current label
-            id = projected.getProjectLocation(i).getLocationId()
+            proj_id = projected.getProjectLocation(i).getLocationId()
             # for each location check if it belongs to SectionStatementBlock or not
-            currentPos = projected.getProjectLocation(i).getLocationPos()
+            current_pos = projected.getProjectLocation(i).getLocationPos()
             # check if label of section is in black-section or not
-            while currentPos != -1:
-                if _transaction_list[id][currentPos].getNodeLabel() in blackSectionList_set:
+            while current_pos != -1:
+                if _transaction_list[proj_id][current_pos].getNodeLabel() in black_section_list_set:
                     projected.deleteProjectLocation(i)
                     i -= 1
                     break
                 else:
-                    currentPos = _transaction_list[id][currentPos].getNodeChild()
+                    current_pos = _transaction_list[proj_id][current_pos].getNodeChild()
             i += 1
         # modify the values of the key
         entry_dict[key] = projected
