@@ -170,8 +170,7 @@ def satisfy_min_node(pat, min_node):
      * @param pat
      * @return
     """
-    pattern_Int = PatternInt()
-    return pattern_Int.countNode(pat) >= min_node
+    return countNode(pat) >= min_node
 
 
 def satisfy_min_leaf(pat, min_leaf):
@@ -180,8 +179,7 @@ def satisfy_min_leaf(pat, min_leaf):
      * @param pat
      * @return
     """
-    pattern_Int = PatternInt()
-    return pattern_Int.countLeafNode(pat) >= min_leaf
+    return countLeafNode(pat) >= min_leaf
 
 
 def satisfyMaxLeaf(pattern, maxLeaf):
@@ -190,8 +188,7 @@ def satisfyMaxLeaf(pattern, maxLeaf):
      * @param pattern
      * @return
     """
-    pattern_Int = PatternInt()
-    return pattern_Int.countLeafNode(pattern) >= maxLeaf
+    return countLeafNode(pattern) >= maxLeaf
 
 
 def isNotFullLeaf(pattern):
@@ -200,8 +197,7 @@ def isNotFullLeaf(pattern):
      * @param pattern
      * @return
     """
-    pattern_Int = PatternInt()
-    return pattern_Int.checkMissingLeaf(pattern)
+    return checkMissingLeaf(pattern)
 
 
 def missingLeftObligatoryChild(pat, candidate, _grammarInt):
@@ -213,16 +209,15 @@ def missingLeftObligatoryChild(pat, candidate, _grammarInt):
     """
     missMandatoryChild = False
     try:
-        pattern_Int = PatternInt()
         # find parent's position of candidate in the patterns
-        parentPos = pattern_Int.findParentPosition(pat, candidate)
+        parentPos = findParentPosition(pat, candidate)
 
         # find all children of patternLabel in grammar
         childrenG_list = _grammarInt[pat.get(parentPos)]
 
         if childrenG_list[0] == "ordered" and not childrenG_list[1] == "1":
             # find all children of parentPos in pattern
-            childrenP = pattern_Int.findChildrenPosition(pat, parentPos)
+            childrenP = findChildrenPosition(pat, parentPos)
             # compare children in pattern and children in grammar
             i = 0
             j = 2
@@ -260,7 +255,6 @@ def missingRightObligatoryChild(pat, _grammarInt_dict):
     """
     missMandatoryChild = False
     try:
-        pattern_Int = PatternInt()
         for pos in range(pat.size()):
             currentLabel = pat.get(pos)
             if currentLabel >= 0: # consider only internal label
@@ -268,7 +262,7 @@ def missingRightObligatoryChild(pat, _grammarInt_dict):
                 childrenG_list = _grammarInt_dict[currentLabel]
                 if childrenG_list[0] == "ordered" and not childrenG_list[1] == "1":
                     # get all children of the current pos in pattern
-                    childrenP = pattern_Int.findChildrenPosition(pat, pos)
+                    childrenP = findChildrenPosition(pat, pos)
                     if childrenP.size() > 0:
                         # check leaf children
                         # compare two sets of children to determine this pattern misses mandatory child or not
@@ -330,12 +324,11 @@ def checkContinuousParagraph(pat, entry_dict, key, _transaction_list):
      * @param: _transaction_list, list of list of NodeFreqT
     """
     try:
-        pattern_Int = PatternInt()
         projected = entry_dict[key]
         # find parent's location of Paragraph
-        parentPos = pattern_Int.findParentPosition(pat, key)
+        parentPos = findParentPosition(pat, key)
         # find Paragraph locations
-        childrenPos = pattern_Int.findChildrenPosition(pat, parentPos)
+        childrenPos = findChildrenPosition(pat, parentPos)
 
         if childrenPos.size() == 1:
             return

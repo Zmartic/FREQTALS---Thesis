@@ -8,6 +8,7 @@ from freqt.src.be.intimals.freqt.util.Util import *
 from freqt.src.be.intimals.freqt.structure.FTArray import *
 from freqt.src.be.intimals.freqt.structure.Pattern import *
 
+from freqt.src.be.intimals.freqt.structure.PatternInt import countNode, getPatternStr
 from freqt.src.be.intimals.freqt.constraint import Constraint
 
 import time
@@ -478,17 +479,16 @@ class FreqT:
          * @param: pat, FTArray
          * @param: projected, Projected
         """
-        pattern_Int = PatternInt()
         if self._config.get2Class():
             score = Constraint.chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
             ac = Constraint.get2ClassSupport(projected, self._config.getWeighted())
             support = str(ac[0]) + "-" + str(ac[1])
-            size = pattern_Int.countNode(pat)
+            size = countNode(pat)
             result = support + "," + str(score) + "," + str(size)
         else:
             support = projected.getProjectedSupport()
             wsupport = projected.getProjectedRootSupport()
-            size = pattern_Int.countNode(pat)
+            size = countNode(pat)
             result = str(support) + "," + str(wsupport) + "," + str(size)
         return result
 
@@ -591,10 +591,9 @@ class FreqT:
             outputCommonPatterns = open(outFile + ".txt", 'w+')
             # output maximal patterns
             outputMaximalPatterns = XMLOutput(outFile, config, grammar_dict, xmlCharacters_dict)
-            pattern_Int = PatternInt()
             pattern = Pattern()
             for key in MFP_dict:
-                pat = pattern_Int.getPatternStr(key, labelIndex_dict)
+                pat = getPatternStr(key, labelIndex_dict)
                 supports = MFP_dict[key]
                 outputMaximalPatterns.report_Int(pat, supports)
                 outputCommonPatterns.write(pattern.getPatternString1(pat) + "\n")
