@@ -8,9 +8,6 @@ from freqt.src.be.intimals.freqt.structure.FTArray import *
 
 
 class Location(FTArray):
-    #new variable for 2-class data
-    classID = 0
-    locationId = 0
 
     def __init__(self):
         super().__init__()

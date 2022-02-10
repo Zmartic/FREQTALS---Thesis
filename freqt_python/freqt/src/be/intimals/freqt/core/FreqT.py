@@ -342,8 +342,7 @@ class FreqT:
          * @param: initLocations, Location
         """
         try:
-            newTree = FTArray()
-            newTree.add_all(prefixInt)
+            newTree = prefixInt.copy()
             newTree.add(candidate)
 
             # if candidate existed in the freq1 then add its location to projected

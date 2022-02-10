@@ -57,6 +57,8 @@ class Projected:
                 found = True
         if not found:
             self.__locations.append(loc)
+        #elif len(self.__locations) == 0:
+        #    print("this \"if not found\" is NOT always true")
 
     def update_location(self, class_id, loc_id, pos):
         loc = Location()
