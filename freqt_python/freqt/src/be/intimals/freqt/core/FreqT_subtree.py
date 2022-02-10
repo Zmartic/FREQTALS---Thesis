@@ -130,7 +130,7 @@ class FreqT_subtree:
             # create input data
             self.__found = False
             self.__newTransaction_list = list()
-            self.__inputPattern.ftarray(pat1)
+            self.__inputPattern = pat1.copy()
             self.__outputPattern = ""
 
             inputPatterns = list()  # list of FTArray

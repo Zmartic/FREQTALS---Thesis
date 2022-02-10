@@ -367,8 +367,7 @@ class FreqT:
          * @param: pat, FTArray
          * @param: projected, Projected
         """
-        self.leafPattern = FTArray()
-        self.leafPattern.ftarray(pat)
+        self.leafPattern = pat.copy()
         self.leafProjected = projected
 
     def addTree(self, pat, projected):
@@ -543,14 +542,14 @@ class FreqT:
          * get a pattern which has minimum chi-square score in the list of patterns
          * @param: _HSP_dict: dictionary with FTArray as key and Projected as values
         """
-        score = 1000.0
-        minScorerPattern = FTArray()
+        min_score = 1000.0
+        min_scorer_pattern = None
         for key in _HSP_dict:
-            scoreTmp = Constraint.chi_square(_HSP_dict[key], self.sizeClass1, self.sizeClass2, self._config.getWeighted())
-            if score > scoreTmp:
-                score = scoreTmp
-                minScorerPattern.ftarray(key)
-        return minScorerPattern
+            score = Constraint.chi_square(_HSP_dict[key], self.sizeClass1, self.sizeClass2, self._config.getWeighted())
+            if min_score > score:
+                min_score = score
+                min_scorer_pattern = key
+        return min_scorer_pattern.copy()
 
     def outputPatternInTheFirstStep(self, MFP_dict, config, grammar_dict, labelIndex_dict, xmlCharacters_dict, report):
         """

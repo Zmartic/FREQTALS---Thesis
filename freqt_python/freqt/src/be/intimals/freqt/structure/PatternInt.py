@@ -14,8 +14,7 @@ def checkBlackLabels(patFTArray, candidateFTArray, listLabelsDict, labelInt):
     if patFTArray.size() == 1:
         return labelInt in listLabelsDict[patFTArray.get(0)]
     else:
-        patternTemp = FTArray()
-        patternTemp.ftarray(patFTArray)
+        patternTemp = patFTArray.copy()
         patternTemp.addAll(candidateFTArray)
         parentPos = findParentPosition(patternTemp, candidateFTArray)
         # find parent's position of potentialCandidate in patternTemp
