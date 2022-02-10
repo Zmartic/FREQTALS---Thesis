@@ -73,16 +73,16 @@ class CheckSubtree:
 
         bigPart = big
         while True: # loop over big, searching for the root
-            rootIdx = bigPart.indexOf(root)
+            rootIdx = bigPart.index(root)
             if rootIdx == -1:
                 return False
             bigPartSize = bigPart.size()
             if rootIdx + smallSize > bigPartSize:
                 return False
-            if self.treeIncludes(bigPart.subList(rootIdx, bigPartSize), small):
+            if self.treeIncludes(bigPart.sub_list(rootIdx, bigPartSize), small):
                 return True
             startIdx += rootIdx + 1
-            bigPart = big.subList(startIdx, bigSize)  # continue with the rest of the array
+            bigPart = big.sub_list(startIdx, bigSize)  # continue with the rest of the array
 
     """
      * both big and small have the same root, inclusion check ignores sub-trees that are in big but not in small

@@ -81,7 +81,7 @@ class FreqT_ext(freqt.FreqT):
                     projected = self.getProjected(keys)
 
                     # keep current pattern and location if this group cannot finish
-                    self.__interrupted_pattern = _rootIDs_dict[keys].subList(0, 1)
+                    self.__interrupted_pattern = _rootIDs_dict[keys].sub_list(0, 1)
                     self.__interrupted_projected = keys
                     # expand the current root occurrences to find maximal patterns
                     self.expandLargestPattern(_rootIDs_dict[keys], projected)
@@ -138,8 +138,8 @@ class FreqT_ext(freqt.FreqT):
             # expand the current pattern with each candidate
             for keys in candidates_dict:
                 oldSize = largestPattern.size()
-                largestPattern.addAll(keys)
-                if largestPattern.getLast() < -1:
+                largestPattern.add_all(keys)
+                if largestPattern.get_last() < -1:
                     self.keepLeafPattern(largestPattern, candidates_dict[keys])
                 oldLeafPattern = self.leafPattern
                 oldLeafProjected = self.leafProjected
@@ -157,7 +157,7 @@ class FreqT_ext(freqt.FreqT):
                     else:
                         # continue expanding pattern
                         self.expandLargestPattern(largestPattern, candidates_dict[keys])
-                largestPattern = largestPattern.subList(0, oldSize)  # keep elements 0 to oldSize
+                largestPattern = largestPattern.sub_list(0, oldSize)  # keep elements 0 to oldSize
                 self.keepLeafPattern(oldLeafPattern, oldLeafProjected)
         except:
             e = sys.exc_info()[0]

@@ -46,7 +46,7 @@ class FreqT_subtree:
                     l = start
                     while l != -1:
                         itemInt = FTArray()
-                        itemInt.addAll(prefixInt)
+                        itemInt.add_all(prefixInt)
                         itemInt.add(self.__newTransaction_list[id][l].getNode_label_int())
                         if itemInt in candidate_dict:
                             candidate_dict[itemInt].set_location(id, l)  # store right most positions
@@ -86,7 +86,7 @@ class FreqT_subtree:
                 # expand the current pattern with each candidate
                 for keys in candidate_dict:
                     # add new candidate to current pattern
-                    self.__maximalPattern.addAll(keys)
+                    self.__maximalPattern.add_all(keys)
                     self.expandPattern(candidate_dict[keys])
         except:
             e = sys.exc_info()[0]

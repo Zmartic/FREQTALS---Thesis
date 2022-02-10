@@ -27,13 +27,13 @@ class Location(FTArray):
         self.add(x)
 
     def getLocationPos(self):
-        return self.getLast()
+        return self.get_last()
 
     def getRoot(self):
         return self.get(0)
 
     def getIdPos(self):
-        return str(self.locationId) + "-" + str(self.getLast()) + ";"
+        return str(self.locationId) + "-" + str(self.get_last()) + ";"
 
     def location(self, other, id, pos):
         self.ftarray(other)

@@ -231,7 +231,7 @@ class FreqT:
         # for each label found in FP1, expand it to find maximal patterns
         for key in freq1:
             pattern = FTArray()
-            pattern.addAll(key)
+            pattern.add_all(key)
             # recursively expand pattern
             self.expandPattern(pattern, freq1[key])
 
@@ -258,9 +258,9 @@ class FreqT:
             for key in candidates_dict:
                 oldSize = pattern.size()
                 # add candidate into pattern
-                pattern.addAll(key)
+                pattern.add_all(key)
                 # if the right most node of the pattern is a leaf then keep track this pattern
-                if pattern.getLast() < -1:
+                if pattern.get_last() < -1:
                     self.keepLeafPattern(pattern, candidates_dict[key])
                 # store leaf pattern
                 oldLeafPattern = self.leafPattern
@@ -278,7 +278,7 @@ class FreqT:
                     else:
                         # continue expanding pattern
                         self.expandPattern(pattern, candidates_dict[key])
-                pattern = pattern.subList(0, oldSize)
+                pattern = pattern.sub_list(0, oldSize)
                 self.keepLeafPattern(oldLeafPattern, oldLeafProjected)
         except:
             e = sys.exc_info()[0]
@@ -343,7 +343,7 @@ class FreqT:
         """
         try:
             newTree = FTArray()
-            newTree.addAll(prefixInt)
+            newTree.add_all(prefixInt)
             newTree.add(candidate)
 
             # if candidate existed in the freq1 then add its location to projected
@@ -426,7 +426,7 @@ class FreqT:
                 _rootIDs_dict.pop(elem, -1)
             if isAdded:
                 # store root occurrences and root label
-                rootLabel_int = pat.subList(0, 1)
+                rootLabel_int = pat.sub_list(0, 1)
                 _rootIDs_dict[projected] = rootLabel_int
         except:
             e = sys.exc_info()[0]

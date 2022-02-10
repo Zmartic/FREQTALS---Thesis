@@ -32,7 +32,7 @@ class FTArray:
             raise Exception("Out of bounds access in FTArray.get(i). i is " + str(i) + ", size is " + str(len(self.memory)))
         return self.memory[i]
 
-    def getLast(self):
+    def get_last(self):
         """
          get the last element store in self.memory
          :return: int
@@ -46,14 +46,14 @@ class FTArray:
         """
         self.memory.append(element)
 
-    def addAll(self, other):
+    def add_all(self, other):
         """
          Append the data of other to self.memory
          :param other: FTArray
         """
         self.memory = self.memory + other.memory
 
-    def subList(self, start, stop):
+    def sub_list(self, start, stop):
         """
          Compute the sublist of self.memory going from index "start" to "stop"
          :param start: int
@@ -83,7 +83,7 @@ class FTArray:
         """
         return element in self.memory
 
-    def indexOf(self, element):
+    def index(self, element):
         """
          Return the position of the element
          :param element: int
