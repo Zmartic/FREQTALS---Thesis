@@ -33,8 +33,8 @@ class FreqT_subtree:
         depth = projected.get_depth()
         candidate_dict = collections.OrderedDict()
         for i in range(projected.size()):
-            id = projected.get_location(i).getLocationId()
-            pos = projected.get_location(i).getLocationPos()
+            id = projected.get_location(i).get_location_id()
+            pos = projected.get_location(i).get_position()
             prefixInt = FTArray()
             for d in range(-1, depth):
                 if pos != -1:

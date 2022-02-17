@@ -7,51 +7,33 @@ from freqt.src.be.intimals.freqt.structure.FTArray import *
 """
 
 
-class Location(FTArray):
+class Location:
 
-    def __init__(self):
-        super().__init__()
-        self.classID = 0
-        self.locationId = 0
+    def __init__(self, root_pos, right_most_pos, loc_id, class_id):
+        """
+        :param root_pos: int, position on the root node
+        :param right_most_pos: int, position of the right most node
+        :param loc_id: int, the transaction tha contain the Location
+        :param class_id: int, class id of the transaction
+        """
+        self.root_pos = root_pos
+        self.right_most_pos = right_most_pos
+        self.location_id = loc_id
+        self.class_id = class_id  # TODO USELESS
 
-    def getLocationId(self):
-        return self.locationId
+    def get_location_id(self):
+        return self.location_id
 
-    def setLocationId(self, a):
-        self.locationId = a
+    def get_position(self):
+        return self.right_most_pos
 
-    def addLocationPos(self, x):
-        self.add(x)
+    def get_root(self):
+        return self.root_pos
 
-    def getLocationPos(self):
-        return self.get_last()
+    def get_class_id(self):
+        return self.class_id
 
-    def getRoot(self):
-        return self.get(0)
-
-    def getIdPos(self):
-        return str(self.locationId) + "-" + str(self.get_last()) + ";"
-
-    def location(self, other, id, pos):
-        self.ftarray(other)
-        self.locationId = id
-        self.add(pos)
-
-    # new procedure for 2-class data
-    def location2(self, other, classId, id, pos):
-        self.ftarray(other)
-        self.classID = classId
-        self.locationId = id
-        self.add(pos)
-
-    def location3(self, classId, id, pos):
-        self.classID = classId
-        self.locationId = id
-        self.add(pos)
-
-    def getClassID(self):
-        return self.classID
-
-    def setClassID(self, a):
-        self.classID = a
-
+    def __eq__(self, other):
+        return self.location_id == other.location_id \
+               and self.root_pos == other.root_pos \
+               and self.right_most_pos == other.right_most_pos

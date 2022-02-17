@@ -5,31 +5,30 @@ import copy
 class FTArray:
     """
     We store data in memory.
+    TODO
     """
 
     def __init__(self, init_memory=None):
+        """
+        :param init_memory: list(int), initializer for the memory
+        """
         if init_memory is None:
             init_memory = []
 
         self.memory = init_memory
-
-    def ftarray(self, source):
-        """
-         :param source: FTArray
-        """
-        self.memory = source.memory.copy()
 
     def copy(self):
         return FTArray(self.memory.copy())
 
     def get(self, i):
         """
-         Get the element in self.memory at index i
+         Get the element of the FTArray at index i
          :param i: int
          :return: int
         """
         if i < 0 or i >= len(self.memory):
-            raise Exception("Out of bounds access in FTArray.get(i). i is " + str(i) + ", size is " + str(len(self.memory)))
+            raise Exception("Out of bounds access in FTArray.get(i). i is " + str(i) + ", size is "
+                            + str(len(self.memory)))
         return self.memory[i]
 
     def get_last(self):
@@ -77,7 +76,7 @@ class FTArray:
 
     def contains(self, element):
         """
-         Return True if the element is contains in the FTArray
+         Return True if element is contains in the FTArray
          :param element: int
          :return: int
         """
@@ -85,7 +84,7 @@ class FTArray:
 
     def index(self, element):
         """
-         Return the position of the element
+         Return the position of element in the FTArray
          :param element: int
          :return: int
         """

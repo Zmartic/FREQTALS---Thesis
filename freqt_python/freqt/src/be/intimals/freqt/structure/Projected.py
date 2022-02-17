@@ -29,9 +29,7 @@ class Projected:
         return self.__rootSupport
 
     def set_location(self, i, j):
-        loc = Location()
-        loc.setLocationId(i)
-        loc.addLocationPos(j)
+        loc = Location(root_pos=j, right_most_pos=j, loc_id=i, class_id=0)
         self.__locations.append(loc)
 
     def get_location(self, i):
@@ -49,11 +47,13 @@ class Projected:
     # new procedure for 2 - class data
     def add_location(self, class_id, loc_id, pos, occurrences):
         # check if this location doesn't exist in the locations
-        loc = Location()
-        loc.location2(occurrences, class_id, loc_id, pos)
+        if occurrences is None:
+            loc = Location(pos, pos, loc_id, class_id)
+        else:
+            loc = Location(occurrences.get_root(), pos, loc_id, class_id)
         found = False
         for location in self.__locations:
-            if loc.getLocationId() == location.getLocationId() and loc.getRoot() == location.getRoot() and loc.getLocationPos() == location.getLocationPos():
+            if loc == location:
                 found = True
         if not found:
             self.__locations.append(loc)
@@ -61,10 +61,7 @@ class Projected:
         #    print("this \"if not found\" is NOT always true")
 
     def update_location(self, class_id, loc_id, pos):
-        loc = Location()
-        loc.setClassID(class_id)
-        loc.setLocationId(loc_id)
-        loc.addLocationPos(pos)
+        loc = Location(pos, pos, loc_id, class_id)
         self.__locations.append(loc)
 
     def __str__(self):

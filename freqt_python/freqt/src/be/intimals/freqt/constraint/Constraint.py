@@ -93,7 +93,7 @@ def get_support(projected):
     old_loc_id = -1
 
     for loc in projected.get_locations():
-        loc_id = loc.getLocationId()
+        loc_id = loc.get_location_id()
 
         if loc_id != old_loc_id:
             sup += 1
@@ -111,8 +111,8 @@ def get_root_support(projected):
     old_loc_id = -1
     old_root_id = -1
     for loc in projected.get_locations():
-        loc_id = loc.getLocationId()
-        root_id = loc.getRoot()
+        loc_id = loc.get_location_id()
+        root_id = loc.get_root()
 
         if loc_id != old_loc_id or (loc_id == old_loc_id and root_id != old_root_id):
             root_sup += 1

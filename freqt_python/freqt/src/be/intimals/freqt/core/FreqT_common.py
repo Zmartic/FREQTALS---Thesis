@@ -54,8 +54,8 @@ class FreqT_common:
         depth = projected.get_depth()
         candidate_dict = collections.OrderedDict()  # ordered dictionary with String as keys and Projected as values
         for i in range(projected.size()):
-            id = projected.get_location(i).getLocationId()
-            pos = projected.get_location(i).getLocationPos()
+            id = projected.get_location(i).get_location_id()
+            pos = projected.get_location(i).get_position()
             prefix = ""
             for d in range(-1, depth):
                 if pos != -1:

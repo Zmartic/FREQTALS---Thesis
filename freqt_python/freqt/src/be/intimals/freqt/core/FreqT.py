@@ -214,7 +214,7 @@ class FreqT:
 
                     if node_label in self.rootLabels_set or len(self.rootLabels_set) == 0:
                         if node_label != "" and node_label[0] != '*' and node_label[0].isupper():
-                            self.updateCandidates(FP1, node_label_id, class_id, i, j, 0, FTArray(), Location())
+                            self.updateCandidates(FP1, node_label_id, class_id, i, j, 0, FTArray(), None)
         except:
             e = sys.exc_info()[0]
             print("build FP1 error " + str(e) + "\n")
@@ -303,9 +303,9 @@ class FreqT:
                 # store all locations of the labels in the pattern: this uses more memory but need for checking continuous paragraphs
                 #occurrences = projected.getProjectLocation(i)
 
-                classID = occurrences.getClassID()
-                id = occurrences.getLocationId()
-                pos = occurrences.getLocationPos()
+                classID = occurrences.get_class_id()
+                id = occurrences.get_location_id()
+                pos = occurrences.get_position()
                 prefixInt = FTArray()
                 # find candidates from left to right
                 for d in range(-1, depth):

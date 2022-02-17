@@ -189,11 +189,10 @@ class FreqT_ext(freqt.FreqT):
         ouputProjected = Projected()
         ouputProjected.set_depth(0)
         for i in range(projected.size()):
-            classID = projected.get_location(i).getClassID()
-            locationID = projected.get_location(i).getLocationId()
-            rootID = projected.get_location(i).getRoot()
-            temp = Location()
-            ouputProjected.add_location(classID, locationID, rootID, temp)
+            classID = projected.get_location(i).get_class_id()
+            locationID = projected.get_location(i).get_location_id()
+            rootID = projected.get_location(i).get_root()
+            ouputProjected.add_location(classID, locationID, rootID, None)
         return ouputProjected
 
     def reportResult(self, _report):

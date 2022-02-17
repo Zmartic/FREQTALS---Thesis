@@ -109,9 +109,9 @@ class Util:
     def getStringRootOccurrence(self, projected):
         rootOccurrences = ""
         for i in range(projected.size()):
-            rootOccurrences = rootOccurrences + str(projected.get_location(i).getClassID()) +\
-                              "-" + str(projected.get_location(i).getLocationId()) + "-" + \
-                              str(projected.get_location(i).getRoot())
+            rootOccurrences = rootOccurrences + str(projected.get_location(i).get_class_id()) +\
+                              "-" + str(projected.get_location(i).get_location_id()) + "-" + \
+                              str(projected.get_location(i).get_root())
             if i < projected.size() - 1:
                 rootOccurrences = rootOccurrences + ";"
         return rootOccurrences
