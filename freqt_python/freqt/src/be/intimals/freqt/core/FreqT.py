@@ -84,7 +84,7 @@ class FreqT:
             Constraint.prune(FP1, self._config.getMinSupport(), self._config.getWeighted())
 
             # expand FP1 to find maximal patterns
-            self.expandFP1(FP1)
+            self.expand_FP1(FP1)
 
             if self._config.getTwoStep():
                 self.notF_set = set()
@@ -214,7 +214,8 @@ class FreqT:
 
                     if node_label in self.rootLabels_set or len(self.rootLabels_set) == 0:
                         if node_label != "" and node_label[0] != '*' and node_label[0].isupper():
-                            self.updateCandidates(FP1, node_label_id, class_id, i, j, 0, FTArray(), None)
+                            new_location = Location(j, j, i, class_id)
+                            self.update_candidates(FP1, node_label_id, new_location, 0, FTArray())
         except:
             e = sys.exc_info()[0]
             print("build FP1 error " + str(e) + "\n")
@@ -223,17 +224,14 @@ class FreqT:
 
         return FP1
 
-    def expandFP1(self, freq1):
+    def expand_FP1(self, freq1):
         """
          * expand FP1 to find frequent subtrees based on input constraints
          * @param: freq1_dict, a dictionary with FTArray as keys and Projected as value
         """
         # for each label found in FP1, expand it to find maximal patterns
-        for key in freq1:
-            pattern = FTArray()
-            pattern.add_all(key)
-            # recursively expand pattern
-            self.expandPattern(pattern, freq1[key])
+        for pat in freq1:
+            self.expandPattern(pat.copy(), freq1[pat])
 
     def expandPattern(self, pattern, projected):
         """
@@ -246,7 +244,7 @@ class FreqT:
             if self.is_timeout():
                 return
             # find candidates of the current pattern
-            candidates_dict = self.generateCandidates(projected, self._transaction_list)  # dictionary with FTArray as keys and Projected as values
+            candidates_dict = self.generate_candidates(projected, self._transaction_list)  # dictionary with FTArray as keys and Projected as values
             # prune candidate based on minSup
             Constraint.prune(candidates_dict, self._config.getMinSupport(), self._config.getWeighted())
             # if there is no candidate then report the pattern and then stop
@@ -287,7 +285,7 @@ class FreqT:
             print(trace)
             raise
 
-    def generateCandidates(self, projected, _transaction_list):
+    def generate_candidates(self, projected, _transaction_list):
         """
          * generate candidates for a pattern
           -> return a dictionary with FTArray as key and Projected as value
@@ -301,35 +299,52 @@ class FreqT:
             depth = projected.get_depth()
             for occurrences in projected.get_locations():
                 # store all locations of the labels in the pattern: this uses more memory but need for checking continuous paragraphs
-                #occurrences = projected.getProjectLocation(i)
 
-                classID = occurrences.get_class_id()
+                class_id = occurrences.get_class_id()
                 id = occurrences.get_location_id()
                 pos = occurrences.get_position()
+                root = occurrences.get_root()
                 prefixInt = FTArray()
-                # find candidates from left to right
-                for d in range(-1, depth):
-                    if pos != -1:
-                        if d == -1:
-                            start = _transaction_list[id][pos].getNodeChild()
-                        else:
-                            start = _transaction_list[id][pos].getNodeSibling()
-                        newDepth = depth - d
-                        l = start
-                        while l != -1:
-                            node_label_int = _transaction_list[id][l].getNode_label_int()
-                            self.updateCandidates(candidates_dict, node_label_int, classID, id, l, newDepth, prefixInt, occurrences)
-                            l = _transaction_list[id][l].getNodeSibling()
-                        if d != -1:
-                            pos = _transaction_list[id][pos].getNodeParent()
-                        prefixInt.add(-1)
+
+                # --- find candidates from left to right ---
+                # * try to add a child of the right most node
+                candi_id = _transaction_list[id][pos].getNodeChild()
+                new_depth = depth + 1
+
+                while candi_id != -1:
+                    node = _transaction_list[id][candi_id]
+                    new_location = Location(root, candi_id, id, class_id)
+                    self.update_candidates(candidates_dict, node.getNode_label_int(), new_location,
+                                          new_depth, prefixInt)
+                    candi_id = node.getNodeSibling()
+
+                prefixInt.add(-1)
+
+                # * try to add a sibling of the parents node
+                for d in range(depth):
+                    pos_node = _transaction_list[id][pos]
+
+                    candi_id = pos_node.getNodeSibling()
+                    new_depth = depth - d
+
+                    while candi_id != -1:
+                        node = _transaction_list[id][candi_id]
+                        new_location = Location(root, candi_id, id, class_id)
+                        self.update_candidates(candidates_dict, node.getNode_label_int(), new_location,
+                                              new_depth, prefixInt)
+                        candi_id = node.getNodeSibling()
+
+                    pos = pos_node.getNodeParent()
+                    if pos == -1:
+                        break
+                    prefixInt.add(-1)
         except:
             e = sys.exc_info()[0]
             print("Error: generate candidates " + str(e) + "\n")
             raise
         return candidates_dict
 
-    def updateCandidates(self, freq1_dict, candidate, classID, id, rightmostPos, depth, prefixInt, initLocations):
+    def update_candidates(self, freq1_dict, candidate, new_location, depth, prefixInt):
         """
          * update candidate locations for two-class data
          * @param: freq1_dict, a dictionary with FTArray as keys and Projected as values
@@ -347,12 +362,12 @@ class FreqT:
 
             # if candidate existed in the freq1 then add its location to projected
             if newTree in freq1_dict:
-                freq1_dict[newTree].add_location(classID, id, rightmostPos, initLocations)
+                freq1_dict[newTree].add(new_location)
             else:
                 # add new location
                 projected = Projected()
                 projected.set_depth(depth)
-                projected.add_location(classID, id, rightmostPos, initLocations)
+                projected.add(new_location)
                 freq1_dict[newTree] = projected
 
         except:

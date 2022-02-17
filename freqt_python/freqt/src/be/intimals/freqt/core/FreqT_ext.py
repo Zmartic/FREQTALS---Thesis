@@ -125,7 +125,7 @@ class FreqT_ext(freqt.FreqT):
                 self.__finishedGroup = False
                 return
             # find candidates for the current pattern
-            candidates_dict = self.generateCandidates(projected, self._transaction_list)  # dictionary with FTArray as keys and Projected as values
+            candidates_dict = self.generate_candidates(projected, self._transaction_list)  # dictionary with FTArray as keys and Projected as values
             # prune on minimum support
             Constraint.prune(candidates_dict, self._config.getMinSupport(), self._config.getWeighted())
             # if there is no candidate then report pattern --> stop

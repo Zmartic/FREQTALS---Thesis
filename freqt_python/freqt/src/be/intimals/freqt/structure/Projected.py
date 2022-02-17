@@ -60,9 +60,11 @@ class Projected:
         #elif len(self.__locations) == 0:
         #    print("this \"if not found\" is NOT always true")
 
-    def update_location(self, class_id, loc_id, pos):
-        loc = Location(pos, pos, loc_id, class_id)
-        self.__locations.append(loc)
+    def add(self, new_loc):
+        for location in self.__locations:
+            if new_loc == location:
+                return
+        self.__locations.append(new_loc)
 
     def __str__(self):
         for i in range(len(self.__locations)):
