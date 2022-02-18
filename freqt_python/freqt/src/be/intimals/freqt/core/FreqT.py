@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from collections import OrderedDict
-from typing import Any
 
 from freqt.src.be.intimals.freqt.output.XMLOutput import *
 from freqt.src.be.intimals.freqt.util.Initial_Int import *
@@ -94,7 +93,8 @@ class FreqT:
                 # find pattern from root occurrences
                 self.expandPatternFromRootIDs(self.rootIDs_dict, report)
             else:
-                self.outputPatternInTheFirstStep(self.MFP_dict, self._config, self._grammar_dict, self._labelIndex_dict, self._xmlCharacters_dict, report)
+                self.outputPatternInTheFirstStep(self.MFP_dict, self._config, self._grammar_dict, self._labelIndex_dict,
+                                                 self._xmlCharacters_dict, report)
         except:
             e = sys.exc_info()[0]
             print("Error: running Freqt_Int " + str(e) + "\n")
@@ -110,19 +110,25 @@ class FreqT:
             # remove black labels when reading ASTs
             if self._config.get2Class():
                 readXML.readDatabase(self._transaction_list, 1,
-                        self._config.getInputFiles1(), self._labelIndex_dict, self.__transactionClassID_list, self._config.getWhiteLabelFile())
+                                     self._config.getInputFiles1(), self._labelIndex_dict,
+                                     self.__transactionClassID_list, self._config.getWhiteLabelFile())
                 readXML.readDatabase(self._transaction_list, 0,
-                        self._config.getInputFiles2(), self._labelIndex_dict, self.__transactionClassID_list, self._config.getWhiteLabelFile())
+                                     self._config.getInputFiles2(), self._labelIndex_dict,
+                                     self.__transactionClassID_list, self._config.getWhiteLabelFile())
                 self.sizeClass1 = sum(self.__transactionClassID_list)
                 self.sizeClass2 = len(self.__transactionClassID_list) - self.sizeClass1
-                initGrammar_Str(self._config.getInputFiles1(), self._config.getWhiteLabelFile(), self._grammar_dict, self._config.buildGrammar())
-                initGrammar_Str(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict, self._config.buildGrammar())
+                initGrammar_Str(self._config.getInputFiles1(), self._config.getWhiteLabelFile(), self._grammar_dict,
+                                self._config.buildGrammar())
+                initGrammar_Str(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict,
+                                self._config.buildGrammar())
                 initGrammar_Int2(self._grammarInt_dict, self._grammar_dict, self._labelIndex_dict)
             else:
                 readXML.readDatabase(self._transaction_list, 1,
-                        self._config.getInputFiles(), self._labelIndex_dict, self.__transactionClassID_list, self._config.getWhiteLabelFile())
+                                     self._config.getInputFiles(), self._labelIndex_dict,
+                                     self.__transactionClassID_list, self._config.getWhiteLabelFile())
                 # create grammar (labels are strings) which is used to print patterns
-                initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict, self._config.buildGrammar())
+                initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
+                                self._config.buildGrammar())
                 # create grammar (labels are integers) which is used in the mining process
                 initGrammar_Int2(self._grammarInt_dict, self._grammar_dict, self._labelIndex_dict)
 
@@ -203,34 +209,29 @@ class FreqT:
         """
         FP1: OrderedDict[FTArray, Projected] = collections.OrderedDict()
         trans = self._transaction_list
-        try:
-            for i in range(len(trans)):
-                # get transaction label
-                class_id = self.__transactionClassID_list[i]
 
-                for j in range(len(trans[i])):
-                    node_label = trans[i][j].getNodeLabel()
-                    node_label_id = trans[i][j].getNode_label_int()
+        for i in range(len(trans)):
+            # get transaction label
+            class_id = self.__transactionClassID_list[i]
 
-                    if node_label in self.rootLabels_set or len(self.rootLabels_set) == 0:
-                        if node_label != "" and node_label[0] != '*' and node_label[0].isupper():
-                            new_location = Location(j, j, i, class_id)
-                            self.update_candidates(FP1, node_label_id, new_location, 0, FTArray())
-        except:
-            e = sys.exc_info()[0]
-            print("build FP1 error " + str(e) + "\n")
-            trace = traceback.format_exc()
-            print(trace)
+            for j in range(len(trans[i])):
+                node_label = trans[i][j].getNodeLabel()
+                node_label_id = trans[i][j].getNode_label_int()
+
+                if node_label in self.rootLabels_set or len(self.rootLabels_set) == 0:
+                    if node_label != "" and node_label[0] != '*' and node_label[0].isupper():
+                        new_location = Location(j, j, i, class_id)
+                        FreqT.update_candidates(FP1, node_label_id, new_location, 0, FTArray())
 
         return FP1
 
     def expand_FP1(self, freq1):
         """
          * expand FP1 to find frequent subtrees based on input constraints
-         * @param: freq1_dict, a dictionary with FTArray as keys and Projected as value
+        :param freq1: dict[FTArray, Projected]
         """
-        # for each label found in FP1, expand it to find maximal patterns
         for pat in freq1:
+            # expand pat to find maximal patterns
             self.expandPattern(pat.copy(), freq1[pat])
 
     def expandPattern(self, pattern, projected):
@@ -243,39 +244,39 @@ class FreqT:
             # if it is timeout then stop expand the pattern;
             if self.is_timeout():
                 return
+
             # find candidates of the current pattern
-            candidates_dict = self.generate_candidates(projected, self._transaction_list)  # dictionary with FTArray as keys and Projected as values
+            candidates: OrderedDict[FTArray, Projected] = FreqT.generate_candidates(projected, self._transaction_list)
             # prune candidate based on minSup
-            Constraint.prune(candidates_dict, self._config.getMinSupport(), self._config.getWeighted())
+            Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
             # if there is no candidate then report the pattern and then stop
-            if len(candidates_dict) == 0:
+            if len(candidates) == 0:
                 if self.leafPattern.size() > 0:
                     self.addTree(self.leafPattern, self.leafProjected)
                 return
+
             # expand each candidate to the current pattern
-            for key in candidates_dict:
+            for key in candidates:
                 oldSize = pattern.size()
                 # add candidate into pattern
                 pattern.add_all(key)
                 # if the right most node of the pattern is a leaf then keep track this pattern
                 if pattern.get_last() < -1:
-                    self.keepLeafPattern(pattern, candidates_dict[key])
+                    self.keepLeafPattern(pattern, candidates[key])
                 # store leaf pattern
                 oldLeafPattern = self.leafPattern
                 oldLeafProjected = self.leafProjected
                 # check obligatory children constraint
-                if Constraint.missing_left_obligatory_child(pattern, key, self._grammarInt_dict):
-                    # do nothing = don't store pattern
-                    pass
-                else:
-                    # check constraints on maximal number of leafs and real leaf
-                    if Constraint.satisfy_max_leaf(pattern, self._config.getMaxLeaf()) or Constraint.is_not_full_leaf(pattern):
+                if not Constraint.missing_left_obligatory_child(pattern, key, self._grammarInt_dict):
+                    # check constraints on maximal number of leaves and real leaf
+                    if Constraint.satisfy_max_leaf(pattern, self._config.getMaxLeaf()) or Constraint.is_not_full_leaf(
+                            pattern):
                         # store the pattern
                         if self.leafPattern.size() > 0:
                             self.addTree(self.leafPattern, self.leafProjected)
                     else:
                         # continue expanding pattern
-                        self.expandPattern(pattern, candidates_dict[key])
+                        self.expandPattern(pattern, candidates[key])
                 pattern = pattern.sub_list(0, oldSize)
                 self.keepLeafPattern(oldLeafPattern, oldLeafProjected)
         except:
@@ -285,95 +286,84 @@ class FreqT:
             print(trace)
             raise
 
-    def generate_candidates(self, projected, _transaction_list):
+    @staticmethod
+    def generate_candidates(projected, _transaction_list):
         """
-         * generate candidates for a pattern
-          -> return a dictionary with FTArray as key and Projected as value
-         * @param: projected, Projected
-         * @param: _transaction_list, list of list of NodeFreqT
+         * generate candidates for a pattern, by extending occurrences of this pattern
+        :param projected: Projected, occurrences of the pattern
+        :param _transaction_list: list(list(NodeFreqT))
+        :return: dict[FTArray, Projected], the set of candidates with their location
         """
         # use oredered dictionary to keep the order of the candidates
         candidates_dict: OrderedDict[FTArray, Projected] = collections.OrderedDict()
-        try:
-            # find candidates for each location
-            depth = projected.get_depth()
-            for occurrences in projected.get_locations():
-                # store all locations of the labels in the pattern: this uses more memory but need for checking continuous paragraphs
+        depth = projected.get_depth()
 
-                class_id = occurrences.get_class_id()
-                id = occurrences.get_location_id()
-                pos = occurrences.get_position()
-                root = occurrences.get_root()
-                prefixInt = FTArray()
+        # --- find candidates for each location ---
+        for occurrences in projected.get_locations():
+            # store all locations of the labels in the pattern:
+            # this uses more memory but need for checking continuous paragraphs
 
-                # --- find candidates from left to right ---
-                # * try to add a child of the right most node
-                candi_id = _transaction_list[id][pos].getNodeChild()
-                new_depth = depth + 1
+            class_id = occurrences.get_class_id()
+            id = occurrences.get_location_id()
+            pos = occurrences.get_position()
+            root = occurrences.get_root()
+            prefixInt = FTArray()
+
+            # --- find candidates (from left to right) ---
+            # * try to add a child of the right most node
+            candi_id = _transaction_list[id][pos].getNodeChild()
+            new_depth = depth + 1
+
+            while candi_id != -1:
+                node = _transaction_list[id][candi_id]
+                new_location = Location(root, candi_id, id, class_id)
+                FreqT.update_candidates(candidates_dict, node.getNode_label_int(), new_location,
+                                        new_depth, prefixInt)
+                candi_id = node.getNodeSibling()
+
+            prefixInt.add(-1)
+
+            # * try to add a sibling of the parents node
+            for d in range(depth):
+                current_node = _transaction_list[id][pos]
+
+                candi_id = current_node.getNodeSibling()
+                new_depth = depth - d
 
                 while candi_id != -1:
                     node = _transaction_list[id][candi_id]
                     new_location = Location(root, candi_id, id, class_id)
-                    self.update_candidates(candidates_dict, node.getNode_label_int(), new_location,
-                                          new_depth, prefixInt)
+                    FreqT.update_candidates(candidates_dict, node.getNode_label_int(), new_location,
+                                            new_depth, prefixInt)
                     candi_id = node.getNodeSibling()
 
+                pos = current_node.getNodeParent()
+                if pos == -1:
+                    break
                 prefixInt.add(-1)
 
-                # * try to add a sibling of the parents node
-                for d in range(depth):
-                    pos_node = _transaction_list[id][pos]
-
-                    candi_id = pos_node.getNodeSibling()
-                    new_depth = depth - d
-
-                    while candi_id != -1:
-                        node = _transaction_list[id][candi_id]
-                        new_location = Location(root, candi_id, id, class_id)
-                        self.update_candidates(candidates_dict, node.getNode_label_int(), new_location,
-                                              new_depth, prefixInt)
-                        candi_id = node.getNodeSibling()
-
-                    pos = pos_node.getNodeParent()
-                    if pos == -1:
-                        break
-                    prefixInt.add(-1)
-        except:
-            e = sys.exc_info()[0]
-            print("Error: generate candidates " + str(e) + "\n")
-            raise
         return candidates_dict
 
-    def update_candidates(self, freq1_dict, candidate, new_location, depth, prefixInt):
+    @staticmethod
+    def update_candidates(freq1_dict, candidate, new_location, depth, prefix_int):
         """
          * update candidate locations for two-class data
-         * @param: freq1_dict, a dictionary with FTArray as keys and Projected as values
-         * @param: candidate, Integer
-         * @param: classId, Integer
-         * @param: id, Integer
-         * @param: rightmostPos, Integer
-         * @param: depth, Integer
-         * @param: prefixInt, FTArray
-         * @param: initLocations, Location
+        :param freq1_dict: dict[FTArray, Projected]
+        :param candidate: int
+        :param new_location: Location
+        :param depth: int
+        :param prefix_int: FTArray
         """
-        try:
-            newTree = prefixInt.copy()
-            newTree.add(candidate)
+        new_tree = prefix_int.copy()
+        new_tree.add(candidate)
 
-            # if candidate existed in the freq1 then add its location to projected
-            if newTree in freq1_dict:
-                freq1_dict[newTree].add(new_location)
-            else:
-                # add new location
-                projected = Projected()
-                projected.set_depth(depth)
-                projected.add(new_location)
-                freq1_dict[newTree] = projected
-
-        except:
-            e = sys.exc_info()[0]
-            print("update projected location error " + str(e) + "\n")
-            raise
+        if new_tree in freq1_dict:
+            freq1_dict[new_tree].add(new_location)
+        else:
+            projected = Projected()
+            projected.set_depth(depth)
+            projected.add(new_location)
+            freq1_dict[new_tree] = projected
 
     def keepLeafPattern(self, pat, projected):
         """
@@ -391,10 +381,13 @@ class FreqT:
          * @param: projected, Projected
         """
         # check minsize constraints and right mandatory children
-        if Constraint.check_output(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not Constraint.missing_right_obligatory_child(pat, self._grammarInt_dict):
+        if Constraint.check_output(pat, self._config.getMinLeaf(),
+                                   self._config.getMinNode()) and not Constraint.missing_right_obligatory_child(pat,
+                                                                                                                self._grammarInt_dict):
             if self._config.get2Class():
                 # check chi-square score
-                if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):
+                if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(),
+                                                 self._config.getWeighted()):
                     if self._config.getTwoStep():
                         # add pattern to the list of 1000-highest chi-square score patterns
                         self.addHighScorePattern(pat, projected, self.__HSP_dict)
@@ -546,7 +539,8 @@ class FreqT:
         """
         score = 1000.0
         for key in _HSP_dict:
-            scoreTmp = Constraint.chi_square(_HSP_dict[key], self.sizeClass1, self.sizeClass2, self._config.getWeighted())
+            scoreTmp = Constraint.chi_square(_HSP_dict[key], self.sizeClass1, self.sizeClass2,
+                                             self._config.getWeighted())
             if score > scoreTmp:
                 score = scoreTmp
         return score
@@ -626,7 +620,7 @@ class FreqT:
          * set time to begin a run
         """
         self.time_start = time.time()
-        self.timeout = self.time_start + self._config.getTimeout()*60 ### add start time to timeout ?
+        self.timeout = self.time_start + self._config.getTimeout() * 60
         self.finished = True
 
     def is_timeout(self):
@@ -634,7 +628,7 @@ class FreqT:
          * check running time of the algorithm
         """
         if not self._config.getTwoStep():
-            if time.time() > self.timeout: ### add start time to timeout ?
+            if time.time() > self.timeout:
                 self.finished = False
                 return True
         return False
@@ -670,7 +664,8 @@ class FreqT:
         """
         return self._grammar_dict
 
-    def log(self, report, msg):
+    @staticmethod
+    def log(report, msg):
         """
          * write a string to report
          * @param: report, a file ready to be written
