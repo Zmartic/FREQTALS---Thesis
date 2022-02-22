@@ -52,13 +52,13 @@ class FTArray:
         """
         self.memory = self.memory + other.memory
 
-    def extend(self, extension, candidate):
+    def extend(self, prefix, candidate):
         """
          * extend the pattern with some extension
-        :param extension: int
+        :param prefix: int
         :param candidate: int
         """
-        self.memory = self.memory + ([-1] * extension)
+        self.memory = self.memory + ([-1] * prefix)
         self.add(candidate)
 
     def sub_list(self, start, stop):

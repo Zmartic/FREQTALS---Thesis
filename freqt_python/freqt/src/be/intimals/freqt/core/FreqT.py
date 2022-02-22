@@ -267,7 +267,7 @@ class FreqT:
             if self.is_timeout():
                 return
 
-            # find candidates of the current pattern
+            # --- find candidates of the current pattern ---
             candidates: OrderedDict[Tuple, Projected] = FreqT.generate_candidates(projected, self._transaction_list)
             # prune candidate based on minSup
             Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
@@ -277,12 +277,13 @@ class FreqT:
                     self.addTree(self.leafPattern, self.leafProjected)
                 return
 
+            # --- expand each candidate to the current pattern ---
             old_size = pattern.size()
-            # expand each candidate to the current pattern
-            for ext, new_proj in candidates.items():
-                extension, candidate = ext
-                # add candidate into pattern
-                pattern.extend(extension, candidate)
+
+            for extension, new_proj in candidates.items():
+                prefix, candidate = extension
+
+                pattern.extend(prefix, candidate)
                 # if the right most node of the pattern is a leaf then keep track this pattern
                 if candidate < -1:
                     self.keepLeafPattern(pattern, new_proj)
@@ -290,7 +291,7 @@ class FreqT:
                 oldLeafPattern = self.leafPattern
                 oldLeafProjected = self.leafProjected
                 # check obligatory children constraint
-                tmp = [-1] * extension # TODO
+                tmp = [-1] * prefix  # TODO
                 tmp.append(candidate)  # TODO
                 key = FTArray(init_memory=tmp)  # TODO
                 if not Constraint.missing_left_obligatory_child(pattern, key, self._grammarInt_dict):
@@ -303,8 +304,8 @@ class FreqT:
                     else:
                         # continue expanding pattern
                         self.expandPattern(pattern, new_proj)
-                pattern = pattern.sub_list(0, old_size)
                 self.keepLeafPattern(oldLeafPattern, oldLeafProjected)
+                pattern = pattern.sub_list(0, old_size)
         except:
             e = sys.exc_info()[0]
             print("Error: expandPattern " + str(e) + "\n")
@@ -344,12 +345,13 @@ class FreqT:
                 node = _transaction_list[loc_id][candi_id]
                 new_location = Location(root, candi_id, loc_id, class_id)
                 FreqT.update_candidates(candidates_dict, node.getNode_label_int(), new_location, new_depth, 0)
+
                 candi_id = node.getNodeSibling()
 
             #prefixInt.add(-1)
-            prefix = 1
 
             # * try to add a sibling of the parents node
+            prefix = 1
             for d in range(depth):
                 current_node = _transaction_list[loc_id][pos]
 
