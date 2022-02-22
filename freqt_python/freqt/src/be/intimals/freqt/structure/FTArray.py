@@ -52,6 +52,15 @@ class FTArray:
         """
         self.memory = self.memory + other.memory
 
+    def extend(self, extension, candidate):
+        """
+         * extend the pattern with some extension
+        :param extension: int
+        :param candidate: int
+        """
+        self.memory = self.memory + ([-1] * extension)
+        self.add(candidate)
+
     def sub_list(self, start, stop):
         """
          Compute the sublist of self.memory going from index "start" to "stop"

@@ -5,6 +5,11 @@ from freqt.src.be.intimals.freqt.structure.Location import *
 class Projected:
 
     def __init__(self):
+        """
+        :depth: int, ...
+        :support: int, total number of transaction represented in Projected
+        :rootSupport: int, total number of location with distinct root represented in Projected
+        """
         self.__depth = -1
         self.__support = -1
         self.__rootSupport = -1

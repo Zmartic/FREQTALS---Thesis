@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from collections import OrderedDict
 
+from typing import Dict, Tuple
+
 from freqt.src.be.intimals.freqt.output.XMLOutput import *
 from freqt.src.be.intimals.freqt.util.Initial_Int import *
 from freqt.src.be.intimals.freqt.util.Util import *
@@ -221,9 +223,29 @@ class FreqT:
                 if node_label in self.rootLabels_set or len(self.rootLabels_set) == 0:
                     if node_label != "" and node_label[0] != '*' and node_label[0].isupper():
                         new_location = Location(j, j, i, class_id)
-                        FreqT.update_candidates(FP1, node_label_id, new_location, 0, FTArray())
+                        FreqT.update_FP1(FP1, node_label_id, new_location)
 
         return FP1
+
+    @staticmethod
+    def update_FP1(FP1, candidate, new_location):
+        """
+         * update FP1
+        :param freq1_dict: dict[FTArray, Projected]
+        :param candidate: int
+        :param new_location: Location
+        :param depth: int
+        :param prefix: int, number of time we push -1 to the pattern
+        """
+        new_tree = FTArray(init_memory=[candidate])
+
+        if new_tree in FP1:
+            FP1[new_tree].add(new_location)
+        else:
+            projected = Projected()
+            projected.set_depth(0)
+            projected.add(new_location)
+            FP1[new_tree] = projected
 
     def expand_FP1(self, freq1):
         """
@@ -246,7 +268,7 @@ class FreqT:
                 return
 
             # find candidates of the current pattern
-            candidates: OrderedDict[FTArray, Projected] = FreqT.generate_candidates(projected, self._transaction_list)
+            candidates: OrderedDict[Tuple, Projected] = FreqT.generate_candidates(projected, self._transaction_list)
             # prune candidate based on minSup
             Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
             # if there is no candidate then report the pattern and then stop
@@ -255,18 +277,22 @@ class FreqT:
                     self.addTree(self.leafPattern, self.leafProjected)
                 return
 
+            old_size = pattern.size()
             # expand each candidate to the current pattern
-            for key in candidates:
-                oldSize = pattern.size()
+            for ext, new_proj in candidates.items():
+                extension, candidate = ext
                 # add candidate into pattern
-                pattern.add_all(key)
+                pattern.extend(extension, candidate)
                 # if the right most node of the pattern is a leaf then keep track this pattern
-                if pattern.get_last() < -1:
-                    self.keepLeafPattern(pattern, candidates[key])
+                if candidate < -1:
+                    self.keepLeafPattern(pattern, new_proj)
                 # store leaf pattern
                 oldLeafPattern = self.leafPattern
                 oldLeafProjected = self.leafProjected
                 # check obligatory children constraint
+                tmp = [-1] * extension # TODO
+                tmp.append(candidate)  # TODO
+                key = FTArray(init_memory=tmp)  # TODO
                 if not Constraint.missing_left_obligatory_child(pattern, key, self._grammarInt_dict):
                     # check constraints on maximal number of leaves and real leaf
                     if Constraint.satisfy_max_leaf(pattern, self._config.getMaxLeaf()) or Constraint.is_not_full_leaf(
@@ -276,8 +302,8 @@ class FreqT:
                             self.addTree(self.leafPattern, self.leafProjected)
                     else:
                         # continue expanding pattern
-                        self.expandPattern(pattern, candidates[key])
-                pattern = pattern.sub_list(0, oldSize)
+                        self.expandPattern(pattern, new_proj)
+                pattern = pattern.sub_list(0, old_size)
                 self.keepLeafPattern(oldLeafPattern, oldLeafProjected)
         except:
             e = sys.exc_info()[0]
@@ -292,10 +318,10 @@ class FreqT:
          * generate candidates for a pattern, by extending occurrences of this pattern
         :param projected: Projected, occurrences of the pattern
         :param _transaction_list: list(list(NodeFreqT))
-        :return: dict[FTArray, Projected], the set of candidates with their location
+        :return: dict[Tuple, Projected], the set of candidates with their location
         """
         # use oredered dictionary to keep the order of the candidates
-        candidates_dict: OrderedDict[FTArray, Projected] = collections.OrderedDict()
+        candidates_dict: OrderedDict[Tuple, Projected] = collections.OrderedDict()
         depth = projected.get_depth()
 
         # --- find candidates for each location ---
@@ -304,66 +330,68 @@ class FreqT:
             # this uses more memory but need for checking continuous paragraphs
 
             class_id = occurrences.get_class_id()
-            id = occurrences.get_location_id()
+            loc_id = occurrences.get_location_id()
             pos = occurrences.get_position()
             root = occurrences.get_root()
-            prefixInt = FTArray()
+            #prefixInt = FTArray()
 
             # --- find candidates (from left to right) ---
             # * try to add a child of the right most node
-            candi_id = _transaction_list[id][pos].getNodeChild()
+            candi_id = _transaction_list[loc_id][pos].getNodeChild()
             new_depth = depth + 1
 
             while candi_id != -1:
-                node = _transaction_list[id][candi_id]
-                new_location = Location(root, candi_id, id, class_id)
-                FreqT.update_candidates(candidates_dict, node.getNode_label_int(), new_location,
-                                        new_depth, prefixInt)
+                node = _transaction_list[loc_id][candi_id]
+                new_location = Location(root, candi_id, loc_id, class_id)
+                FreqT.update_candidates(candidates_dict, node.getNode_label_int(), new_location, new_depth, 0)
                 candi_id = node.getNodeSibling()
 
-            prefixInt.add(-1)
+            #prefixInt.add(-1)
+            prefix = 1
 
             # * try to add a sibling of the parents node
             for d in range(depth):
-                current_node = _transaction_list[id][pos]
+                current_node = _transaction_list[loc_id][pos]
 
                 candi_id = current_node.getNodeSibling()
                 new_depth = depth - d
 
                 while candi_id != -1:
-                    node = _transaction_list[id][candi_id]
-                    new_location = Location(root, candi_id, id, class_id)
-                    FreqT.update_candidates(candidates_dict, node.getNode_label_int(), new_location,
-                                            new_depth, prefixInt)
+                    node = _transaction_list[loc_id][candi_id]
+                    new_location = Location(root, candi_id, loc_id, class_id)
+                    FreqT.update_candidates(candidates_dict, node.getNode_label_int(), new_location, new_depth, prefix)
                     candi_id = node.getNodeSibling()
 
                 pos = current_node.getNodeParent()
                 if pos == -1:
                     break
-                prefixInt.add(-1)
+                #prefixInt.add(-1)
+                prefix += 1
 
         return candidates_dict
 
     @staticmethod
-    def update_candidates(freq1_dict, candidate, new_location, depth, prefix_int):
+    def update_candidates(freq1_dict, candidate, new_location, depth, prefix):
         """
          * update candidate locations for two-class data
-        :param freq1_dict: dict[FTArray, Projected]
+        :param freq1_dict: dict[Tuple, Projected]
         :param candidate: int
         :param new_location: Location
         :param depth: int
-        :param prefix_int: FTArray
+        :param prefix: int, number of time we push -1 to the pattern
         """
-        new_tree = prefix_int.copy()
-        new_tree.add(candidate)
+        #new_tree = prefix_int.copy() # FTArray
+        #new_tree.add(candidate)
 
-        if new_tree in freq1_dict:
-            freq1_dict[new_tree].add(new_location)
+        extension = (prefix, candidate)
+
+        if extension in freq1_dict:
+            freq1_dict[extension].add(new_location)
         else:
             projected = Projected()
             projected.set_depth(depth)
             projected.add(new_location)
-            freq1_dict[new_tree] = projected
+            freq1_dict[extension] = projected
 
     def keepLeafPattern(self, pat, projected):
         """

@@ -135,15 +135,19 @@ class FreqT_ext(freqt.FreqT):
                     self.addPattern(self.leafPattern, self.leafProjected)
                 return
 
+            oldSize = largestPattern.size()
             # expand the current pattern with each candidate
-            for keys in candidates_dict:
-                oldSize = largestPattern.size()
-                largestPattern.add_all(keys)
+            for ext, new_proj in candidates_dict.items():
+                extension, candidate = ext
+                largestPattern.extend(extension, candidate)
                 if largestPattern.get_last() < -1:
-                    self.keepLeafPattern(largestPattern, candidates_dict[keys])
+                    self.keepLeafPattern(largestPattern, new_proj)
                 oldLeafPattern = self.leafPattern
                 oldLeafProjected = self.leafProjected
                 # check section and paragraphs in COBOL
+                tmp = [-1] * extension  # TODO
+                tmp.append(candidate)  # TODO
+                keys = FTArray(init_memory=tmp)  # TODO
                 Constraint.check_cobol_constraints(largestPattern, candidates_dict, keys, self._labelIndex_dict, self._transaction_list)
                 # check constraints
                 if Constraint.missing_left_obligatory_child(largestPattern, keys, self._grammarInt_dict):
@@ -156,7 +160,7 @@ class FreqT_ext(freqt.FreqT):
                             self.addPattern(self.leafPattern, self.leafProjected)
                     else:
                         # continue expanding pattern
-                        self.expandLargestPattern(largestPattern, candidates_dict[keys])
+                        self.expandLargestPattern(largestPattern, new_proj)
                 largestPattern = largestPattern.sub_list(0, oldSize)  # keep elements 0 to oldSize
                 self.keepLeafPattern(oldLeafPattern, oldLeafProjected)
         except:

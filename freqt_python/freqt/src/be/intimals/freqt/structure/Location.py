@@ -11,10 +11,10 @@ class Location:
 
     def __init__(self, root_pos, right_most_pos, loc_id, class_id):
         """
-        :param root_pos: int, position on the root node
-        :param right_most_pos: int, position of the right most node
-        :param loc_id: int, the transaction tha contain the Location
-        :param class_id: int, class id of the transaction
+        :root_pos: int, position on the root node
+        :right_most_pos: int, position of the right most node
+        :loc_id: int, the transaction tha contain the Location
+        :class_id: int, class id of the transaction
         """
         self.root_pos = root_pos
         self.right_most_pos = right_most_pos
