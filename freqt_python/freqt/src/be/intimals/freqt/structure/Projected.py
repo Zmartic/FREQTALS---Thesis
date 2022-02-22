@@ -44,6 +44,14 @@ class Projected:
     def size(self):
         return len(self.__locations)
 
+    def compute_support(self):
+        self.__support = len({loc.get_location_id() for loc in self.__locations})
+        return self.__support
+
+    def compute_root_support(self):
+        self.__rootSupport = len(self.__locations)
+        return self.__rootSupport
+
     # new procedure for 2 - class data
     def add_location(self, class_id, loc_id, pos, occurrences):
         # check if this location doesn't exist in the locations
@@ -61,10 +69,8 @@ class Projected:
         #    print("this \"if not found\" is NOT always true")
 
     def add(self, new_loc):
-        for location in self.__locations:
-            if new_loc == location:
-                return
-        self.__locations.append(new_loc)
+        if new_loc not in self.__locations:
+            self.__locations.append(new_loc)
 
     def __str__(self):
         for i in range(len(self.__locations)):

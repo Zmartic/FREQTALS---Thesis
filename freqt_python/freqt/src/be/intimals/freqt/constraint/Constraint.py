@@ -35,11 +35,11 @@ def get_2class_support(projected, weighted):
     if weighted:
         # count support by occurrences
         a = get_root_support_class1(projected)
-        c = get_root_support(projected) - a
+        c = projected.get_root_support() - a
     else:
         # count support by files
         a = get_support_class1(projected)
-        c = get_support(projected) - a
+        c = projected.get_support() - a
 
     return a, c
 
@@ -57,6 +57,8 @@ def get_support_class1(projected):
         if loc.getClassID() == 1 and loc_id != old_loc_id:
             sup += 1
             old_loc_id = loc_id
+
+    tmp_sup = len([0 for loc in projected.get_locations() if loc.get_class_id() == 1])
 
     return sup
 
@@ -80,44 +82,8 @@ def get_root_support_class1(projected):
             old_loc_id = loc_id
             old_root_id = root_id
 
-    return root_sup
+    tmp_root_sup = len({loc.get_location_id() for loc in projected.get_locations() if loc.get_class_id() == 1})
 
-
-def get_support(projected):
-    """
-     * calculate the support of a pattern = number of files
-     * @param projected
-     * @return
-    """
-    sup = 0
-    old_loc_id = -1
-
-    for loc in projected.get_locations():
-        loc_id = loc.get_location_id()
-
-        if loc_id != old_loc_id:
-            sup += 1
-            old_loc_id = loc_id
-    return sup
-
-
-def get_root_support(projected):
-    """
-     * calculate the root support of a pattern = number of occurrences
-     * @param projected
-     * @return
-    """
-    root_sup = 0
-    old_loc_id = -1
-    old_root_id = -1
-    for loc in projected.get_locations():
-        loc_id = loc.get_location_id()
-        root_id = loc.get_root()
-
-        if loc_id != old_loc_id or (loc_id == old_loc_id and root_id != old_root_id):
-            root_sup += 1
-            old_loc_id = loc_id
-            old_root_id = root_id
     return root_sup
 
 
@@ -132,15 +98,12 @@ def prune(candidates, min_sup, weighted):
     for elem in keys:
         proj = candidates[elem]
 
-        sup = get_support(proj)
-        wsup = get_root_support(proj)
+        sup = proj.compute_support()
+        wsup = proj.compute_root_support()
         limit = wsup if weighted else sup
 
         if limit < min_sup:
             del candidates[elem]
-        else:
-            proj.set_support(sup)
-            proj.set_root_support(wsup)
 
 
 def check_black_list_label(label, black_labels):  # UNUSED
