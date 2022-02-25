@@ -212,32 +212,31 @@ class FreqT:
         FP1: OrderedDict[FTArray, Projected] = collections.OrderedDict()
         trans = self._transaction_list
 
-        for i in range(len(trans)):
+        for trans_id in range(len(trans)):
             # get transaction label
-            class_id = self.__transactionClassID_list[i]
+            class_id = self.__transactionClassID_list[trans_id]
 
-            for j in range(len(trans[i])):
-                node_label = trans[i][j].getNodeLabel()
-                node_label_id = trans[i][j].getNode_label_int()
+            for loc in range(len(trans[trans_id])):
+                node = trans[trans_id][loc]
+                node_label = node.getNodeLabel()
+                node_label_id = node.getNode_label_int() # TODO
 
                 if node_label in self.rootLabels_set or len(self.rootLabels_set) == 0:
                     if node_label != "" and node_label[0] != '*' and node_label[0].isupper():
-                        new_location = Location(j, j, i, class_id)
+                        new_location = Location(loc, loc, trans_id, class_id)
                         FreqT.update_FP1(FP1, node_label_id, new_location)
 
         return FP1
 
     @staticmethod
-    def update_FP1(FP1, candidate, new_location):
+    def update_FP1(FP1, root_label, new_location):
         """
          * update FP1
-        :param freq1_dict: dict[FTArray, Projected]
-        :param candidate: int
+        :param FP1: dict[FTArray, Projected]
+        :param root_label: int, id of the label corresponding to the root node
         :param new_location: Location
-        :param depth: int
-        :param prefix: int, number of time we push -1 to the pattern
         """
-        new_tree = FTArray(init_memory=[candidate])
+        new_tree = FTArray(init_memory=[root_label])
 
         if new_tree in FP1:
             FP1[new_tree].add(new_location)
@@ -262,56 +261,54 @@ class FreqT:
          * @param: pattern, FTArray
          * @param: projected, Projected
         """
-        try:
-            # if it is timeout then stop expand the pattern;
-            if self.is_timeout():
-                return
+        # if it is timeout then stop expand the pattern;
+        if self.is_timeout():
+            return
 
-            # --- find candidates of the current pattern ---
-            candidates: OrderedDict[Tuple, Projected] = FreqT.generate_candidates(projected, self._transaction_list)
-            # prune candidate based on minSup
-            Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
-            # if there is no candidate then report the pattern and then stop
-            if len(candidates) == 0:
-                if self.leafPattern.size() > 0:
-                    self.addTree(self.leafPattern, self.leafProjected)
-                return
+        # --- find candidates of the current pattern ---
+        candidates: OrderedDict[Tuple, Projected] = FreqT.generate_candidates(projected, self._transaction_list)
+        # prune candidate based on minSup
+        Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
+        # if there is no candidate then report the pattern and then stop
+        if len(candidates) == 0:
+            if self.leafPattern.size() > 0:
+                self.addTree(self.leafPattern, self.leafProjected)
+            return
 
-            # --- expand each candidate to the current pattern ---
-            old_size = pattern.size()
+        # --- expand each candidate pattern ---
+        old_size = pattern.size()
+        # store leaf pattern
+        old_leaf_pattern = self.leafPattern
+        old_leaf_projected = self.leafProjected
 
-            for extension, new_proj in candidates.items():
-                prefix, candidate = extension
+        for extension, new_proj in candidates.items():
+            prefix, candidate_label = extension
 
-                pattern.extend(prefix, candidate)
-                # if the right most node of the pattern is a leaf then keep track this pattern
-                if candidate < -1:
-                    self.keepLeafPattern(pattern, new_proj)
-                # store leaf pattern
-                oldLeafPattern = self.leafPattern
-                oldLeafProjected = self.leafProjected
-                # check obligatory children constraint
-                tmp = [-1] * prefix  # TODO
-                tmp.append(candidate)  # TODO
-                key = FTArray(init_memory=tmp)  # TODO
-                if not Constraint.missing_left_obligatory_child(pattern, key, self._grammarInt_dict):
-                    # check constraints on maximal number of leaves and real leaf
-                    if Constraint.satisfy_max_leaf(pattern, self._config.getMaxLeaf()) or Constraint.is_not_full_leaf(
-                            pattern):
-                        # store the pattern
-                        if self.leafPattern.size() > 0:
-                            self.addTree(self.leafPattern, self.leafProjected)
-                    else:
-                        # continue expanding pattern
-                        self.expandPattern(pattern, new_proj)
-                self.keepLeafPattern(oldLeafPattern, oldLeafProjected)
-                pattern = pattern.sub_list(0, old_size)
-        except:
-            e = sys.exc_info()[0]
-            print("Error: expandPattern " + str(e) + "\n")
-            trace = traceback.format_exc()
-            print(trace)
-            raise
+            # built the candidate pattern using the extension
+            pattern.extend(prefix, candidate_label)
+
+            # if the right most node of the pattern is a leaf then keep track this pattern
+            if candidate_label < -1:
+                self.keepLeafPattern(pattern, new_proj)
+
+            # check obligatory children constraint
+            tmp = [-1] * prefix  # TODO
+            tmp.append(candidate_label)  # TODO
+            key = FTArray(init_memory=tmp)  # TODO
+            if not Constraint.missing_left_obligatory_child(pattern, key, self._grammarInt_dict):
+                # check constraints on maximal number of leaves and real leaf
+                if Constraint.satisfy_max_leaf(pattern, self._config.getMaxLeaf()) or Constraint.is_not_full_leaf(
+                        pattern):
+                    # store the pattern
+                    if self.leafPattern.size() > 0:
+                        self.addTree(self.leafPattern, self.leafProjected)
+                else:
+                    # continue expanding pattern
+                    self.expandPattern(pattern, new_proj)
+
+            # restore the original pattern
+            self.keepLeafPattern(old_leaf_pattern, old_leaf_projected)
+            pattern = pattern.sub_list(0, old_size)
 
     @staticmethod
     def generate_candidates(projected, _transaction_list):
@@ -373,19 +370,16 @@ class FreqT:
         return candidates_dict
 
     @staticmethod
-    def update_candidates(freq1_dict, candidate, new_location, depth, prefix):
+    def update_candidates(freq1_dict, candidate_label, new_location, depth, prefix):
         """
          * update candidate locations for two-class data
         :param freq1_dict: dict[Tuple, Projected]
-        :param candidate: int
+        :param candidate_label: int
         :param new_location: Location
         :param depth: int
         :param prefix: int, number of time we push -1 to the pattern
         """
-        #new_tree = prefix_int.copy() # FTArray
-        #new_tree.add(candidate)
-
-        extension = (prefix, candidate)
+        extension = (prefix, candidate_label)
 
         if extension in freq1_dict:
             freq1_dict[extension].add(new_location)
