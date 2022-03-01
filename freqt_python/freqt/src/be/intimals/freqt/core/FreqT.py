@@ -219,7 +219,7 @@ class FreqT:
             for loc in range(len(trans[trans_id])):
                 node = trans[trans_id][loc]
                 node_label = node.getNodeLabel()
-                node_label_id = node.getNode_label_int() # TODO
+                node_label_id = node.getNode_label_int()
 
                 if node_label in self.rootLabels_set or len(self.rootLabels_set) == 0:
                     if node_label != "" and node_label[0] != '*' and node_label[0].isupper():

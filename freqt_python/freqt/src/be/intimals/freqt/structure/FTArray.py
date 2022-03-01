@@ -26,9 +26,6 @@ class FTArray:
          :param i: int
          :return: int
         """
-        if i < 0 or i >= len(self.memory):
-            raise Exception("Out of bounds access in FTArray.get(i). i is " + str(i) + ", size is "
-                            + str(len(self.memory)))
         return self.memory[i]
 
     def get_last(self):
