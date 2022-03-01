@@ -138,19 +138,19 @@ class FreqT_ext(freqt.FreqT):
             oldSize = largestPattern.size()
             # expand the current pattern with each candidate
             for ext, new_proj in candidates_dict.items():
-                extension, candidate = ext
-                largestPattern.extend(extension, candidate)
+                prefix, candidate = ext
+                largestPattern.extend(prefix, candidate)
                 if largestPattern.get_last() < -1:
                     self.keepLeafPattern(largestPattern, new_proj)
                 oldLeafPattern = self.leafPattern
                 oldLeafProjected = self.leafProjected
                 # check section and paragraphs in COBOL
-                tmp = [-1] * extension  # TODO
+                tmp = [-1] * prefix  # TODO
                 tmp.append(candidate)  # TODO
                 keys = FTArray(init_memory=tmp)  # TODO
                 Constraint.check_cobol_constraints(largestPattern, candidates_dict, keys, self._labelIndex_dict, self._transaction_list)
                 # check constraints
-                if Constraint.missing_left_obligatory_child(largestPattern, keys, self._grammarInt_dict):
+                if Constraint.missing_left_obligatory_child(largestPattern, prefix, self._grammarInt_dict):
                     # do nothing = don't store pattern to MFP
                     continue
                 else:

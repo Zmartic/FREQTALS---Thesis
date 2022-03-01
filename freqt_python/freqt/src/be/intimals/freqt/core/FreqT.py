@@ -282,20 +282,17 @@ class FreqT:
         old_leaf_projected = self.leafProjected
 
         for extension, new_proj in candidates.items():
-            prefix, candidate_label = extension
+            candidate_prefix, candidate_label = extension
 
             # built the candidate pattern using the extension
-            pattern.extend(prefix, candidate_label)
+            pattern.extend(candidate_prefix, candidate_label)
 
             # if the right most node of the pattern is a leaf then keep track this pattern
             if candidate_label < -1:
                 self.keepLeafPattern(pattern, new_proj)
 
             # check obligatory children constraint
-            tmp = [-1] * prefix  # TODO
-            tmp.append(candidate_label)  # TODO
-            key = FTArray(init_memory=tmp)  # TODO
-            if not Constraint.missing_left_obligatory_child(pattern, key, self._grammarInt_dict):
+            if not Constraint.missing_left_obligatory_child(pattern, candidate_prefix, self._grammarInt_dict):
                 # check constraints on maximal number of leaves and real leaf
                 if Constraint.satisfy_max_leaf(pattern, self._config.getMaxLeaf()) or Constraint.is_not_full_leaf(
                         pattern):

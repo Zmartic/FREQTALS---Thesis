@@ -78,38 +78,27 @@ def countNode(patFTArray):
             count += 1
     return count
 
-def findParentPosition(patFTArray, candidateFTArray):
+def findParentPosition(candidate_pattern, candidate_prefix):
     """
      * return parent's position of the candidate in the pattern
      * @param patFTArray, FTArray
      * @param candidateFTArray, FTArray
      * @return
     """
-    parentPos = 0
-    nodeLevel = 0
-    candidateSize = 0
-    try:
-        for i in range(0, candidateFTArray.size()):
-            if candidateFTArray.get(i) == -1:
-                nodeLevel += 1
-            candidateSize += 1
+    node_level = candidate_prefix
+    candidate_size = candidate_prefix + 1
+    original_size = candidate_pattern.size() - candidate_size
 
-        size = patFTArray.size() - candidateSize
-        if nodeLevel == 0:
-            parentPos = size - 1
-        else:
-            for i in range(size - 1, 0, -1):
-                if patFTArray.get(i) == -1:
-                    nodeLevel += 1
-                else:
-                    nodeLevel -= 1
-                if nodeLevel == -1:
-                    parentPos = i
-                    break
-    except:
-        print("find parent position error ")
+    if node_level == 0:
+        # right most node of the original pattern
+        return original_size - 1
+    else:
+        for i in range(original_size - 1, 0, -1):
+            node_level = (node_level + 1) if candidate_pattern.get(i) == -1 else (node_level - 1)
+            if node_level == -1:
+                return i
 
-    return parentPos
+    return None
 
 def findChildrenPosition(patFTArray, parentPosInt):
     """

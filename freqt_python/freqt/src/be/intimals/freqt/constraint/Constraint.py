@@ -48,43 +48,14 @@ def get_support_class1(projected):
     """
      * count support of pattern in the class 1
     """
-    sup = 0
-    old_loc_id = -1
-
-    for loc in projected.get_locations():
-        loc_id = loc.getLocationId()
-
-        if loc.getClassID() == 1 and loc_id != old_loc_id:
-            sup += 1
-            old_loc_id = loc_id
-
-    tmp_sup = len([0 for loc in projected.get_locations() if loc.get_class_id() == 1])
-
-    return sup
+    return len({loc.get_location_id() for loc in projected.get_locations() if loc.get_class_id() == 1})
 
 
 def get_root_support_class1(projected):
     """
      * count root support of pattern in the class 1
     """
-    root_sup = 0
-    old_loc_id = -1
-    old_root_id = -1
-
-    for loc in projected.get_locations():
-        class_id = loc.getClassID()
-        loc_id = loc.getLocationId()
-        root_id = loc.getRoot()
-
-        if class_id == 1:
-            if loc_id != old_loc_id or (loc_id == old_loc_id and root_id != old_root_id):
-                root_sup += 1
-            old_loc_id = loc_id
-            old_root_id = root_id
-
-    tmp_root_sup = len({loc.get_location_id() for loc in projected.get_locations() if loc.get_class_id() == 1})
-
-    return root_sup
+    return len({(loc.get_location_id(), loc.get_root()) for loc in projected.get_locations() if loc.get_class_id() == 1})
 
 
 def prune(candidates, min_sup, weighted):
@@ -170,37 +141,30 @@ def missing_left_obligatory_child(pat, candidate, grammar):
      * @param: candidate, FTArray
      * @param: _grammarInt_dict, dictionary with Integer as keys and list of String as values
     """
-    try:
-        # find parent's position of candidate in the patterns
-        parent_pos = findParentPosition(pat, candidate)
+    # find parent's position of candidate in the patterns
+    parent_pos = findParentPosition(pat, candidate)
 
-        # find all children of patternLabel in grammar
-        childrenG_list = grammar[pat.get(parent_pos)]
+    # find all children of patternLabel in grammar
+    childrenG_list = grammar[pat.get(parent_pos)]
 
-        if childrenG_list[0] == "ordered" and not childrenG_list[1] == "1":
-            # find all children of parentPos in pattern
-            children_pos = findChildrenPosition(pat, parent_pos)
-            # compare children in pattern and children in grammar
-            i = 0
-            j = 2
-            while i < children_pos.size() and j < len(childrenG_list):
-                child_grammar_temp = childrenG_list[j].split(UNICHAR)
-                label_int = int(child_grammar_temp[0])
-                if pat.get(children_pos.get(i)) == label_int:
-                    i += 1
+    if childrenG_list[0] == "ordered" and not childrenG_list[1] == "1":
+        # find all children of parentPos in pattern
+        children_pos = findChildrenPosition(pat, parent_pos)
+        # compare children in pattern and children in grammar
+        i = 0
+        j = 2
+        while i < children_pos.size() and j < len(childrenG_list):
+            child_grammar_temp = childrenG_list[j].split(UNICHAR)
+            label_int = int(child_grammar_temp[0])
+            if pat.get(children_pos.get(i)) == label_int:
+                i += 1
+                j += 1
+            else:
+                # if this child is optional
+                if child_grammar_temp[1] == "false":
                     j += 1
-                else:
-                    # if this child is optional
-                    if child_grammar_temp[1] == "false":
-                        j += 1
-                    elif child_grammar_temp[1] == "true":
-                        return True
-
-    except:
-        e = sys.exc_info()[0]
-        print("check left Obligatory Children error: " + str(e) + "\n")
-        trace = traceback.format_exc()
-        print(trace)
+                elif child_grammar_temp[1] == "true":
+                    return True
 
     return False
 

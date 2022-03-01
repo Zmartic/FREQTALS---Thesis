@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <results>
-<subtree id="1" support="2" wsupport="2" size="31">
+<subtree id="1" support="2" wsupport="-1" size="31">
 <TypeDeclaration>
 <bodyDeclarations>
 <__directives><match-sequence/></__directives>
@@ -75,7 +75,7 @@ this
 </bodyDeclarations>
 </TypeDeclaration>
 </subtree>
-<subtree id="2" support="2" wsupport="2" size="16">
+<subtree id="2" support="2" wsupport="-1" size="16">
 <TypeDeclaration>
 <bodyDeclarations>
 <__directives><match-sequence/></__directives>
@@ -118,7 +118,7 @@ false
 </bodyDeclarations>
 </TypeDeclaration>
 </subtree>
-<subtree id="3" support="2" wsupport="3" size="25">
+<subtree id="3" support="3" wsupport="-1" size="25">
 <Block>
 <statements>
 <__directives><match-sequence/></__directives>

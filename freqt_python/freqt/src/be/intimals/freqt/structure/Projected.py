@@ -54,7 +54,7 @@ class Projected:
         return self.__support
 
     def compute_root_support(self):
-        self.__rootSupport = len(self.__locations)
+        self.__support = len({(loc.get_location_id(), loc.get_root()) for loc in self.__locations})
         return self.__rootSupport
 
     # new procedure for 2 - class data
