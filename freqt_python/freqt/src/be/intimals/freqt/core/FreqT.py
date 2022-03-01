@@ -485,11 +485,10 @@ class FreqT:
             if pat in _MFP_dict:
                 return
 
-            checkSubtree = CheckSubtree()
             to_remove_list = list()
             # check maximal pattern
             for max_pat in _MFP_dict.keys():
-                res = checkSubtree.checkSubTree(pat, max_pat, self._config)
+                res = check_subtree(pat, max_pat)
                 if res == 1:  # * pat is a subtree of max_pat
                     self.notF_set.add(pat)
                     return

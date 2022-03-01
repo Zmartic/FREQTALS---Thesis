@@ -180,9 +180,9 @@ class FreqT_ext(freqt.FreqT):
             if self._config.get2Class():
                 # check chi-square score
                 if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):
-                    self.addMaximalPattern(pat, projected, self.MFP_dict)
+                    self.add_maximal_pattern(pat, projected, self.MFP_dict)
             else:
-                self.addMaximalPattern(pat, projected, self.MFP_dict)
+                self.add_maximal_pattern(pat, projected, self.MFP_dict)
 
     """
      * get initial locations of a projected
