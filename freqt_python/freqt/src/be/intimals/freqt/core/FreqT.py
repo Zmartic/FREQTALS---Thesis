@@ -56,8 +56,8 @@ class FreqT:
         self.sizeClass1 = -1
         self.sizeClass2 = 1
 
-        self.leafPattern = FTArray()
-        self.leafProjected = Projected()
+        self.leafPattern = None
+        self.leafProjected = None
         self.notF_set = set()  # set of FTArray
 
     # ////////////////////////////////////////////////////////////
@@ -219,12 +219,11 @@ class FreqT:
             for loc in range(len(trans[trans_id])):
                 node = trans[trans_id][loc]
                 node_label = node.getNodeLabel()
-                node_label_id = node.getNode_label_int()
 
                 if node_label in self.rootLabels_set or len(self.rootLabels_set) == 0:
                     if node_label != "" and node_label[0] != '*' and node_label[0].isupper():
                         new_location = Location(loc, loc, trans_id, class_id)
-                        FreqT.update_FP1(FP1, node_label_id, new_location)
+                        FreqT.update_FP1(FP1, node.getNode_label_int(), new_location)
 
         return FP1
 
@@ -253,15 +252,15 @@ class FreqT:
         """
         for pat in freq1:
             # expand pat to find maximal patterns
-            self.expandPattern(pat.copy(), freq1[pat])
+            self.expand_pattern(pat.copy(), freq1[pat])
 
-    def expandPattern(self, pattern, projected):
+    def expand_pattern(self, pattern, projected):
         """
          * expand pattern
          * @param: pattern, FTArray
          * @param: projected, Projected
         """
-        # if it is timeout then stop expand the pattern;
+        # if timeout then stop expand the pattern;
         if self.is_timeout():
             return
 
@@ -271,8 +270,8 @@ class FreqT:
         Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
         # if there is no candidate then report the pattern and then stop
         if len(candidates) == 0:
-            if self.leafPattern.size() > 0:
-                self.addTree(self.leafPattern, self.leafProjected)
+            if self.leafPattern is not None:
+                self.add_tree(self.leafPattern, self.leafProjected)
             return
 
         # --- expand each candidate pattern ---
@@ -289,7 +288,7 @@ class FreqT:
 
             # if the right most node of the pattern is a leaf then keep track this pattern
             if candidate_label < -1:
-                self.keepLeafPattern(pattern, new_proj)
+                self.keep_leaf_pattern(pattern, new_proj)
 
             # check obligatory children constraint
             if not Constraint.missing_left_obligatory_child(pattern, candidate_prefix, self._grammarInt_dict):
@@ -297,14 +296,14 @@ class FreqT:
                 if Constraint.satisfy_max_leaf(pattern, self._config.getMaxLeaf()) or Constraint.is_not_full_leaf(
                         pattern):
                     # store the pattern
-                    if self.leafPattern.size() > 0:
-                        self.addTree(self.leafPattern, self.leafProjected)
+                    if self.leafPattern is not None:
+                        self.add_tree(self.leafPattern, self.leafProjected)
                 else:
                     # continue expanding pattern
-                    self.expandPattern(pattern, new_proj)
+                    self.expand_pattern(pattern, new_proj)
 
             # restore the original pattern
-            self.keepLeafPattern(old_leaf_pattern, old_leaf_projected)
+            self.restore_leaf_pattern(old_leaf_pattern, old_leaf_projected)
             pattern = pattern.sub_list(0, old_size)
 
     @staticmethod
@@ -314,6 +313,9 @@ class FreqT:
         :param projected: Projected, occurrences of the pattern
         :param _transaction_list: list(list(NodeFreqT))
         :return: dict[Tuple, Projected], the set of candidates with their location
+
+        note: the list of candidate are store in a OrderedDict to allow easy computation of the support
+        which assume that (current.loc,current.root) <= (next.loc,next.root)
         """
         # use oredered dictionary to keep the order of the candidates
         candidates_dict: OrderedDict[Tuple, Projected] = collections.OrderedDict()
@@ -328,7 +330,6 @@ class FreqT:
             loc_id = occurrences.get_location_id()
             pos = occurrences.get_position()
             root = occurrences.get_root()
-            #prefixInt = FTArray()
 
             # --- find candidates (from left to right) ---
             # * try to add a child of the right most node
@@ -342,9 +343,7 @@ class FreqT:
 
                 candi_id = node.getNodeSibling()
 
-            #prefixInt.add(-1)
-
-            # * try to add a sibling of the parents node
+            # * try to add a sibling of a parent node
             prefix = 1
             for d in range(depth):
                 current_node = _transaction_list[loc_id][pos]
@@ -361,7 +360,6 @@ class FreqT:
                 pos = current_node.getNodeParent()
                 if pos == -1:
                     break
-                #prefixInt.add(-1)
                 prefix += 1
 
         return candidates_dict
@@ -386,7 +384,7 @@ class FreqT:
             projected.add(new_location)
             freq1_dict[extension] = projected
 
-    def keepLeafPattern(self, pat, projected):
+    def keep_leaf_pattern(self, pat, projected):
         """
          * keep track the pattern which has the right-most node is a leaf
          * @param: pat, FTArray
@@ -395,16 +393,27 @@ class FreqT:
         self.leafPattern = pat.copy()
         self.leafProjected = projected
 
-    def addTree(self, pat, projected):
+    def restore_leaf_pattern(self, old_pat, old_proj):
+        """
+         * restore leaf pattern to its previous value
+         * @param: pat, FTArray
+         * @param: projected, Projected
+        """
+        self.leafPattern = old_pat
+        self.leafProjected = old_proj
+
+    def add_tree(self, pat, projected):
         """
          * add the tree to the root IDs or the MFP
          * @param: pat FTArray
          * @param: projected, Projected
         """
-        # check minsize constraints and right mandatory children
-        if Constraint.check_output(pat, self._config.getMinLeaf(),
-                                   self._config.getMinNode()) and not Constraint.missing_right_obligatory_child(pat,
-                                                                                                                self._grammarInt_dict):
+        # Verify:
+        # * Minimum size constraints
+        # * Right mandatory children
+        if Constraint.check_output(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not \
+                Constraint.missing_right_obligatory_child(pat, self._grammarInt_dict):
+
             if self._config.get2Class():
                 # check chi-square score
                 if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(),
@@ -413,14 +422,15 @@ class FreqT:
                         # add pattern to the list of 1000-highest chi-square score patterns
                         self.addHighScorePattern(pat, projected, self.__HSP_dict)
                     else:
-                        self.addMaximalPattern(pat, projected, self.MFP_dict)
+                        self.add_maximal_pattern(pat, projected, self.MFP_dict)
+
             else:
                 if self._config.getTwoStep():
                     # add root occurrences of the current pattern to rootIDs
                     self.addRootIDs(pat, projected, self.rootIDs_dict)
                 else:
                     # add pattern to maximal pattern list
-                    self.addMaximalPattern(pat, projected, self.MFP_dict)
+                    self.add_maximal_pattern(pat, projected, self.MFP_dict)
 
     def addRootIDs(self, pat, projected, _rootIDs_dict):
         """
@@ -462,7 +472,7 @@ class FreqT:
             trace = traceback.format_exc()
             print(trace)
 
-    def addMaximalPattern(self, pat, projected, _MFP_dict):
+    def add_maximal_pattern(self, pat, projected, _MFP_dict):
         """
          * add maximal patterns
          * @param: pat, FTArray
@@ -470,38 +480,30 @@ class FreqT:
          * @param: _MFP_dict, a dictionary with FTArray as keys and String as values
         """
         if len(_MFP_dict) != 0:
-            for key in self.notF_set:
-                if pat == key:
-                    return
-            for key in _MFP_dict:
-                if pat == key:
-                    return
+            if pat in self.notF_set:
+                return
+            if pat in _MFP_dict:
+                return
 
             checkSubtree = CheckSubtree()
             to_remove_list = list()
             # check maximal pattern
-            for key in _MFP_dict:
-                if checkSubtree.checkSubTree(pat, key, self._config) == 1:
-                    # pat is a subtree of entry.getKey
+            for max_pat in _MFP_dict.keys():
+                res = checkSubtree.checkSubTree(pat, max_pat, self._config)
+                if res == 1:  # * pat is a subtree of max_pat
                     self.notF_set.add(pat)
                     return
-                elif checkSubtree.checkSubTree(pat, key, self._config) == 2:
-                    # entry.getKey is a subtree of pat
-                    self.notF_set.add(key)
-                    to_remove_list.append(key)
+                elif res == 2:  # * max_pat is a subtree of pat
+                    self.notF_set.add(max_pat)
+                    to_remove_list.append(max_pat)
 
-            for elem in to_remove_list:
-                _MFP_dict.pop(elem, -1)
+            for key in to_remove_list:
+                del _MFP_dict[key]
 
-            # add new maximal pattern to the list
-            patternSupport = self.getSupportString(pat, projected)
-            _MFP_dict[pat] = patternSupport
-        else:
-            # add new maximal pattern to the list
-            patternSupport = self.getSupportString(pat, projected)
-            _MFP_dict[pat] = patternSupport
+        # add new maximal pattern to the list
+        _MFP_dict[pat] = self.get_support_string(pat, projected)
 
-    def getSupportString(self, pat, projected):
+    def get_support_string(self, pat, projected):
         """
          * get a string of support, score, size for a pattern
          * @param: pat, FTArray

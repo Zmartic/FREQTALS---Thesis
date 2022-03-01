@@ -19,7 +19,7 @@ class Location:
         self.root_pos = root_pos
         self.right_most_pos = right_most_pos
         self.location_id = loc_id
-        self.class_id = class_id  # TODO USELESS
+        self.class_id = class_id
 
     def get_location_id(self):
         return self.location_id

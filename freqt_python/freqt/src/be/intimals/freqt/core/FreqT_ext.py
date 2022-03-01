@@ -130,7 +130,7 @@ class FreqT_ext(freqt.FreqT):
             Constraint.prune(candidates_dict, self._config.getMinSupport(), self._config.getWeighted())
             # if there is no candidate then report pattern --> stop
             if len(candidates_dict) == 0:
-                if self.leafPattern.size() > 0:
+                if self.leafPattern is not None:
                     # store pattern
                     self.addPattern(self.leafPattern, self.leafProjected)
                 return
@@ -141,7 +141,7 @@ class FreqT_ext(freqt.FreqT):
                 prefix, candidate = ext
                 largestPattern.extend(prefix, candidate)
                 if largestPattern.get_last() < -1:
-                    self.keepLeafPattern(largestPattern, new_proj)
+                    self.keep_leaf_pattern(largestPattern, new_proj)
                 oldLeafPattern = self.leafPattern
                 oldLeafProjected = self.leafProjected
                 # check section and paragraphs in COBOL
@@ -155,14 +155,14 @@ class FreqT_ext(freqt.FreqT):
                     continue
                 else:
                     if Constraint.is_not_full_leaf(largestPattern):
-                        if self.leafPattern.size() > 0:
+                        if self.leafPattern is not None:
                             # store the pattern
                             self.addPattern(self.leafPattern, self.leafProjected)
                     else:
                         # continue expanding pattern
                         self.expandLargestPattern(largestPattern, new_proj)
                 largestPattern = largestPattern.sub_list(0, oldSize)  # keep elements 0 to oldSize
-                self.keepLeafPattern(oldLeafPattern, oldLeafProjected)
+                self.restore_leaf_pattern(oldLeafPattern, oldLeafProjected)
         except:
             e = sys.exc_info()[0]
             print("Error: Freqt_ext projected " + str(e) + "\n")
