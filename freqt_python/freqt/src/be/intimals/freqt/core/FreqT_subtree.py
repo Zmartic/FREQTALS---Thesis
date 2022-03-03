@@ -6,7 +6,6 @@ from freqt.src.be.intimals.freqt.structure.Projected import *
 from freqt.src.be.intimals.freqt.constraint import Constraint
 
 import collections
-import traceback
 
 
 class FreqT_subtree:
@@ -66,33 +65,27 @@ class FreqT_subtree:
      * @param projected
     """
     def expandPattern(self, projected):
-        try:
-            if self.__found:
-                return
+        if self.__found:
+            return
 
-            # find all candidates of the current subtree
-            candidate_dict = self.generateCandidates(projected)  # output dict of with FTArray as key and Projected as value
+        # find all candidates of the current subtree
+        candidate_dict = self.generateCandidates(projected)  # output dict of with FTArray as key and Projected as value
 
-            Constraint.prune(candidate_dict, 2, False)  # pq 2 comme minsup?
+        Constraint.prune(candidate_dict, 2, False)  # pq 2 comme minsup?
 
-            if len(candidate_dict) == 0:
-                if self.__maximalPattern == self.__inputPattern:
-                    self.__outputPattern = "found subtree"
-                # not found and stop
-                self.__found = True
-                return
+        if len(candidate_dict) == 0:
+            if self.__maximalPattern == self.__inputPattern:
+                self.__outputPattern = "found subtree"
+            # not found and stop
+            self.__found = True
+            return
 
-            else:
-                # expand the current pattern with each candidate
-                for keys in candidate_dict:
-                    # add new candidate to current pattern
-                    self.__maximalPattern.add_all(keys)
-                    self.expandPattern(candidate_dict[keys])
-        except:
-            e = sys.exc_info()[0]
-            print("ERROR: post-processing expanding" + str(e) + "\n")
-            trace = traceback.format_exc()
-            print(trace)
+        else:
+            # expand the current pattern with each candidate
+            for keys in candidate_dict:
+                # add new candidate to current pattern
+                self.__maximalPattern.add_all(keys)
+                self.expandPattern(candidate_dict[keys])
 
     """
      * Prune all the candidate that don't appear at least the value of the minSup
@@ -126,35 +119,29 @@ class FreqT_subtree:
      * @param pat2, FTArray
     """
     def checkSubtrees(self, pat1, pat2):
-        try:
-            # create input data
-            self.__found = False
-            self.__newTransaction_list = list()
-            self.__inputPattern = pat1.copy()
-            self.__outputPattern = ""
+        # create input data
+        self.__found = False
+        self.__newTransaction_list = list()
+        self.__inputPattern = pat1.copy()
+        self.__outputPattern = ""
 
-            inputPatterns = list()  # list of FTArray
-            inputPatterns.append(pat1)
-            inputPatterns.append(pat2)
-            self.initDatabase(inputPatterns)
+        inputPatterns = list()  # list of FTArray
+        inputPatterns.append(pat1)
+        inputPatterns.append(pat2)
+        self.initDatabase(inputPatterns)
 
-            self.__maximalPattern = FTArray()
-            rootLabel_int = pat1.get(0)
+        self.__maximalPattern = FTArray()
+        rootLabel_int = pat1.get(0)
 
-            self.__maximalPattern.add(rootLabel_int)
-            # init locations of pattern
-            projected = Projected()
-            projected.set_depth(0)
-            for i in range(0, len(self.__newTransaction_list)):
-                for j in range(0, len(self.__newTransaction_list[i])):
-                    node_label = self.__newTransaction_list[i][j].getNode_label_int()
-                    if node_label == rootLabel_int:
-                        projected.set_location(i, j)
-            # expand the pattern
-            self.expandPattern(projected)
+        self.__maximalPattern.add(rootLabel_int)
+        # init locations of pattern
+        projected = Projected()
+        projected.set_depth(0)
+        for i in range(0, len(self.__newTransaction_list)):
+            for j in range(0, len(self.__newTransaction_list[i])):
+                node_label = self.__newTransaction_list[i][j].getNode_label_int()
+                if node_label == rootLabel_int:
+                    projected.set_location(i, j)
+        # expand the pattern
+        self.expandPattern(projected)
 
-        except:
-            e = sys.exc_info()[0]
-            print("Error: check sub-trees: " + str(e) + "\n")
-            trace = traceback.format_exc()
-            print(trace)

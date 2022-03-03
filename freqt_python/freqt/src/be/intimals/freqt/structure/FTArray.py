@@ -90,8 +90,12 @@ class FTArray:
 
     def index(self, element):
         """
-         Return the position of element in the FTArray
+         Return the position of the first occurrence of element in the FTArray
+         -1 otherwise
          :param element: int
          :return: int
         """
-        return self.memory.index(element)
+        try:
+            return self.memory.index(element)
+        except ValueError:
+            return -1

@@ -65,8 +65,7 @@ def prune(candidates, min_sup, weighted):
      * @param: minSup, int
      * @param: weighted, boolean
     """
-    keys = list(candidates.keys())
-    for elem in keys:
+    for elem in list(candidates.keys()):
         proj = candidates[elem]
 
         sup = proj.compute_support()

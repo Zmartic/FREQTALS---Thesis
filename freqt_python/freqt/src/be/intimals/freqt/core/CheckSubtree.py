@@ -12,20 +12,7 @@ def check_subtree(pat1, pat2):
      * @param config, Config
      * @return
     """
-
-    fast_result = fast_check_subtree(pat1, pat2)
-    if fast_result != -1:
-        return fast_result
-
-    fr = FreqT_subtree()
-    pat1_size = pat1.size()
-    pat2_size = pat2.size()
-    fr.checkSubtrees(pat1, pat2) if pat1_size < pat2_size else fr.checkSubtrees(pat2, pat1)
-
-    if len(fr.getOutputPattern()) == 0:
-        return 0
-
-    return 1 if pat1_size <= pat2_size else 2
+    return fast_check_subtree(pat1, pat2)
 
 
 def fast_check_subtree(pat1, pat2):
@@ -37,22 +24,15 @@ def fast_check_subtree(pat1, pat2):
     if pat1.size() == pat2.size():
         return 1 if pat1 == pat2 else 0
 
-    try:
-        if pat1.size() > pat2.size():
-            return 2 if has_subtree(pat1, pat2) else 0
+    if pat1.size() > pat2.size():
+        return 2 if has_subtree(pat1, pat2) else 0
 
-        return 1 if has_subtree(pat2, pat1) else 0
-
-    except ValueError:
-        return -1
+    return 1 if has_subtree(pat2, pat1) else 0
 
 
-def complex_check_subtree(pat1, pat2):
-
+def complex_check_subtree(small, big):
     fr = FreqT_subtree()
-    pat1_size = pat1.size()
-    pat2_size = pat2.size()
-    fr.checkSubtrees(pat1, pat2) if pat1_size < pat2_size else fr.checkSubtrees(pat2, pat1)
+    fr.checkSubtrees(small, big)
 
     return len(fr.getOutputPattern()) != 0
 
@@ -64,69 +44,67 @@ def has_subtree(big, small):
      * @param small, FTArray
     """
     root = small.get(0)  # the root of small
-    small_size = small.size()
-    big_size = big.size()
     start_idx = 0
-
     big_part = big
+
     while True:  # loop over big, searching for the root
         root_idx = big_part.index(root)
-
-        if root_idx == -1:
+        if root_idx == -1:  # no root found
             return False
 
-        big_part_size = big_part.size()
-        if root_idx + small_size > big_part_size:
+        # * Size consistency
+        if root_idx + small.size() > big_part.size():
             return False
-        if treeIncludes(big_part.sub_list(root_idx, big_part_size), small):
+
+        # --- Verify if small is included in big_part ---
+        big_part = big_part.sub_list(root_idx, big_part.size())
+
+        if big_part.size() == small.size():
+            return big_part == small
+
+        small_index = 1
+        big_part_index = 1
+        is_included = True
+
+        while small_index < small.size():  # loop until the end of the small tree
+            if big_part_index >= big_part.size():
+                is_included = False  # there is more in small that is not in big
+                break
+
+            # -- Look for small_node in big --
+            big_node = big_part.get(big_part_index)
+            small_node = small.get(small_index)
+
+            while big_node != small_node:
+                # - skip over leaves in big but not in small
+                if big_node < -1:
+                    big_part_index += 2
+                # - in a branch in big that has the same prefix but continues differently in small
+                # we need to go back and skip over it -- complex case
+                elif big_node == -1:
+                    return complex_check_subtree(small, big)
+                # - in big we have a branch that is not in small, skip over it
+                else:
+                    big_part_index = skip_over(big_part, big_part_index + 1)
+
+                if big_part_index >= big_part.size():
+                    is_included = False  # there is more in small that is not in big
+                    break
+
+                big_node = big.get(big_part_index)
+            # --                            --
+            if not is_included:
+                break
+            big_part_index += 1
+            small_index += 1
+
+        if is_included:
             return True
+        # ---                                         ---
 
+        # * Continue looping with the rest of the array
         start_idx += root_idx + 1
-        big_part = big.sub_list(start_idx, big_size)  # continue with the rest of the array
-
-
-def treeIncludes(big, small):
-    """
-     * both big and small have the same root, inclusion check ignores sub-trees that are in big but not in small
-     * @param: big, FTArray
-     * @param: small, FTArray
-    """
-    small_size = small.size()
-    big_size = big.size()
-    if big_size == small_size:
-        return big == small
-
-    small_index = 1
-    big_index = 1
-
-    # loop until the end of the small tree
-    while small_index < small_size:
-        if big_index >= big_size:
-            # there is more in small that is not in big
-            return False
-        big_node = big.get(big_index)
-        small_node = small.get(small_index)
-
-        while big_node != small_node:
-            if big_node < -1:
-                big_index += 2   # skip over leaves in big but not in small
-                if big_index >= big_size:
-                    # there is more in small that is not in big
-                    return False
-            # in a branch in big that has the same prefix but continues differently in small
-            # we need to go back and skip over it -- complex case
-            elif big_node == -1:
-                raise ValueError
-                # in big we have a branch that is not in small, skip over it
-            else:
-                big_index = skip_over(big, big_index + 1)
-                if big_index >= big_size:
-                    # there is more in small that is not in big
-                    return False
-            big_node = big.get(big_index)
-        big_index += 1
-        small_index += 1
-    return True
+        big_part = big.sub_list(start_idx, big.size())
 
 
 def skip_over(tree, offset):
