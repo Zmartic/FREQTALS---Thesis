@@ -4,8 +4,14 @@ import copy
 
 class FTArray:
     """
-    We store data in memory.
-    TODO
+    FTArray represent a subtree/pattern (using an array).
+    ex:
+         1
+        / \
+       2   3
+      /   / \
+     4   5   6
+    FTArray = [1, 2, -4, -1, -1, 3, -5, -1, -6]
     """
 
     def __init__(self, init_memory=None):
@@ -23,37 +29,37 @@ class FTArray:
     def get(self, i):
         """
          Get the element of the FTArray at index i
-         :param i: int
-         :return: int
+        :param i: int
+        :return: int
         """
         return self.memory[i]
 
     def get_last(self):
         """
-         get the last element store in self.memory
-         :return: int
+         Get the last element store in self.memory
+        :return: int, last element
         """
         return self.memory[-1]
 
     def add(self, element):
         """
-         Append one element to self.memory
-         :param element: int
+         Append one element to the FTArray
+        :param element: int
         """
         self.memory.append(element)
 
     def add_all(self, other):
         """
-         Append the data of other to self.memory
-         :param other: FTArray
+         Append the data of other to self
+        :param other: FTArray
         """
         self.memory = self.memory + other.memory
 
     def extend(self, prefix, candidate):
         """
-         * extend the pattern with some extension
-        :param prefix: int
-        :param candidate: int
+         Extend the pattern with some extension = (prefix, candidate)
+        :param prefix: int, number of -1 to be push
+        :param candidate: int, the label of the node we want to add
         """
         self.memory = self.memory + ([-1] * prefix)
         self.add(candidate)
@@ -61,9 +67,10 @@ class FTArray:
     def sub_list(self, start, stop):
         """
          Compute the sublist of self.memory going from index "start" to "stop"
-         :param start: int
-         :param stop:  int
-         :return:      FTArray
+            this function should create a new FTArray
+         :param start: int, index where we start to include element
+         :param stop:  int, index where we stop to include element
+         :return: FTArray, the sub_list
         """
         return FTArray(self.memory[start:stop])
 
@@ -91,10 +98,11 @@ class FTArray:
     def index(self, element):
         """
          Return the position of the first occurrence of element in the FTArray
-         -1 otherwise
-         note : todo
+            if the FTArray doesn't contains element, return -1
          :param element: int
-         :return: int
+         :return: int, the first
+
+         note: the implementation of index() in Python returns ValueError if element is not found
         """
         try:
             return self.memory.index(element)
