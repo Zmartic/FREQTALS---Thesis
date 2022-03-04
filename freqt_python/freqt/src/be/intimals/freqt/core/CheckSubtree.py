@@ -5,21 +5,12 @@ from freqt.src.be.intimals.freqt.core.FreqT_subtree import *
 
 def check_subtree(pat1, pat2):
     """
-     * check if pat1 is a subtree of pat2 ?
-     * return 1 : pat1 is subset of 2; 2 : pat2 is subset of pat1; otherwise return 0
-     * @param pat1, FTArray
-     * @param pat2, FTArray
-     * @param config, Config
-     * @return
-    """
-    return fast_check_subtree(pat1, pat2)
-
-
-def fast_check_subtree(pat1, pat2):
-    """
-     return 0 = no subtree, 1 = pat1 is a subtree of pat2, 2 = pat2 is a subtree of pat1
-      * @param: pat1, FTArray
-      * @param: pat2, FTArray
+     Check if a on pattern is a subtree of an other pattern
+    :param pat1: FTArray
+    :param pat2: FTArray
+    :return: int, 0 = no subtree
+                  1 = pat1 is a subtree of pat2
+                  2 = pat2 is a subtree of pat1
     """
     if pat1.size() == pat2.size():
         return 1 if pat1 == pat2 else 0
@@ -30,15 +21,17 @@ def fast_check_subtree(pat1, pat2):
     return 1 if has_subtree(pat2, pat1) else 0
 
 
-def complex_check_subtree(small, big):
-    return FreqT_subtree(small, big).check_subtree()
-
-
 def has_subtree(big, small):
     """
-    return true if a tree is a subtree of an other
-     * @param big, FTArray
-     * @param small, FTArray
+     Return true if the tree "small" is a subtree of "big"
+        * It's compute using a greedy algorithm which try to match each node of "small"
+          with a node in "big" (from left to right)
+        * If a complex case is encounter, fallback to a complete algorithm: FreqT_subtree
+    :param big: FTArray, the big tree
+    :param small: FTArray, the small tree
+    :return: boolean, whether "small" is a subtree of "big"
+
+    note: this function could be upgraded by avoiding to create sub_list of "big"
     """
     root = small.get(0)  # the root of small
     start_idx = 0
@@ -79,7 +72,7 @@ def has_subtree(big, small):
                 # - in a branch in big that has the same prefix but continues differently in small
                 # we need to go back and skip over it -- complex case
                 elif big_node == -1:
-                    return complex_check_subtree(small, big)
+                    return FreqT_subtree(small, big).check_subtree()
                 # - skip over BRANCH in big, which is not present in small
                 else:
                     big_part_index = skip_over(big_part, big_part_index + 1)
@@ -106,22 +99,25 @@ def has_subtree(big, small):
 
 def skip_over(tree, offset):
     """
-     * in the tree at offset-1 there is the start of a subtree that we should skip over
-       return the offset in the tree after that subtree
-     * @param: tree, FTArray
-     * @param: offset, int
+     In "tree" at offset-1 begins a branch that we would like to skip over.
+     Return the new offset after skipping over this branch.
+    :param tree: FTArray
+    :param offset: int, the current offset
+    :return: int, the new offset
     """
     offset += 1
     tree_size = tree.size()
-    recursion = 1  # how deep are we recursing in the subtree
-    while recursion >= 0:
+    depth = 1  # depth of the branch
+
+    while depth >= 0:  # stop when we have skipped the branch
         if offset >= tree_size:
             return offset  # end of the big tree, break out
         node = tree.get(offset)
         if node == -1:
-            recursion -= 1
+            depth -= 1
         else:
-            recursion += 1
+            depth += 1
 
         offset += 1
+
     return offset
