@@ -12,10 +12,8 @@ class FreqT_subtree:
     """
 
     def __init__(self, small_pat, big_pat):
-        self.__found = False
         self.__transactions_list = list()
         self.__input_pattern = small_pat.copy()
-        self.__is_subtree = False
 
         self.init_database([small_pat, big_pat])
 
@@ -33,7 +31,7 @@ class FreqT_subtree:
                 if node_label == root_label:
                     projected.set_location(i, j)
 
-        self.expandPattern(projected)
+        self.__is_subtree = self.expand_pattern(projected)
 
     def check_subtree(self):
         """
@@ -75,34 +73,28 @@ class FreqT_subtree:
                     prefix += 1
         return candidate_dict
 
-    def expandPattern(self, projected):
+    def expand_pattern(self, projected):
         """
          * expand a subtree
          * @param projected
         """
-        if self.__found:
-            return
-
-        # find all candidates of the current subtree
         candidates = self.generate_candidates(projected)  # output dict of with Tuple as key and Projected as value
 
         FreqT_subtree.prune_min2(candidates)
 
         if len(candidates) == 0:
-            self.__is_subtree = self.__maximal_pattern == self.__input_pattern
-            # stop
-            self.__found = True
-            return
+            return self.__maximal_pattern == self.__input_pattern
 
-        # expand the current pattern with each candidate
-        ### print("subtree: "+str(len(candidates)))
-        # extension = next(iter(candidates))
-        for extension, new_proj in candidates.items():
-            print(extension)
-            candidate_prefix, candidate_label = extension
-            # add new candidate to current pattern
-            self.__maximal_pattern.extend(candidate_prefix, candidate_label)
-            self.expandPattern(new_proj)
+        # expand the current pattern with the first candidate
+        # note: we consider the first candidate because generate_candidate() start generating candidate from the small
+        #       pattern. Which mean that if we were to use and other candidate we would be able to include the first
+        #       candidate (due to left to right candidate generation)
+        #       ultimately generate_candidate() should be modify to take this fact into account
+        extension = next(iter(candidates))
+        candidate_prefix, candidate_label = extension
+        self.__maximal_pattern.extend(candidate_prefix, candidate_label)
+
+        return self.expand_pattern(candidates[extension])
 
     @staticmethod
     def prune_min2(candidates):
