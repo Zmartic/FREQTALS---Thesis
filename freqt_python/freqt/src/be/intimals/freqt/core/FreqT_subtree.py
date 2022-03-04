@@ -17,12 +17,16 @@ class FreqT_subtree:
 
         self.init_database([small_pat, big_pat])
 
-        root_label = small_pat.get(0)
+        root_label = self.__input_pattern.get(0)
         self.__maximal_pattern = FTArray(init_memory=[root_label])
 
-        # --- Check pattern subtree ---
+    def check_subtree(self):
+        """
+         * check subtrees
+        """
+        # -- Init locations of initial pattern --
+        root_label = self.__input_pattern.get(0)
 
-        # init locations of pattern
         projected = Projected()
         projected.set_depth(0)
         for i in range(0, len(self.__transactions_list)):
@@ -31,13 +35,8 @@ class FreqT_subtree:
                 if node_label == root_label:
                     projected.set_location(i, j)
 
-        self.__is_subtree = self.expand_pattern(projected)
-
-    def check_subtree(self):
-        """
-         * check subtrees
-        """
-        return self.__is_subtree
+        # -- Extend initial pattern --
+        return self.expand_pattern(projected)
 
     def generate_candidates(self, projected):
         """
