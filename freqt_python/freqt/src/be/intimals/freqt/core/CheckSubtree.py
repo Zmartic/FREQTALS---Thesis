@@ -31,10 +31,7 @@ def fast_check_subtree(pat1, pat2):
 
 
 def complex_check_subtree(small, big):
-    fr = FreqT_subtree()
-    fr.checkSubtrees(small, big)
-
-    return len(fr.getOutputPattern()) != 0
+    return FreqT_subtree(small, big).check_subtree()
 
 
 def has_subtree(big, small):
@@ -76,14 +73,14 @@ def has_subtree(big, small):
             small_node = small.get(small_index)
 
             while big_node != small_node:
-                # - skip over leaves in big but not in small
+                # - skip over LEAF in big, which is not present in small
                 if big_node < -1:
                     big_part_index += 2
                 # - in a branch in big that has the same prefix but continues differently in small
                 # we need to go back and skip over it -- complex case
                 elif big_node == -1:
                     return complex_check_subtree(small, big)
-                # - in big we have a branch that is not in small, skip over it
+                # - skip over BRANCH in big, which is not present in small
                 else:
                     big_part_index = skip_over(big_part, big_part_index + 1)
 
@@ -91,7 +88,7 @@ def has_subtree(big, small):
                     is_included = False  # there is more in small that is not in big
                     break
 
-                big_node = big.get(big_part_index)
+                big_node = big_part.get(big_part_index)
             # --                            --
             if not is_included:
                 break

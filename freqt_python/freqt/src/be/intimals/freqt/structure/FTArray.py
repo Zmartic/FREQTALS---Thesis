@@ -92,6 +92,7 @@ class FTArray:
         """
          Return the position of the first occurrence of element in the FTArray
          -1 otherwise
+         note : todo
          :param element: int
          :return: int
         """
