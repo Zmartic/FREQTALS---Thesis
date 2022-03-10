@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import traceback
 
 from freqt.src.be.intimals.freqt.util.Util import *
 import freqt.src.be.intimals.freqt.core.FreqT as freqt

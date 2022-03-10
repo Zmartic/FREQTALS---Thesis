@@ -4,7 +4,6 @@ from freqt.src.be.intimals.freqt.structure.PatternInt import *
 from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 
 import sys
-import traceback
 
 
 def satisfy_chi_square(projected, size_class1, size_class2, chi_square_threshold, weighted):
@@ -144,16 +143,16 @@ def missing_left_obligatory_child(pat, candidate, grammar):
     parent_pos = findParentPosition(pat, candidate)
 
     # find all children of patternLabel in grammar
-    childrenG_list = grammar[pat.get(parent_pos)]
+    children_grammar = grammar[pat.get(parent_pos)]
 
-    if childrenG_list[0] == "ordered" and not childrenG_list[1] == "1":
+    if children_grammar[0] == "ordered" and not children_grammar[1] == "1":
         # find all children of parentPos in pattern
         children_pos = findChildrenPosition(pat, parent_pos)
         # compare children in pattern and children in grammar
         i = 0
         j = 2
-        while i < children_pos.size() and j < len(childrenG_list):
-            child_grammar_temp = childrenG_list[j].split(UNICHAR)
+        while i < children_pos.size() and j < len(children_grammar):
+            child_grammar_temp = children_grammar[j].split(UNICHAR)
             label_int = int(child_grammar_temp[0])
             if pat.get(children_pos.get(i)) == label_int:
                 i += 1
@@ -178,44 +177,39 @@ def missing_right_obligatory_child(pat, grammar):
      * @param: pat, FTArray
      * @param: _grammerInt_dict, dictionary with Integer as keys and list of String as values
     """
-    try:
-        for pos in range(pat.size()):
-            current_label = pat.get(pos)
-            if current_label >= 0:  # consider only internal label
-                # find all children of patternLabel in grammar
-                childrenG_list = grammar[current_label]
-                if childrenG_list[0] == "ordered" and not childrenG_list[1] == "1":
-                    # get all children of the current pos in pattern
-                    children_pos = findChildrenPosition(pat, pos)
-                    if children_pos.size() > 0:
-                        # check leaf children
-                        # compare two sets of children to determine this pattern misses mandatory child or not
-                        i = 0
-                        j = 2
-                        while i < children_pos.size() and j < len(childrenG_list):
-                            child_grammar_temp = childrenG_list[j].split(UNICHAR)
-                            label_int = int(child_grammar_temp[0])
+    for pos in range(pat.size()):
+        current_label = pat.get(pos)
+        if current_label >= 0:  # consider only internal label
+            # find all children of patternLabel in grammar
+            children_grammar = grammar[current_label]
+            if children_grammar[0] == "ordered" and not children_grammar[1] == "1":
+                # get all children of the current pos in pattern
+                children_pos = findChildrenPosition(pat, pos)
+                if children_pos.size() > 0:
+                    # check leaf children
+                    # compare two sets of children to determine this pattern misses mandatory child or not
+                    i = 0
+                    j = 2
+                    while i < children_pos.size() and j < len(children_grammar):
+                        child_grammar_temp = children_grammar[j].split(UNICHAR)
+                        label_int = int(child_grammar_temp[0])
 
-                            if pat.get(children_pos.get(i)) == label_int:
-                                i += 1
+                        if pat.get(children_pos.get(i)) == label_int:
+                            i += 1
+                            j += 1
+                        else:
+                            if child_grammar_temp[1] == "false":
                                 j += 1
-                            else:
-                                if child_grammar_temp[1] == "false":
-                                    j += 1
-                                elif child_grammar_temp[1] == "true":
-                                    return True
+                            elif child_grammar_temp[1] == "true":
+                                return True
 
-                        # check right children
-                        if j < len(childrenG_list):
-                            while j < len(childrenG_list):
-                                child_grammar_temp = childrenG_list[j].split(UNICHAR)
-                                if child_grammar_temp[1] == "true":
-                                    return True
-                                j += 1
-
-    except:
-        e = sys.exc_info()[0]
-        print("check Right Obligatory Children error: " + str(e) + "\n")
+                    # check right children
+                    if j < len(children_grammar):
+                        while j < len(children_grammar):
+                            child_grammar_temp = children_grammar[j].split(UNICHAR)
+                            if child_grammar_temp[1] == "true":
+                                return True
+                            j += 1
 
     return False
 

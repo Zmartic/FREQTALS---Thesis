@@ -76,8 +76,7 @@ class FreqT:
             self.disconnect_not_whitelisted_node()
 
             # remove node SourceFile because it is not AST node ##
-            not_ast_node = FTArray()
-            not_ast_node.add(0)
+            not_ast_node = FTArray(init_memory=[0])
             if not_ast_node in FP1:
                 del FP1[not_ast_node]
 
@@ -169,6 +168,26 @@ class FreqT:
                     if previous_child is None:
                         node.setNodeChild(-1)
         return
+
+    # --- CONSTRAINT --- #
+
+    def authorized_pattern(self, pattern, candidate_prefix):
+        # * check obligatory children constraint
+        return not Constraint.missing_left_obligatory_child(pattern, candidate_prefix, self._grammarInt_dict)
+
+    def stop_expand_pattern(self, pattern):
+        return Constraint.satisfy_max_leaf(pattern, self._config.getMaxLeaf()) or Constraint.is_not_full_leaf(pattern)
+
+    def satisfy_post_expansion_constraint(self, pattern):
+        if pattern is None:
+            return False
+        # * Minimum size constraints
+        # * Right mandatory children
+        return Constraint.satisfy_min_leaf(pattern, self._config.getMinLeaf()) and \
+            Constraint.satisfy_min_node(pattern, self._config.getMinNode()) and \
+            not Constraint.missing_right_obligatory_child(pattern, self._grammarInt_dict)
+
+    # ---            --- #
 
     def expandPatternFromRootIDs(self, _rootIDs_dict, report):
         """
@@ -291,12 +310,11 @@ class FreqT:
                 self.keep_leaf_pattern(pattern, new_proj)
 
             # check obligatory children constraint
-            if not Constraint.missing_left_obligatory_child(pattern, candidate_prefix, self._grammarInt_dict):
+            if self.authorized_pattern(pattern, candidate_prefix):
                 # check constraints on maximal number of leaves and real leaf
-                if Constraint.satisfy_max_leaf(pattern, self._config.getMaxLeaf()) or Constraint.is_not_full_leaf(
-                        pattern):
-                    # store the pattern
-                    if self.leafPattern is not None:
+                if self.stop_expand_pattern(pattern):
+                    if self.satisfy_post_expansion_constraint(self.leafPattern):
+                        # store the pattern
                         self.add_tree(self.leafPattern, self.leafProjected)
                 else:
                     # continue expanding pattern
@@ -408,29 +426,23 @@ class FreqT:
          * @param: pat FTArray
          * @param: projected, Projected
         """
-        # Verify:
-        # * Minimum size constraints
-        # * Right mandatory children
-        if Constraint.check_output(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not \
-                Constraint.missing_right_obligatory_child(pat, self._grammarInt_dict):
-
-            if self._config.get2Class():
-                # check chi-square score
-                if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(),
-                                                 self._config.getWeighted()):
-                    if self._config.getTwoStep():
-                        # add pattern to the list of 1000-highest chi-square score patterns
-                        self.addHighScorePattern(pat, projected, self.__HSP_dict)
-                    else:
-                        self.add_maximal_pattern(pat, projected, self.MFP_dict)
-
-            else:
+        if self._config.get2Class():
+            # check chi-square score
+            if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(),
+                                             self._config.getWeighted()):
                 if self._config.getTwoStep():
-                    # add root occurrences of the current pattern to rootIDs
-                    self.addRootIDs(pat, projected, self.rootIDs_dict)
+                    # add pattern to the list of 1000-highest chi-square score patterns
+                    self.addHighScorePattern(pat, projected, self.__HSP_dict)
                 else:
-                    # add pattern to maximal pattern list
                     self.add_maximal_pattern(pat, projected, self.MFP_dict)
+
+        else:
+            if self._config.getTwoStep():
+                # add root occurrences of the current pattern to rootIDs
+                self.addRootIDs(pat, projected, self.rootIDs_dict)
+            else:
+                # add pattern to maximal pattern list
+                self.add_maximal_pattern(pat, projected, self.MFP_dict)
 
     def addRootIDs(self, pat, projected, _rootIDs_dict):
         """
