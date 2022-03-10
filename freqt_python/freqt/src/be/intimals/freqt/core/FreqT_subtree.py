@@ -79,16 +79,19 @@ class FreqT_subtree:
         """
         candidates = self.generate_candidates(projected)  # output dict of with Tuple as key and Projected as value
 
+        # Prune using candidate that doesn't appear in both pattern
         FreqT_subtree.prune_min2(candidates)
 
         if len(candidates) == 0:
+            # check whether input_pattern is the maximal frequent pattern
             return self.__maximal_pattern == self.__input_pattern
 
         # expand the current pattern with the first candidate
         # note: we consider the first candidate because generate_candidate() start generating candidate from the small
-        #       pattern. Which mean that if we were to use and other candidate we would be able to include the first
-        #       candidate (due to left to right candidate generation)
-        #       ultimately generate_candidate() should be modify to take this fact into account
+        #       pattern. Which means that if we were to use and other candidate we would not be able
+        #       to include this first candidate = portion of small pattern (due to left to right candidate generation)
+        #       the maximal pattern thus cannot be the small pattern
+        #       > ultimately generate_candidate() could be specialised to take this fact into account
         extension = next(iter(candidates))
         candidate_prefix, candidate_label = extension
         self.__maximal_pattern.extend(candidate_prefix, candidate_label)
