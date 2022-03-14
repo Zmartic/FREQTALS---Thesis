@@ -6,6 +6,40 @@ from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 
 import sys
 
+
+def convert_grammar_keys2int(gram_str, label_index):
+    """
+         * convert grammar in form of String to Int
+         * @param: gramInt_dict, a dictionary with Integer as keys and list of String as values
+         * @param: gramStr_dict, a dictionary with String as keys and list of String as values
+         * @param: labelIndex_dict, a dictionary with Integer as keys and String as values
+        """
+    gram_int = dict()
+
+    for key in gram_str:
+        nodeChildren_list = gram_str[key]  # list of string
+        # find index of the current label
+        index = find_index(key, label_index)
+        # new int children
+        newChildren_list = list()  # list of string
+        newChildren_list.append(nodeChildren_list[0])
+        newChildren_list.append(nodeChildren_list[1])
+        # find new int children
+        for i in range(2, len(nodeChildren_list)):
+            temp = nodeChildren_list[i].split(UNICHAR)
+            if temp[0] != "leaf-node":
+                childIndex = find_index(temp[0], label_index)
+                newChild = str(childIndex) + UNICHAR + str(temp[1])
+                newChildren_list.append(newChild)
+            else:
+                newChild = str(0) + UNICHAR + str(temp[1])
+                newChildren_list.append(newChild)
+        # add current int label and int children into gramInt
+        gram_int[index] = newChildren_list
+
+    return gram_int
+
+
 def initGrammar_Int2(gramInt_dict, gramStr_dict, labelIndex_dict):
     """
      * convert grammar in form of String to Int
@@ -40,6 +74,7 @@ def initGrammar_Int2(gramInt_dict, gramStr_dict, labelIndex_dict):
         trace = traceback.format_exc()
         print(trace)
 
+
 def initGrammar_Str(path, white, gram_dict, _buildGrammar):
     """
      * Load the grammar from a given file or build it from a set of ASTs
@@ -58,6 +93,7 @@ def initGrammar_Str(path, white, gram_dict, _buildGrammar):
     except:
         e = sys.exc_info()[0]
         print("Error: reading grammar " + str(e) + "\n")
+
 
 def readRootLabel(path, rootLabels_set):
     """
