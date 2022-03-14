@@ -2,25 +2,24 @@
 import sys
 import traceback
 
-from freqt.src.be.intimals.freqt.constraint.Constraint import satisfy_chi_square, chi_square, get_2class_support
 from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import DefaultStrategy
-from freqt.src.be.intimals.freqt.core.CheckSubtree import check_subtree
 from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
+from freqt.src.be.intimals.freqt.core.CheckSubtree import check_subtree
+
+from freqt.src.be.intimals.freqt.structure.Pattern import Pattern
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
 from freqt.src.be.intimals.freqt.output.XMLOutput import XMLOutput
-from freqt.src.be.intimals.freqt.structure.Pattern import Pattern
 from freqt.src.be.intimals.freqt.structure.PatternInt import countNode, getPatternStr
-from freqt.src.be.intimals.freqt.util.Initial_Int import initGrammar_Str, initGrammar_Int2, readRootLabel, \
-    readXMLCharacter, convert_grammar_keys2int
+from freqt.src.be.intimals.freqt.util.Initial_Int import initGrammar_Str, readXMLCharacter, convert_grammar_keys2int
 
 
-class FreqT2Class(FreqTCore):
+class FreqT1Class(FreqTCore):
 
     def __init__(self, config):
         super().__init__(config)
-        self.label_str2int = dict()
-        self.sizeClass1 = -1
-        self.sizeClass2 = 1
+
+        self.label_str2int = dict()  # label encoder
+        # self.label_int2str = dict()  # label decoder
 
         # dictionary of maximal frequent patterns
         self.mfp = dict()
@@ -35,16 +34,10 @@ class FreqT2Class(FreqTCore):
             readXML = ReadXMLInt()
             # remove black labels when reading ASTs
             readXML.readDatabase(self._transaction_list, 1,
-                                 self._config.getInputFiles1(), self.label_str2int,
+                                 self._config.getInputFiles(), self.label_str2int,
                                  self.__transactionClassID_list, self._config.getWhiteLabelFile())
-            readXML.readDatabase(self._transaction_list, 0,
-                                 self._config.getInputFiles2(), self.label_str2int,
-                                 self.__transactionClassID_list, self._config.getWhiteLabelFile())
-            self.sizeClass1 = sum(self.__transactionClassID_list)
-            self.sizeClass2 = len(self.__transactionClassID_list) - self.sizeClass1
-            initGrammar_Str(self._config.getInputFiles1(), self._config.getWhiteLabelFile(), self._grammar_dict,
-                            self._config.buildGrammar())
-            initGrammar_Str(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict,
+            # create grammar (labels are strings) which is used to print patterns
+            initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
                             self._config.buildGrammar())
 
             # read list of special XML characters
@@ -59,20 +52,19 @@ class FreqT2Class(FreqTCore):
             trace = traceback.format_exc()
             print(trace)
 
-    def add_tree(self, pat, projected):
+    def add_tree(self, pat, proj):
         """
          * add the tree to the root IDs or the MFP
          * @param: pat FTArray
          * @param: projected, Projected
         """
-        # check chi-square score
-        if satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(),
-                              self._config.getWeighted()):
-            self.add_maximal_pattern(pat, projected, self.mfp)
+        self.add_maximal_pattern(pat, proj, self.mfp)
 
     def post_mining_process(self):
         self.outputPatternInTheFirstStep(self.mfp, self._config, self._grammar_dict, self.label_str2int,
                                          self._xmlCharacters_dict, self.report)
+
+    # --------------- #
 
     def add_maximal_pattern(self, pat, projected, _MFP_dict):
         """
@@ -102,20 +94,19 @@ class FreqT2Class(FreqTCore):
                 del _MFP_dict[key]
 
         # add new maximal pattern to the list
-        _MFP_dict[pat] = self.get_support_string(pat, projected)
+        _MFP_dict[pat] = FreqT1Class.get_support_string(pat, projected)
 
-    def get_support_string(self, pat, projected):
+    @staticmethod
+    def get_support_string(pat, projected):
         """
          * get a string of support, score, size for a pattern
          * @param: pat, FTArray
          * @param: projected, Projected
         """
-        score = chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
-        ac = get_2class_support(projected, self._config.getWeighted())
-        support = str(ac[0]) + "-" + str(ac[1])
+        support = projected.get_support()
+        w_support = projected.get_root_support()
         size = countNode(pat)
-
-        return support + "," + str(score) + "," + str(size)
+        return str(support) + "," + str(w_support) + "," + str(size)
 
     def outputPatternInTheFirstStep(self, MFP_dict, config, grammar_dict, labelIndex_dict, xmlCharacters_dict, report):
         """
