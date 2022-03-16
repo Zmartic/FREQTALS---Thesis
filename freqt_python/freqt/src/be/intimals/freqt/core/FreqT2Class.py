@@ -36,12 +36,12 @@ class FreqT2Class(FreqTCore):
             # remove black labels when reading ASTs
             readXML.readDatabase(self._transaction_list, 1,
                                  self._config.getInputFiles1(), self.label_str2int,
-                                 self.__transactionClassID_list, self._config.getWhiteLabelFile())
+                                 self._transactionClassID_list, self._config.getWhiteLabelFile())
             readXML.readDatabase(self._transaction_list, 0,
                                  self._config.getInputFiles2(), self.label_str2int,
-                                 self.__transactionClassID_list, self._config.getWhiteLabelFile())
-            self.sizeClass1 = sum(self.__transactionClassID_list)
-            self.sizeClass2 = len(self.__transactionClassID_list) - self.sizeClass1
+                                 self._transactionClassID_list, self._config.getWhiteLabelFile())
+            self.sizeClass1 = sum(self._transactionClassID_list)
+            self.sizeClass2 = len(self._transactionClassID_list) - self.sizeClass1
             initGrammar_Str(self._config.getInputFiles1(), self._config.getWhiteLabelFile(), self._grammar_dict,
                             self._config.buildGrammar())
             initGrammar_Str(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict,

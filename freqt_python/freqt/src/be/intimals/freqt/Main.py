@@ -10,12 +10,13 @@ python implementation: 12 June 2021
 
 from freqt.src.be.intimals.freqt.config.Config import *
 from freqt.src.be.intimals.freqt.core.FreqT import *
+from freqt.src.be.intimals.freqt.core.FreqT1Class import FreqT1Class
+from freqt.src.be.intimals.freqt.core.FreqT1Class2Step import FreqT1Class2Step
 from freqt.src.be.intimals.freqt.core.FreqT_common import *
 
 import sys
 import os
 import traceback
-import time
 
 
 def main(args):
@@ -53,7 +54,17 @@ def singleRun(args_list):
         config = Config()
         config.config(finalConfig)
 
-        freqt = FreqT(config)
+        if config.get2Class():
+            if config.getTwoStep():
+                freqt = FreqT(config)
+            else:
+                freqt = FreqT(config)
+        else:
+            if config.getTwoStep():
+                freqt = FreqT1Class2Step(config)
+            else:
+                freqt = FreqT1Class(config)
+
         freqt.run()
 
         # run forestmatcher to find matches of patterns in source code

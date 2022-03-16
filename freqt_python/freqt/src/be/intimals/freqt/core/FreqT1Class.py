@@ -23,7 +23,7 @@ class FreqT1Class(FreqTCore):
 
         # dictionary of maximal frequent patterns
         self.mfp = dict()
-        # set of pattern that are not maximal
+        # set of pattern that are not maximal ( used for add_maximal_pattern() )
         self.not_maximal_set = set()
 
     def init_data(self):
@@ -35,7 +35,7 @@ class FreqT1Class(FreqTCore):
             # remove black labels when reading ASTs
             readXML.readDatabase(self._transaction_list, 1,
                                  self._config.getInputFiles(), self.label_str2int,
-                                 self.__transactionClassID_list, self._config.getWhiteLabelFile())
+                                 self._transactionClassID_list, self._config.getWhiteLabelFile())
             # create grammar (labels are strings) which is used to print patterns
             initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
                             self._config.buildGrammar())

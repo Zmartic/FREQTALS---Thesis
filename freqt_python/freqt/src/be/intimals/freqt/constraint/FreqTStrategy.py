@@ -15,6 +15,10 @@ class FreqTStrategy(ABC):
         pass
 
     @abstractmethod
+    def prune(self, proj):
+        pass
+
+    @abstractmethod
     def authorized_pattern(self, pattern, candidate_prefix):
         """
 
@@ -46,6 +50,7 @@ class FreqTStrategy(ABC):
 class DefaultStrategy(FreqTStrategy):
 
     def __init__(self, config, grammar):
+        self.min_supp = config.getMinSupport()
         self.min_node = config.getMinNode()
         self.max_leaf = config.getMaxLeaf()
         self.min_leaf = config.getMinLeaf()
@@ -60,10 +65,18 @@ class DefaultStrategy(FreqTStrategy):
         else:
             self.is_root_allowed = lambda root: root in self.root_labels_set'''
 
+        if config.getWeighted():
+            self.prune_method = lambda proj: proj.get_root_support() > self.min_supp
+        else:
+            self.prune_method = lambda proj: proj.get_support() > self.min_supp
+
     def allowed_label_as_root(self, label):
         if label in self.root_labels_set or len(self.root_labels_set) == 0:
             return label != "" and label[0] != '*' and label[0].isupper()
         return False
+
+    def prune(self, proj):
+        return self.prune_method(proj)
 
     def authorized_pattern(self, pattern, candidate_prefix):
         # * check obligatory children constraint
@@ -77,6 +90,6 @@ class DefaultStrategy(FreqTStrategy):
             return False
         # * Minimum size constraints
         # * Right mandatory children
-        return Constraint.satisfy_min_leaf(pattern, self.max_leaf) and \
-               Constraint.satisfy_min_node(pattern, self.min_leaf) and \
-               not Constraint.missing_right_obligatory_child(pattern, self.grammar)
+        return Constraint.satisfy_min_leaf(pattern, self.min_leaf) and \
+            Constraint.satisfy_min_node(pattern, self.min_node) and \
+            not Constraint.missing_right_obligatory_child(pattern, self.grammar)

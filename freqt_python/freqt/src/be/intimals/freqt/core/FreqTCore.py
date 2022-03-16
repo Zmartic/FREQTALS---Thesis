@@ -26,11 +26,11 @@ class FreqTCore:
         self._xmlCharacters_dict = dict()  # dictionary with String as keys and String as value
 
         # new variables for Integer
-        self._blackLabelsInt_dict = dict()  # dictionary with Integer as keys and List of Integer as value
-        self._whiteLabelsInt_dict = dict()  # dictionary with Integer as keys and List of Integer as value
+        # self._blackLabelsInt_dict = dict()  # dictionary with Integer as keys and List of Integer as value
+        # self._whiteLabelsInt_dict = dict()  # dictionary with Integer as keys and List of Integer as value
 
         # store transaction ids and their correspond class ids
-        self.__transactionClassID_list = list()  # list of Integer
+        self._transactionClassID_list = list()  # list of Integer
 
         self.leafPattern = None
         self.leafProjected = None
@@ -63,6 +63,7 @@ class FreqTCore:
         """
          * Called at the end of the main run
         """
+        pass
 
     # --- CORE --- #
 
@@ -72,9 +73,9 @@ class FreqTCore:
 
         print("Mining frequent subtrees ...")
 
-        FP1: OrderedDict[FTArray, Projected] = self.build_FP1()
-
         self.disconnect_not_whitelisted_node()
+
+        FP1: OrderedDict[FTArray, Projected] = self.build_FP1()
 
         # remove node SourceFile because it is not AST node ##
         not_ast_node = FTArray(init_memory=[0])
@@ -124,7 +125,7 @@ class FreqTCore:
 
         for trans_id in range(len(trans)):
             # get transaction label
-            class_id = self.__transactionClassID_list[trans_id]
+            class_id = self._transactionClassID_list[trans_id]
 
             for loc in range(len(trans[trans_id])):
                 node = trans[trans_id][loc]

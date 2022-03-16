@@ -82,7 +82,8 @@ class Projected:
             print("depth: " + str(self.__depth))
             print("sup: " + str(self.__support))
             print("root_sup: " + str(self.__rootSupport))
-            print("locID: " + str(self.__locations[i].getLocationId()))
-            print("rootId: " + str(self.__locations[i].getRoot()))
-            print("LastId: " + str(self.__locations[i].getLast()))
+            print("locID: " + str(self.__locations[i].get_location_id()))
+            print("rootId: " + str(self.__locations[i].get_root()))
+            print("LastId: " + str(self.__locations[i].get_position()))
             print("\n")
+        return ""
