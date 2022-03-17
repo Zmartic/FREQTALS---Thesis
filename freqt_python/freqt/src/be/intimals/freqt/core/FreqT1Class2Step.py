@@ -3,6 +3,7 @@ import sys
 import traceback
 
 from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import DefaultStrategy
+from freqt.src.be.intimals.freqt.core.FreqT1ClassExt import FreqT1ClassExt
 from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
 
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
@@ -66,7 +67,6 @@ class FreqT1Class2Step(FreqTCore):
          * @param: projected, Projected
          * @param: _rootIDs_dict, a dictionary with Projected as keys and FTArray as values
         """
-        print("addRootIds"+str(pat.memory))
         # find root occurrences of current pattern
         util = Util()
         rootOccurrences = util.getStringRootOccurrence(projected)
@@ -93,7 +93,6 @@ class FreqT1Class2Step(FreqTCore):
             # store root occurrences and root label
             rootLabel_int = pat.sub_list(0, 1)
             _rootIDs_dict[projected] = rootLabel_int
-        print(isAdded)
 
     def expandPatternFromRootIDs(self, _rootIDs_dict, report):
         """
@@ -114,9 +113,13 @@ class FreqT1Class2Step(FreqTCore):
         self.log(report, "- Step 2: Mining maximal patterns WITHOUT max size constraint:")
 
         # run the second step
-        from freqt.src.be.intimals.freqt.core.FreqT_ext import FreqT_ext
+        '''from freqt.src.be.intimals.freqt.core.FreqT_ext import FreqT_ext
         freqT_ext = FreqT_ext(self._config, self._grammar_dict, self.constraints.grammar,
-                              dict(),
-                              dict(), self._xmlCharacters_dict, self.label_str2int,
+                              None,
+                              None, self._xmlCharacters_dict, self.label_str2int,
                               self._transaction_list, -1, 1)
-        freqT_ext.run_ext(_rootIDs_dict, report)
+        freqT_ext.run_ext(_rootIDs_dict, report)'''
+        freqT_ext = FreqT1ClassExt(self._config, _rootIDs_dict, self._grammar_dict, self.constraints.grammar,
+                       self._xmlCharacters_dict, self.label_str2int, self._transaction_list)
+        freqT_ext.run_ext(report)
+

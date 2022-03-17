@@ -65,17 +65,17 @@ class DefaultStrategy(FreqTStrategy):
         else:
             self.is_root_allowed = lambda root: root in self.root_labels_set'''
 
-        if config.getWeighted():
-            self.prune_method = lambda proj: proj.get_root_support() > self.min_supp
+        if config.getWeighted():  # TODO maybe doesn't work
+            self.prune_method = lambda proj: Constraint.prune_min_w_supp(proj, self.min_supp)
         else:
-            self.prune_method = lambda proj: proj.get_support() > self.min_supp
+            self.prune_method = lambda proj: Constraint.prune_min_supp(proj, self.min_supp)
 
     def allowed_label_as_root(self, label):
         if label in self.root_labels_set or len(self.root_labels_set) == 0:
             return label != "" and label[0] != '*' and label[0].isupper()
         return False
 
-    def prune(self, proj):
+    def prune(self, proj):  # maybe doesn't work
         return self.prune_method(proj)
 
     def authorized_pattern(self, pattern, candidate_prefix):
@@ -93,3 +93,9 @@ class DefaultStrategy(FreqTStrategy):
         return Constraint.satisfy_min_leaf(pattern, self.min_leaf) and \
             Constraint.satisfy_min_node(pattern, self.min_node) and \
             not Constraint.missing_right_obligatory_child(pattern, self.grammar)
+
+
+class FreqTExtStrategy(DefaultStrategy):
+
+    def stop_expand_pattern(self, pattern):
+        return Constraint.is_not_full_leaf(pattern)

@@ -6,16 +6,16 @@ from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 import sys
 
 
-def satisfy_chi_square(projected, size_class1, size_class2, chi_square_threshold, weighted):
-    score = chi_square(projected, size_class1, size_class2, weighted)
+def satisfy_chi_square(proj, size_class1, size_class2, chi_square_threshold, weighted):
+    score = chi_square(proj, size_class1, size_class2, weighted)
     return score >= chi_square_threshold
 
 
-def chi_square(projected, size_class1, size_class2, weighted):
+def chi_square(proj, size_class1, size_class2, weighted):
     """
      * return chiSquare value of a pattern in two classes
     """
-    a, c = get_2class_support(projected, weighted)
+    a, c = get_2class_support(proj, weighted)
 
     # a: occurrences in the first class data
     # c: occurrences in the second class data
@@ -27,34 +27,34 @@ def chi_square(projected, size_class1, size_class2, weighted):
     return one * two * (size_class1 + size_class2)
 
 
-def get_2class_support(projected, weighted):
+def get_2class_support(proj, weighted):
     """
      * return number of occurrences of a pattern in two classes
     """
     if weighted:
         # count support by occurrences
-        a = get_root_support_class1(projected)
-        c = projected.get_root_support() - a
+        a = get_root_support_class1(proj)
+        c = proj.get_root_support() - a
     else:
         # count support by files
-        a = get_support_class1(projected)
-        c = projected.get_support() - a
+        a = get_support_class1(proj)
+        c = proj.get_support() - a
 
     return a, c
 
 
-def get_support_class1(projected):
+def get_support_class1(proj):
     """
      * count support of pattern in the class 1
     """
-    return len({loc.get_location_id() for loc in projected.get_locations() if loc.get_class_id() == 1})
+    return len({loc.get_location_id() for loc in proj.get_locations() if loc.get_class_id() == 1})
 
 
-def get_root_support_class1(projected):
+def get_root_support_class1(proj):
     """
      * count root support of pattern in the class 1
     """
-    return len({(loc.get_location_id(), loc.get_root()) for loc in projected.get_locations() if loc.get_class_id() == 1})
+    return len({(loc.get_location_id(), loc.get_root()) for loc in proj.get_locations() if loc.get_class_id() == 1})
 
 
 def prune(candidates, min_sup, weighted):
@@ -73,6 +73,32 @@ def prune(candidates, min_sup, weighted):
 
         if limit < min_sup:
             del candidates[elem]
+
+
+def prune_min_supp(proj, min_supp):
+    """
+     * prune candidates based on minimal support
+     * @param: candidates, dictionary with FTArray as key and Projected as value
+     * @param: minSup, int
+     * @param: weighted, boolean
+    """
+    if min_supp < proj.compute_support():
+        _ = proj.compute_root_support()
+        return True
+    return False
+
+
+def prune_min_w_supp(proj, min_supp):
+    """
+     * prune candidates based on minimal support
+     * @param: candidates, dictionary with FTArray as key and Projected as value
+     * @param: minSup, int
+     * @param: weighted, boolean
+    """
+    if min_supp < proj.compute_root_support():
+        _ = proj.compute_support()
+        return True
+    return False
 
 
 def check_black_list_label(label, black_labels):  # UNUSED
@@ -114,22 +140,26 @@ def satisfy_min_leaf(pat, min_leaf):
     return countLeafNode(pat) >= min_leaf
 
 
-def satisfy_max_leaf(pattern, max_leaf):
+def satisfy_max_leaf(pat, max_leaf):
     """
      * return true if the number of leafs of the pattern is larger than maxLeaf
      * @param pattern
      * @return
     """
-    return countLeafNode(pattern) >= max_leaf
+    return countLeafNode(pat) >= max_leaf
 
 
-def is_not_full_leaf(pattern):
+def is_not_full_leaf(pat):
     """
-     * return true if the pattern misses leaf
-     * @param pattern
+     * return true if the pattern misses real leaf
+     * @param patFTArray, FTArray
      * @return
     """
-    return checkMissingLeaf(pattern)
+    for i in range(0, pat.size() - 1):
+        if pat.get(i) != -1 and pat.get(i + 1) == -1:
+            if pat.get(i) >= 0:
+                return True
+    return False
 
 
 def missing_left_obligatory_child(pat, candidate, grammar):
@@ -140,8 +170,10 @@ def missing_left_obligatory_child(pat, candidate, grammar):
      * @param: _grammarInt_dict, dictionary with Integer as keys and list of String as values
     """
     # find parent's position of candidate in the patterns
+    ###print(pat.memory)
+    ###print(candidate)
     parent_pos = findParentPosition(pat, candidate)
-
+    ###print(parent_pos)
     # find all children of patternLabel in grammar
     children_grammar = grammar[pat.get(parent_pos)]
 

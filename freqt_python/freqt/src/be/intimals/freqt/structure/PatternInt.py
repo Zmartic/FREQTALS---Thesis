@@ -40,20 +40,6 @@ def getPatternStr(patFTArray, labelIndexDict):
             patStr.append(labelIndexDict[patFTArray.get(i)])
     return patStr
 
-def checkMissingLeaf(patFTArray):
-    """
-     * return true if the pattern misses real leaf
-     * @param patFTArray, FTArray
-     * @return
-    """
-    result = False
-    for i in range(0, patFTArray.size() - 1):
-        if patFTArray.get(i) != -1 and patFTArray.get(i + 1) == -1:
-            if patFTArray.get(i) >= 0:
-                result = True
-                break
-    return result
-
 def countLeafNode(patFTArray):
     """
      * return number of leafs in the pattern

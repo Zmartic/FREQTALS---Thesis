@@ -186,9 +186,6 @@ class FreqTCore:
 
         # --- expand each candidate pattern ---
         old_size = pattern.size()
-        # store leaf pattern
-        old_leaf_pattern = self.leafPattern
-        old_leaf_projected = self.leafProjected
 
         for extension, new_proj in candidates.items():
             candidate_prefix, candidate_label = extension
@@ -199,6 +196,9 @@ class FreqTCore:
             # if the right most node of the pattern is a leaf then keep track this pattern
             if candidate_label < -1:
                 self.keep_leaf_pattern(pattern, new_proj)
+            # store leaf pattern
+            old_leaf_pattern = self.leafPattern
+            old_leaf_projected = self.leafProjected
 
             # check obligatory children constraint
             if self.constraints.authorized_pattern(pattern, candidate_prefix):
@@ -265,6 +265,7 @@ class FreqTCore:
                     new_location = Location(root, candi_id, loc_id, class_id)
                     FreqTCore.update_candidates(candidates_dict, node.getNode_label_int(), new_location,
                                                 new_depth, prefix)
+
                     candi_id = node.getNodeSibling()
 
                 pos = current_node.getNodeParent()

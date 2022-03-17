@@ -85,7 +85,7 @@ class FreqT_ext(freqt.FreqT):
                     self.__interrupted_pattern = _rootIDs_dict[keys].sub_list(0, 1)
                     self.__interrupted_projected = keys
                     # expand the current root occurrences to find maximal patterns
-                    self.expandLargestPattern(_rootIDs_dict[keys], projected)
+                    self.expand_pattern(_rootIDs_dict[keys], projected)
 
                 # update running time
                 self.__timeSpent = time.time() - self.__timeStart2nd
@@ -112,7 +112,7 @@ class FreqT_ext(freqt.FreqT):
      * @param: largestPattern, FTArray
      * @param: projected, Projected
     """
-    def expandLargestPattern(self, largestPattern, projected):
+    def expand_pattern(self, pattern, projected):
         try:
             if not self.__finishedGroup or not self.finished:
                 return
@@ -133,37 +133,35 @@ class FreqT_ext(freqt.FreqT):
             if len(candidates_dict) == 0:
                 if self.leafPattern is not None:
                     # store pattern
-                    self.addPattern(self.leafPattern, self.leafProjected)
+                    self.add_tree(self.leafPattern, self.leafProjected)
                 return
 
-            oldSize = largestPattern.size()
+            oldSize = pattern.size()
             # expand the current pattern with each candidate
             for ext, new_proj in candidates_dict.items():
                 prefix, candidate = ext
-                largestPattern.extend(prefix, candidate)
-                if largestPattern.get_last() < -1:
-                    self.keep_leaf_pattern(largestPattern, new_proj)
+                pattern.extend(prefix, candidate)
+                if pattern.get_last() < -1:
+                    self.keep_leaf_pattern(pattern, new_proj)
                 oldLeafPattern = self.leafPattern
                 oldLeafProjected = self.leafProjected
                 # check section and paragraphs in COBOL
-                tmp = [-1] * prefix  # TODO
-                tmp.append(candidate)  # TODO
-                keys = FTArray(init_memory=tmp)  # TODO
-                Constraint.check_cobol_constraints(largestPattern, candidates_dict, keys, self._labelIndex_dict, self._transaction_list)
+                '''tmp = [-1] * prefix
+                tmp.append(candidate)
+                keys = FTArray(init_memory=tmp)'''
+                #Constraint.check_cobol_constraints(largestPattern, candidates_dict, keys, self._labelIndex_dict, self._transaction_list)
                 # check constraints
-                if Constraint.missing_left_obligatory_child(largestPattern, prefix, self._grammarInt_dict):
-                    # do nothing = don't store pattern to MFP
-                    continue
-                else:
-                    if Constraint.is_not_full_leaf(largestPattern):
-                        if self.leafPattern is not None:
+                if self.authorized_pattern(pattern, prefix):
+                    if Constraint.is_not_full_leaf(pattern):
+                        if self.satisfy_post_expansion_constraint(self.leafPattern):
                             # store the pattern
-                            self.addPattern(self.leafPattern, self.leafProjected)
+                            self.add_tree(self.leafPattern, self.leafProjected)
                     else:
                         # continue expanding pattern
-                        self.expandLargestPattern(largestPattern, new_proj)
-                largestPattern = largestPattern.sub_list(0, oldSize)  # keep elements 0 to oldSize
+                        self.expand_pattern(pattern, new_proj)
+
                 self.restore_leaf_pattern(oldLeafPattern, oldLeafProjected)
+                pattern = pattern.sub_list(0, oldSize)
         except:
             e = sys.exc_info()[0]
             print("Error: Freqt_ext projected " + str(e) + "\n")
@@ -175,15 +173,14 @@ class FreqT_ext(freqt.FreqT):
      * @param: pat, FTArray
      * @param: projected, Projected
     """
-    def addPattern(self, pat, projected):
+    def add_tree(self, pat, projected):
         # check output constraints and right mandatory children before storing pattern
-        if Constraint.check_output(pat, self._config.getMinLeaf(), self._config.getMinNode()) and not Constraint.missing_right_obligatory_child(pat, self._grammarInt_dict):
-            if self._config.get2Class():
-                # check chi-square score
-                if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):
-                    self.add_maximal_pattern(pat, projected, self.MFP_dict)
-            else:
+        if self._config.get2Class():
+            # check chi-square score
+            if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):
                 self.add_maximal_pattern(pat, projected, self.MFP_dict)
+        else:
+            self.add_maximal_pattern(pat, projected, self.MFP_dict)
 
     """
      * get initial locations of a projected
