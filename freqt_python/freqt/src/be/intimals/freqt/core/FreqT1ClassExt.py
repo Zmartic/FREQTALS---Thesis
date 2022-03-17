@@ -6,16 +6,17 @@ import traceback
 from freqt.src.be.intimals.freqt.constraint import Constraint
 from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqTExtStrategy
 from freqt.src.be.intimals.freqt.core.FreqT1Class import FreqT1Class
+from freqt.src.be.intimals.freqt.structure.Location import Location
 from freqt.src.be.intimals.freqt.structure.Projected import Projected
 
 
 class FreqT1ClassExt(FreqT1Class):
 
-    def __init__(self, _config, _rootIDs_dict, _grammar_dict, _grammarInt_dict, _xmlCharacters_dict, _labelIndex_dict,
+    def __init__(self, _config, root_ids_list, _grammar_dict, _grammarInt_dict, _xmlCharacters_dict, _labelIndex_dict,
                  _transaction_list):
         super().__init__(_config)
 
-        self._rootIDs_dict = _rootIDs_dict
+        self.root_ids_list = root_ids_list
         self.constraints = FreqTExtStrategy(_config, _grammarInt_dict)
 
         self._grammar_dict = _grammar_dict
@@ -24,11 +25,9 @@ class FreqT1ClassExt(FreqT1Class):
         self._transaction_list = _transaction_list
 
         # FreqTExt timeout variable
-        self.__interruptedRootIDs_dict = None
-        self.__interrupted_pattern = None
-        self.__interrupted_projected = None
+        self.__interruptedRootIDs = None
 
-    def run_ext(self):
+    def run(self):
         """
          * @param: _rootIDs_dict, dictionary with Projected as keys and FTArray as values
          * @param: _report, a open file ready to be writting
@@ -37,7 +36,7 @@ class FreqT1ClassExt(FreqT1Class):
         self.set_starting_time()
         timeout_step2 = self.time_start + self._config.getTimeout() * 60
 
-        while len(self._rootIDs_dict) != 0:
+        while len(self.root_ids_list) != 0:
             # note : each group of rootID has a running time budget "timePerGroup"
             #        if a group cannot finish search in the given time
             #        this group will be stored in the "interruptedRootID"
@@ -48,26 +47,28 @@ class FreqT1ClassExt(FreqT1Class):
             remaining_time = timeout_step2 - time.time()
             if remaining_time <= 0:
                 break
-            time_per_group = remaining_time / len(self._rootIDs_dict)
+            time_per_group = remaining_time / len(self.root_ids_list)
 
-            self.__interruptedRootIDs_dict = dict()
+            self.__interruptedRootIDs = list()
 
-            for keys in self._rootIDs_dict:
+            for elem in self.root_ids_list:
                 # start expanding a group of rootID
                 self.set_timeout(time_per_group)
-
-                projected = self.getProjected(keys)
+                root_pat, occ = elem
+                proj = self.getProjected(occ)
 
                 # keep current pattern and location if this group cannot finish
-                self.__interrupted_pattern = self._rootIDs_dict[keys].sub_list(0, 1)
-                self.__interrupted_projected = keys
+                interrupted_pattern = root_pat.sub_list(0, 1)
                 # expand the current root occurrences to find maximal patterns
                 # print(self._rootIDs_dict[keys].memory) #-------------
-                self.expand_pattern(self._rootIDs_dict[keys], projected)
+                self.expand_pattern(root_pat, proj)
                 # print(self._rootIDs_dict[keys].memory) #-------------
 
+                if not self.finished:
+                    self.__interruptedRootIDs.append((interrupted_pattern, occ))
+
             # update lists of root occurrences for next round
-            self._rootIDs_dict = self.__interruptedRootIDs_dict
+            self.root_ids_list = self.__interruptedRootIDs
 
         # print the largest patterns
         if len(self.mfp) != 0:
@@ -134,16 +135,13 @@ class FreqT1ClassExt(FreqT1Class):
          * @param: projected, Projected
         """
 
-    def getProjected(self, projected):
+    def getProjected(self, root_occ):
         # create location for the current pattern
-        ouputProjected = Projected()
-        ouputProjected.set_depth(0)
-        for i in range(projected.size()):
-            classID = projected.get_location(i).get_class_id()
-            locationID = projected.get_location(i).get_location_id()
-            rootID = projected.get_location(i).get_root()
-            ouputProjected.add_location(classID, locationID, rootID, None)
-        return ouputProjected
+        proj = Projected()
+        proj.set_depth(0)
+        for loc, root in root_occ:
+            proj.add(Location(root, root, loc, 1))
+        return proj
 
     # --- TIMEOUT --- #
 

@@ -8,7 +8,6 @@ from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
 
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
 from freqt.src.be.intimals.freqt.util.Initial_Int import initGrammar_Str, readXMLCharacter, convert_grammar_keys2int
-from freqt.src.be.intimals.freqt.util.Util import Util
 
 
 class FreqT1Class2Step(FreqTCore):
@@ -19,7 +18,7 @@ class FreqT1Class2Step(FreqTCore):
         self.label_str2int = dict()  # label encoder
         # self.label_int2str = dict()  # label decoder
 
-        self.root_ids_dict = dict()
+        self.root_ids_list = list()
 
     def init_data(self):
         """
@@ -53,48 +52,37 @@ class FreqT1Class2Step(FreqTCore):
          * @param: pat FTArray
          * @param: projected, Projected
         """
-        self.addRootIDs(pat, proj, self.root_ids_dict)
+        self.addRootIDs(pat, proj, self.root_ids_list)
 
     def post_mining_process(self, report):
-        self.expandPatternFromRootIDs(self.root_ids_dict, report)
+        self.expandPatternFromRootIDs(self.root_ids_list, report)
 
     # --------------- #
 
-    def addRootIDs(self, pat, projected, _rootIDs_dict):
+    def addRootIDs(self, pat, proj, root_ids_list):
         """
          * add root occurrences of pattern to rootIDs
          * @param: pat, FTArray
          * @param: projected, Projected
          * @param: _rootIDs_dict, a dictionary with Projected as keys and FTArray as values
         """
-        # find root occurrences of current pattern
-        util = Util()
-        rootOccurrences = util.getStringRootOccurrence(projected)
+        # set of root occurrences of current pattern
+        root_occ1 = {(loc.get_location_id(), loc.get_root()) for loc in proj.get_locations()}
 
-        # check the current root occurrences existing in the rootID or not
-        isAdded = True
-        l1 = rootOccurrences.split(";")
-
-        to_remove_list = list()
-        for key in _rootIDs_dict:
-            rootOccurrence1 = util.getStringRootOccurrence(key)
-            l2 = rootOccurrence1.split(";")
-            # if l1 is super set of l2 then we don't need to add l1 to rootIDs
-            if util.containsAll(l1, l2):
-                isAdded = False
-                break
+        # check whether the current root occurrences existing in the rootID
+        for elem in root_ids_list:
+            root_occ2 = elem[1]
+            if len(root_occ1) <= len(root_occ2):
+                if root_occ1.issubset(root_occ2):
+                    return
             else:
-                # if l2 is a super set of l1 then remove l2 from rootIDs
-                if util.containsAll(l2, l1):
-                    to_remove_list.append(key)
-        for elem in to_remove_list:
-            _rootIDs_dict.pop(elem, -1)
-        if isAdded:
-            # store root occurrences and root label
-            rootLabel_int = pat.sub_list(0, 1)
-            _rootIDs_dict[projected] = rootLabel_int
+                if root_occ1.issuperset(root_occ2):
+                    del elem
 
-    def expandPatternFromRootIDs(self, _rootIDs_dict, report):
+        # store root occurrences and root label
+        root_ids_list.append((pat.sub_list(0, 1), root_occ1))
+
+    def expandPatternFromRootIDs(self, root_ids_list, report):
         """
          * run the 2nd step to find maximal patterns from groups of root occurrences
          * @param: _rootIDs_dict, a dictionary with Projected as keys and FTArray as value
@@ -108,14 +96,14 @@ class FreqT1Class2Step(FreqTCore):
         # report first phase
         self.log(report, "- Step 1: Mining frequent patterns with max size constraints")
         self.log(report, "\t + running time = " + str(self.get_running_time()) + "s")
-        self.log(report, "\t + root occurrences groups = " + str(len(_rootIDs_dict)))
+        self.log(report, "\t + root occurrences groups = " + str(len(root_ids_list)))
         # phase 2: find maximal patterns from rootIDs
         self.log(report, "- Step 2: Mining maximal patterns WITHOUT max size constraint:")
 
         # run second step
-        freqt_ext = FreqT1ClassExt(self._config, _rootIDs_dict, self._grammar_dict, self.constraints.grammar,
+        freqt_ext = FreqT1ClassExt(self._config, root_ids_list, self._grammar_dict, self.constraints.grammar,
                                    self._xmlCharacters_dict, self.label_str2int, self._transaction_list)
-        freqt_ext.run_ext()
+        freqt_ext.run()
 
         # report result
         if freqt_ext.finished:

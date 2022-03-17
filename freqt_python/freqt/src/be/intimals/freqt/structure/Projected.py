@@ -64,14 +64,9 @@ class Projected:
             loc = Location(pos, pos, loc_id, class_id)
         else:
             loc = Location(occurrences.get_root(), pos, loc_id, class_id)
-        found = False
-        for location in self.__locations:
-            if loc == location:
-                found = True
-        if not found:
+
+        if loc not in self.__locations:  # always true ?
             self.__locations.append(loc)
-        #elif len(self.__locations) == 0:
-        #    print("this \"if not found\" is NOT always true")
 
     def add(self, new_loc):
         if new_loc not in self.__locations:
