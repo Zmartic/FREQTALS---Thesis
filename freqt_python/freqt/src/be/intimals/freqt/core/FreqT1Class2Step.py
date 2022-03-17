@@ -55,8 +55,8 @@ class FreqT1Class2Step(FreqTCore):
         """
         self.addRootIDs(pat, proj, self.root_ids_dict)
 
-    def post_mining_process(self):
-        self.expandPatternFromRootIDs(self.root_ids_dict, self.report)
+    def post_mining_process(self, report):
+        self.expandPatternFromRootIDs(self.root_ids_dict, report)
 
     # --------------- #
 
@@ -105,21 +105,26 @@ class FreqT1Class2Step(FreqTCore):
         self.log(report, "OUTPUT")
         self.log(report, "===================")
 
-        # report the phase 1
+        # report first phase
         self.log(report, "- Step 1: Mining frequent patterns with max size constraints")
         self.log(report, "\t + running time = " + str(self.get_running_time()) + "s")
         self.log(report, "\t + root occurrences groups = " + str(len(_rootIDs_dict)))
         # phase 2: find maximal patterns from rootIDs
         self.log(report, "- Step 2: Mining maximal patterns WITHOUT max size constraint:")
 
-        # run the second step
-        '''from freqt.src.be.intimals.freqt.core.FreqT_ext import FreqT_ext
-        freqT_ext = FreqT_ext(self._config, self._grammar_dict, self.constraints.grammar,
-                              None,
-                              None, self._xmlCharacters_dict, self.label_str2int,
-                              self._transaction_list, -1, 1)
-        freqT_ext.run_ext(_rootIDs_dict, report)'''
-        freqT_ext = FreqT1ClassExt(self._config, _rootIDs_dict, self._grammar_dict, self.constraints.grammar,
-                       self._xmlCharacters_dict, self.label_str2int, self._transaction_list)
-        freqT_ext.run_ext(report)
+        # run second step
+        freqt_ext = FreqT1ClassExt(self._config, _rootIDs_dict, self._grammar_dict, self.constraints.grammar,
+                                   self._xmlCharacters_dict, self.label_str2int, self._transaction_list)
+        freqt_ext.run_ext()
+
+        # report result
+        if freqt_ext.finished:
+            self.log(report, "\t + search finished")
+        else:
+            self.log(report, "\t + timeout in the second step")
+
+        self.log(report, "\t + maximal patterns: " + str(len(freqt_ext.mfp)))
+        self.log(report, "\t + running time: ..." + str(freqt_ext.get_running_time()) + "s")
+        report.flush()
+        report.close()
 

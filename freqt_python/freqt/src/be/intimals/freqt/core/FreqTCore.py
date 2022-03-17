@@ -35,8 +35,6 @@ class FreqTCore:
         self.leafPattern = None
         self.leafProjected = None
 
-        self.report = self.init_report()
-
         self.time_start = -1
         self.timeout = -1
         self.finished = False
@@ -59,7 +57,7 @@ class FreqTCore:
         """
         pass
 
-    def post_mining_process(self):
+    def post_mining_process(self, report):
         """
          * Called at the end of the main run
         """
@@ -70,6 +68,7 @@ class FreqTCore:
     def run(self):
         self.init_data()
         self.set_starting_time()
+        report = self.init_report()
 
         print("Mining frequent subtrees ...")
 
@@ -85,7 +84,7 @@ class FreqTCore:
         Constraint.prune(FP1, self._config.getMinSupport(), self._config.getWeighted())
         self.expand_FP1(FP1)
 
-        self.post_mining_process()
+        self.post_mining_process(report)
 
     def disconnect_not_whitelisted_node(self):
         white_labels = ReadXMLInt().read_whiteLabel(self._config.getWhiteLabelFile())

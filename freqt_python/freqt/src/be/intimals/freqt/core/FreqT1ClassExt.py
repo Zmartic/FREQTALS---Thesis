@@ -31,7 +31,7 @@ class FreqT1ClassExt(FreqT1Class):
         self.__timeStartGroup = -1
         self.__timePerGroup = -1
 
-    def run_ext(self, report):
+    def run_ext(self):
         """
          * @param: _rootIDs_dict, dictionary with Projected as keys and FTArray as values
          * @param: _report, a open file ready to be writting
@@ -40,7 +40,6 @@ class FreqT1ClassExt(FreqT1Class):
         self.set_starting_time()
 
         while len(self._rootIDs_dict) != 0 and self.finished:
-            #print("again")
             # each group of rootID has a running time budget "timePerGroup"
             # if a group cannot finish search in the given time
             # this group will be stored in the "interruptedRootID"
@@ -69,8 +68,6 @@ class FreqT1ClassExt(FreqT1Class):
         if len(self.mfp) != 0:
             self.output_patterns(self.mfp, self._config, self._grammar_dict, self._labelIndex_dict,
                                  self._xmlCharacters_dict)
-
-        self.reportResult(report)
 
     def expand_pattern(self, pattern, projected):
         """
@@ -146,17 +143,6 @@ class FreqT1ClassExt(FreqT1Class):
             rootID = projected.get_location(i).get_root()
             ouputProjected.add_location(classID, locationID, rootID, None)
         return ouputProjected
-
-    def reportResult(self, _report):
-        if self.finished:
-            self.log(_report, "\t + search finished")
-        else:
-            self.log(_report, "\t + timeout in the second step")
-
-        self.log(_report, "\t + maximal patterns: " + str(len(self.mfp)))
-        self.log(_report, "\t + running time: ..." + str(self.get_running_time()) + "s")
-        _report.flush()
-        _report.close()
 
     def isGroupTimeout(self):
         return time.time() - self.__timeStartGroup > self.__timePerGroup

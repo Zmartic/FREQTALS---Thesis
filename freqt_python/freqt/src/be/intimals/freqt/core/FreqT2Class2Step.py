@@ -64,8 +64,8 @@ class FreqT2Class2Step(FreqTCore):
                               self._config.getWeighted()):
             self.addHighScorePattern(pat, projected, self.hsp)
 
-    def post_mining_process(self):
-        self.expandPatternFromRootIDs(self.groupRootOcc(self.hsp), self.report)
+    def post_mining_process(self, report):
+        self.expandPatternFromRootIDs(self.groupRootOcc(self.hsp), report)
 
     def addHighScorePattern(self, pat, projected, _HSP_dict):
         """
