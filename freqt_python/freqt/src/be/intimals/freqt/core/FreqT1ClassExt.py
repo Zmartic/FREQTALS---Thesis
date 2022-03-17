@@ -23,13 +23,10 @@ class FreqT1ClassExt(FreqT1Class):
         self._labelIndex_dict = _labelIndex_dict
         self._transaction_list = _transaction_list
 
-        # tmp
-        self.__finishedGroup = True
+        # FreqTExt timeout variable
         self.__interruptedRootIDs_dict = None
         self.__interrupted_pattern = None
         self.__interrupted_projected = None
-        self.__timeStartGroup = -1
-        self.__timePerGroup = -1
 
     def run_ext(self):
         """
@@ -38,20 +35,26 @@ class FreqT1ClassExt(FreqT1Class):
         """
         # set running time for the second steps
         self.set_starting_time()
+        timeout_step2 = self.time_start + self._config.getTimeout() * 60
 
-        while len(self._rootIDs_dict) != 0 and self.finished:
-            # each group of rootID has a running time budget "timePerGroup"
-            # if a group cannot finish search in the given time
-            # this group will be stored in the "interruptedRootID"
-            # after passing over all groups in rootIDs, if still having time budget
-            # the algorithm will continue exploring patterns from groups stored in interruptedRootID
-            self.__interruptedRootIDs_dict = dict()  # dictionary with Projected as keys and FTArray as value
+        while len(self._rootIDs_dict) != 0:
+            # note : each group of rootID has a running time budget "timePerGroup"
+            #        if a group cannot finish search in the given time
+            #        this group will be stored in the "interruptedRootID"
+            #        after passing over all groups in rootIDs, if still having time budget
+            #        the algorithm will continue exploring patterns from groups stored in interruptedRootID
+
             # calculate running time for each group in the current round
-            self.__timePerGroup = (self.timeout - self.get_running_time()) / len(self._rootIDs_dict)
+            remaining_time = timeout_step2 - time.time()
+            if remaining_time <= 0:
+                break
+            time_per_group = remaining_time / len(self._rootIDs_dict)
+
+            self.__interruptedRootIDs_dict = dict()
+
             for keys in self._rootIDs_dict:
                 # start expanding a group of rootID
-                self.__timeStartGroup = time.time()
-                self.__finishedGroup = True
+                self.set_timeout(time_per_group)
 
                 projected = self.getProjected(keys)
 
@@ -59,7 +62,9 @@ class FreqT1ClassExt(FreqT1Class):
                 self.__interrupted_pattern = self._rootIDs_dict[keys].sub_list(0, 1)
                 self.__interrupted_projected = keys
                 # expand the current root occurrences to find maximal patterns
+                # print(self._rootIDs_dict[keys].memory) #-------------
                 self.expand_pattern(self._rootIDs_dict[keys], projected)
+                # print(self._rootIDs_dict[keys].memory) #-------------
 
             # update lists of root occurrences for next round
             self._rootIDs_dict = self.__interruptedRootIDs_dict
@@ -75,16 +80,12 @@ class FreqT1ClassExt(FreqT1Class):
          * @param: pattern, FTArray
          * @param: projected, Projected
         """
-        if not self.__finishedGroup or not self.finished:
-            return
-        # check running time of the 2nd step
-        if self.is_timeout():
-            self.finished = False
+        if not self.finished:
             return
         # check running for the current group
-        if self.isGroupTimeout():
+        if self.is_timeout():
+            self.finished = False
             self.__interruptedRootIDs_dict[self.__interrupted_projected] = self.__interrupted_pattern
-            self.__finishedGroup = False
             return
 
         # --- find candidates of the current pattern ---
@@ -144,5 +145,14 @@ class FreqT1ClassExt(FreqT1Class):
             ouputProjected.add_location(classID, locationID, rootID, None)
         return ouputProjected
 
-    def isGroupTimeout(self):
-        return time.time() - self.__timeStartGroup > self.__timePerGroup
+    # --- TIMEOUT --- #
+
+    def set_starting_time(self):
+        """
+         * set time to begin a run
+        """
+        self.time_start = time.time()
+
+    def set_timeout(self, budget_time):
+        self.finished = True
+        self.timeout = time.time() + budget_time

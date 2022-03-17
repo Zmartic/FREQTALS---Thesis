@@ -197,3 +197,9 @@ class FreqT2Class2Step(FreqTCore):
         except:
             e = sys.exc_info()[0]
             print("expand pattern from root IDs error " + str(e) + "\n")
+
+    def is_timeout(self):
+        """
+         * check running time of the algorithm
+        """
+        return False

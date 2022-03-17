@@ -171,6 +171,7 @@ class FreqTCore:
         """
         # if timeout then stop expand the pattern;
         if self.is_timeout():
+            self.finished = False
             return
 
         # --- find candidates of the current pattern ---
@@ -369,11 +370,7 @@ class FreqTCore:
         """
          * check running time of the algorithm
         """
-        if not self._config.getTwoStep():
-            if time.time() > self.timeout:
-                self.finished = False
-                return True
-        return False
+        return time.time() > self.timeout
 
     def get_running_time(self):
         return time.time() - self.time_start

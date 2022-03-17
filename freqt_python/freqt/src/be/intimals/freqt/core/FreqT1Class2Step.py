@@ -128,3 +128,8 @@ class FreqT1Class2Step(FreqTCore):
         report.flush()
         report.close()
 
+    def is_timeout(self):
+        """
+         * check running time of the algorithm
+        """
+        return False
