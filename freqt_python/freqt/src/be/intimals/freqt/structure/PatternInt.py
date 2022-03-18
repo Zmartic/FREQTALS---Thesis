@@ -94,7 +94,7 @@ def findChildrenPosition(patFTArray, parentPosInt):
      * @return
     """
     top = -1
-    tmp = FTArray()
+    tmp = list()
     if parentPosInt < patFTArray.size() - 1:
         count = parentPosInt
         for i in range(parentPosInt + 1, patFTArray.size()):
@@ -104,7 +104,7 @@ def findChildrenPosition(patFTArray, parentPosInt):
                 top += 1
                 count += 1
             if top == 0 and patFTArray.get(i) != -1:
-                tmp.add(i)
+                tmp.append(i)
             if top == -2:
                 break
     return tmp

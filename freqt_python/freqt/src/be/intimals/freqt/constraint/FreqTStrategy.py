@@ -49,7 +49,7 @@ class FreqTStrategy(ABC):
 
 class DefaultStrategy(FreqTStrategy):
 
-    def __init__(self, config, grammar):
+    def __init__(self, config, grammar, root_label_set=None):
         self.min_supp = config.getMinSupport()
         self.min_node = config.getMinNode()
         self.max_leaf = config.getMaxLeaf()
@@ -58,6 +58,7 @@ class DefaultStrategy(FreqTStrategy):
         self.grammar = grammar
 
         # read root labels (AST Nodes)
+        #if root_label_set is not None:
         self.root_labels_set = set()
         readRootLabel(config.getRootLabelFile(), self.root_labels_set)
         '''if len(self.root_labels_set) == 0:

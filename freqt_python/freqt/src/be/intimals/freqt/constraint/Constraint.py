@@ -128,7 +128,10 @@ def satisfy_min_node(pat, min_node):
      * @param pat
      * @return
     """
-    return countNode(pat) >= min_node
+    tmp = countNode(pat)
+    if tmp != pat.n_node:
+        print("min_node" + str(tmp) + " =! " + str(pat.n_node))
+    return tmp >= min_node
 
 
 def satisfy_min_leaf(pat, min_leaf):
@@ -137,7 +140,10 @@ def satisfy_min_leaf(pat, min_leaf):
      * @param pat
      * @return
     """
-    return countLeafNode(pat) >= min_leaf
+    tmp = countLeafNode(pat)
+    if tmp != pat.n_leaf:
+        print("min_leaf" + str(tmp) + " =! " + str(pat.n_leaf))
+    return tmp >= min_leaf
 
 
 def satisfy_max_leaf(pat, max_leaf):
@@ -146,7 +152,10 @@ def satisfy_max_leaf(pat, max_leaf):
      * @param pattern
      * @return
     """
-    return countLeafNode(pat) >= max_leaf
+    tmp = countLeafNode(pat)
+    if tmp != pat.n_leaf:
+        print("max_leaf" + str(tmp) + " =! " + str(pat.n_leaf))
+    return tmp >= max_leaf
 
 
 def is_not_full_leaf(pat):
@@ -170,10 +179,7 @@ def missing_left_obligatory_child(pat, candidate, grammar):
      * @param: _grammarInt_dict, dictionary with Integer as keys and list of String as values
     """
     # find parent's position of candidate in the patterns
-    ###print(pat.memory)
-    ###print(candidate)
     parent_pos = findParentPosition(pat, candidate)
-    ###print(parent_pos)
     # find all children of patternLabel in grammar
     children_grammar = grammar[pat.get(parent_pos)]
 
@@ -183,10 +189,10 @@ def missing_left_obligatory_child(pat, candidate, grammar):
         # compare children in pattern and children in grammar
         i = 0
         j = 2
-        while i < children_pos.size() and j < len(children_grammar):
+        while i < len(children_pos) and j < len(children_grammar):
             child_grammar_temp = children_grammar[j].split(UNICHAR)
             label_int = int(child_grammar_temp[0])
-            if pat.get(children_pos.get(i)) == label_int:
+            if pat.get(children_pos[i]) == label_int:
                 i += 1
                 j += 1
             else:
@@ -217,16 +223,16 @@ def missing_right_obligatory_child(pat, grammar):
             if children_grammar[0] == "ordered" and not children_grammar[1] == "1":
                 # get all children of the current pos in pattern
                 children_pos = findChildrenPosition(pat, pos)
-                if children_pos.size() > 0:
+                if len(children_pos) > 0:
                     # check leaf children
                     # compare two sets of children to determine this pattern misses mandatory child or not
                     i = 0
                     j = 2
-                    while i < children_pos.size() and j < len(children_grammar):
+                    while i < len(children_pos) and j < len(children_grammar):
                         child_grammar_temp = children_grammar[j].split(UNICHAR)
                         label_int = int(child_grammar_temp[0])
 
-                        if pat.get(children_pos.get(i)) == label_int:
+                        if pat.get(children_pos[i]) == label_int:
                             i += 1
                             j += 1
                         else:
@@ -280,7 +286,7 @@ def check_continuous_paragraph(pat, entry_dict, key, _transaction_list):
         # find Paragraph locations
         children_pos = findChildrenPosition(pat, parent_pos)
 
-        if children_pos.size() == 1:
+        if len(children_pos) == 1:
             return
         # check continuous paragraphs
         # find the first position in pos --> compare to the last position
@@ -292,7 +298,7 @@ def check_continuous_paragraph(pat, entry_dict, key, _transaction_list):
 
             first_pos = 0
             for j in range(pos.size() - 2, 0, -1):
-                if _transaction_list[pos_id][pos.get(j)].getNode_label_int() == pat.get(children_pos.get(children_pos.size() - 2)):
+                if _transaction_list[pos_id][pos.get(j)].getNode_label_int() == pat.get(children_pos[len(children_pos) - 2]):
                     first_pos = pos.get(j)
                     break
             last_pos = pos.get(pos.size() - 1)

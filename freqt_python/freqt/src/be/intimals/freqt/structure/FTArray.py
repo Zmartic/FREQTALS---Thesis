@@ -14,17 +14,20 @@ class FTArray:
     FTArray = [1, 2, -4, -1, -1, 3, -5, -1, -6]
     """
 
-    def __init__(self, init_memory=None):
+    def __init__(self, init_memory, n_node, n_leaf):
         """
         :param init_memory: list(int), initializer for the memory
         """
-        if init_memory is None:
-            init_memory = []
-
         self.memory = init_memory
+        self.n_node = n_node
+        self.n_leaf = n_leaf
+
+    @staticmethod
+    def make_root_pattern(root):
+        return FTArray([root], 1, 0)
 
     def copy(self):
-        return FTArray(self.memory.copy())
+        return FTArray(self.memory.copy(), self.n_node, self.n_leaf)
 
     def get(self, i):
         """
@@ -41,28 +44,31 @@ class FTArray:
         """
         return self.memory[-1]
 
-    def add(self, element):
-        """
-         Append one element to the FTArray
-        :param element: int
-        """
-        self.memory.append(element)
-
-    def add_all(self, other):
-        """
-         Append the data of other to self
-        :param other: FTArray
-        """
-        self.memory = self.memory + other.memory
-
     def extend(self, prefix, candidate):
         """
          Extend the pattern with some extension = (prefix, candidate)
         :param prefix: int, number of -1 to be push
         :param candidate: int, the label of the node we want to add
         """
+        self.n_node += 1
+        if candidate < -1:
+            self.n_leaf += 1
+
         self.memory = self.memory + ([-1] * prefix)
-        self.add(candidate)
+        self.memory.append(candidate)
+
+    def undo_extend(self, prefix):
+        """
+        Undo some extension
+        :param prefix: int, number of -1 that as been pushed
+        """
+        self.n_node -= 1
+        if self.get_last() < -1:
+            self.n_leaf -= 1
+
+        _ = self.memory.pop()
+        for _ in range(prefix):
+            _ = self.memory.pop()
 
     def sub_list(self, start, stop):
         """
@@ -72,7 +78,8 @@ class FTArray:
          :param stop:  int, index where we stop to include element
          :return: FTArray, the sub_list
         """
-        return FTArray(self.memory[start:stop])
+        # TODO
+        return FTArray(self.memory[start:stop], self.n_node, self.n_leaf)
 
     def __eq__(self, other):
         return self.memory == other.memory

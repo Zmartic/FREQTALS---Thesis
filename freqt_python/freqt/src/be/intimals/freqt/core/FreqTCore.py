@@ -77,7 +77,7 @@ class FreqTCore:
         FP1: OrderedDict[FTArray, Projected] = self.build_FP1()
 
         # remove node SourceFile because it is not AST node ##
-        not_ast_node = FTArray(init_memory=[0])
+        not_ast_node = FTArray.make_root_pattern(0)
         if not_ast_node in FP1:
             del FP1[not_ast_node]
 
@@ -144,7 +144,7 @@ class FreqTCore:
         :param root_label: int, id of the label corresponding to the root node
         :param new_location: Location
         """
-        new_tree = FTArray(init_memory=[root_label])
+        new_tree = FTArray.make_root_pattern(root_label)
 
         if new_tree in FP1:
             FP1[new_tree].add(new_location)
@@ -213,7 +213,7 @@ class FreqTCore:
 
             # restore the original pattern
             self.restore_leaf_pattern(old_leaf_pattern, old_leaf_projected)
-            pattern = pattern.sub_list(0, old_size)
+            pattern.undo_extend(candidate_prefix)
 
     @staticmethod
     def generate_candidates(projected, _transaction_list):

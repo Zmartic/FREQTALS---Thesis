@@ -90,7 +90,7 @@ class FreqT1Class(FreqTCore):
                     del mfp[max_pat]
 
         # add new maximal pattern to the list
-        mfp[pat] = FreqT1Class.get_support_string(pat, proj)
+        mfp[pat] = FreqT1Class.get_support_string(pat, proj)  # <-------------------------------------
 
     @staticmethod
     def get_support_string(pat, proj):
@@ -101,7 +101,7 @@ class FreqT1Class(FreqTCore):
         """
         return str(proj.get_support()) + "," + str(proj.get_root_support()) + "," + str(countNode(pat))
 
-    def outputPatternInTheFirstStep(self, MFP_dict, config, grammar_dict, labelIndex_dict, xmlCharacters_dict, report):
+    def outputPatternInTheFirstStep(self, mfp, config, grammar_dict, labelIndex_dict, xmlCharacters_dict, report):
         """
          * print patterns found in the first step
          * @param: MFP_dict, a dictionary with FTArray as keys and String as value
@@ -118,9 +118,9 @@ class FreqT1Class(FreqTCore):
         else:
             self.log(report, "timeout")
         # print pattern to xml file
-        self.output_patterns(MFP_dict, config, grammar_dict, labelIndex_dict, xmlCharacters_dict)
+        self.output_patterns(mfp, config, grammar_dict, labelIndex_dict, xmlCharacters_dict)
 
-        self.log(report, "+ Maximal patterns = " + str(len(MFP_dict)))
+        self.log(report, "+ Maximal patterns = " + str(len(mfp)))
         self.log(report, "+ Running times = " + str(self.get_running_time()) + " s")
         report.close()
 

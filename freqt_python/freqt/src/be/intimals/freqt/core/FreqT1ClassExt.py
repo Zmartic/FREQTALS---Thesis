@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-import sys
 import time
-import traceback
 
 from freqt.src.be.intimals.freqt.constraint import Constraint
 from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqTExtStrategy
 from freqt.src.be.intimals.freqt.core.FreqT1Class import FreqT1Class
+from freqt.src.be.intimals.freqt.structure.FTArray import FTArray
 from freqt.src.be.intimals.freqt.structure.Location import Location
 from freqt.src.be.intimals.freqt.structure.Projected import Projected
 
@@ -58,10 +57,10 @@ class FreqT1ClassExt(FreqT1Class):
                 proj = self.getProjected(occ)
 
                 # keep current pattern and location if this group cannot finish
-                interrupted_pattern = root_pat.sub_list(0, 1)
+                interrupted_pattern = root_pat
                 # expand the current root occurrences to find maximal patterns
                 # print(self._rootIDs_dict[keys].memory) #-------------
-                self.expand_pattern(root_pat, proj)
+                self.expand_pattern(FTArray.make_root_pattern(root_pat), proj)
                 # print(self._rootIDs_dict[keys].memory) #-------------
 
                 if not self.finished:
@@ -81,12 +80,9 @@ class FreqT1ClassExt(FreqT1Class):
          * @param: pattern, FTArray
          * @param: projected, Projected
         """
-        if not self.finished:
-            return
         # check running for the current group
         if self.is_timeout():
             self.finished = False
-            self.__interruptedRootIDs_dict[self.__interrupted_projected] = self.__interrupted_pattern
             return
 
         # --- find candidates of the current pattern ---
@@ -128,7 +124,7 @@ class FreqT1ClassExt(FreqT1Class):
 
             # restore the original pattern
             self.restore_leaf_pattern(old_leaf_pattern, old_leaf_projected)
-            pattern = pattern.sub_list(0, old_size)
+            pattern.undo_extend(candidate_prefix)
 
     """
          * get initial locations of a projected

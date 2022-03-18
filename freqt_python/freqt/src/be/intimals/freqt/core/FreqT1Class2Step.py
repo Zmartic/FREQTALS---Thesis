@@ -61,7 +61,7 @@ class FreqT1Class2Step(FreqTCore):
 
     def addRootIDs(self, pat, proj, root_ids_list):
         """
-         * add root occurrences of pattern to rootIDs
+         * store root occurrences of pattern
          * @param: pat, FTArray
          * @param: projected, Projected
          * @param: _rootIDs_dict, a dictionary with Projected as keys and FTArray as values
@@ -80,7 +80,7 @@ class FreqT1Class2Step(FreqTCore):
                     del elem
 
         # store root occurrences and root label
-        root_ids_list.append((pat.sub_list(0, 1), root_occ1))
+        root_ids_list.append((pat.get(0), root_occ1))
 
     def expandPatternFromRootIDs(self, root_ids_list, report):
         """

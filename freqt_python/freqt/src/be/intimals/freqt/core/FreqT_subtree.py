@@ -17,7 +17,7 @@ class FreqT_subtree:
         self.init_database([small_pat, big_pat])
 
         root_label = self.__input_pattern.get(0)
-        self.__maximal_pattern = FTArray(init_memory=[root_label])
+        self.__maximal_pattern = FTArray.make_root_pattern(root_label)
 
     def check_subtree(self):
         """
