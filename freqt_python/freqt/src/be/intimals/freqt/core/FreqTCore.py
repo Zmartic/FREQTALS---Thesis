@@ -32,9 +32,6 @@ class FreqTCore:
         # store transaction ids and their correspond class ids
         self._transactionClassID_list = list()  # list of Integer
 
-        self.leafPattern = None
-        self.leafProjected = None
-
         self.time_start = -1
         self.timeout = -1
         self.finished = False
@@ -55,7 +52,9 @@ class FreqTCore:
          * @param: pat FTArray
          * @param: projected, Projected
         """
-        pass
+        if self.constraints.satisfy_post_expansion_constraint(pat):
+            return True
+        return False
 
     def post_mining_process(self, report):
         """
@@ -178,14 +177,9 @@ class FreqTCore:
         candidates: OrderedDict[Tuple, Projected] = FreqTCore.generate_candidates(projected, self._transaction_list)
         # prune candidate based on minSup
         Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
-        # if there is no candidate then report the pattern and then stop
-        if len(candidates) == 0:
-            if self.leafPattern is not None:
-                self.add_tree(self.leafPattern, self.leafProjected)
-            return
 
         # --- expand each candidate pattern ---
-        old_size = pattern.size()
+        new_leaf_pattern_found = False
 
         for extension, new_proj in candidates.items():
             candidate_prefix, candidate_label = extension
@@ -193,12 +187,10 @@ class FreqTCore:
             # built the candidate pattern using the extension
             pattern.extend(candidate_prefix, candidate_label)
 
+            # --- OLD ---
             # if the right most node of the pattern is a leaf then keep track this pattern
-            if candidate_label < -1:
+            '''if candidate_label < -1:
                 self.keep_leaf_pattern(pattern, new_proj)
-            # store leaf pattern
-            old_leaf_pattern = self.leafPattern
-            old_leaf_projected = self.leafProjected
 
             # check obligatory children constraint
             if self.constraints.authorized_pattern(pattern, candidate_prefix):
@@ -210,10 +202,30 @@ class FreqTCore:
                 else:
                     # continue expanding pattern
                     self.expand_pattern(pattern, new_proj)
+            '''
+            # --- NEW ---
+            if self.constraints.authorized_pattern(pattern, candidate_prefix):
+                # check constraints on maximal number of leaves and real leaf
+                if self.constraints.stop_expand_pattern(pattern):
+                    if candidate_label < -1:
+                        if self.add_tree(pattern.copy(), new_proj):
+                            new_leaf_pattern_found = True  # added successfully
+                    # else:
+                        # No leaf pattern found
+                else:
+                    # continue expanding pattern
+                    did_found_leaf_pattern = self.expand_pattern(pattern, new_proj)
+                    if did_found_leaf_pattern:
+                        new_leaf_pattern_found = True
+                        # Don't add pattern because we found a bigger pattern
+                    elif candidate_label < -1:
+                        if self.add_tree(pattern.copy(), new_proj):
+                            new_leaf_pattern_found = True  # added successfully
 
-            # restore the original pattern
-            self.restore_leaf_pattern(old_leaf_pattern, old_leaf_projected)
+            # restore the pattern
             pattern.undo_extend(candidate_prefix)
+
+        return new_leaf_pattern_found
 
     @staticmethod
     def generate_candidates(projected, _transaction_list):
@@ -294,24 +306,6 @@ class FreqTCore:
             projected.set_depth(depth)
             projected.add(new_location)
             freq1_dict[extension] = projected
-
-    def keep_leaf_pattern(self, pat, projected):
-        """
-         * keep track the pattern which has the right-most node is a leaf
-         * @param: pat, FTArray
-         * @param: projected, Projected
-        """
-        self.leafPattern = pat.copy()
-        self.leafProjected = projected
-
-    def restore_leaf_pattern(self, old_pat, old_proj):
-        """
-         * restore leaf pattern to its previous value
-         * @param: pat, FTArray
-         * @param: projected, Projected
-        """
-        self.leafPattern = old_pat
-        self.leafProjected = old_proj
 
     # --- UTIL --- #
 

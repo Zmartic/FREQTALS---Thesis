@@ -60,9 +60,12 @@ class FreqT2Class2Step(FreqTCore):
          * @param: projected, Projected
         """
         # check chi-square score
-        if satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(),
-                              self._config.getWeighted()):
+        if self.constraints.satisfy_post_expansion_constraint(pat) and \
+                satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(),
+                                   self._config.getWeighted()):
             self.addHighScorePattern(pat, projected, self.hsp)
+            return True
+        return False
 
     def post_mining_process(self, report):
         self.expandPatternFromRootIDs(self.groupRootOcc(self.hsp), report)

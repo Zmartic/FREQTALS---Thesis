@@ -52,7 +52,10 @@ class FreqT1Class2Step(FreqTCore):
          * @param: pat FTArray
          * @param: projected, Projected
         """
-        self.addRootIDs(pat, proj, self.root_ids_list)
+        if self.constraints.satisfy_post_expansion_constraint(pat):
+            self.addRootIDs(pat, proj, self.root_ids_list)
+            return True
+        return False
 
     def post_mining_process(self, report):
         self.expandPatternFromRootIDs(self.root_ids_list, report)

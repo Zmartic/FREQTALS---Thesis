@@ -62,9 +62,12 @@ class FreqT2Class(FreqT1Class):
          * @param: projected, Projected
         """
         # check chi-square score
-        if satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(),
-                              self._config.getWeighted()):
+        if self.constraints.satisfy_post_expansion_constraint(pat) and \
+                satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(),
+                                   self._config.getWeighted()):
             self.add_maximal_pattern(pat, projected, self.mfp)
+            return True
+        return False
 
     def post_mining_process(self, report):
         self.outputPatternInTheFirstStep(self.mfp, self._config, self._grammar_dict, self.label_str2int,

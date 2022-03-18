@@ -89,42 +89,40 @@ class FreqT1ClassExt(FreqT1Class):
         candidates = FreqT1ClassExt.generate_candidates(projected, self._transaction_list)
         # prune candidate based on minSup
         Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
-        # if there is no candidate then report the pattern and then stop
-        if len(candidates) == 0:
-            if self.leafPattern is not None:
-                self.add_tree(self.leafPattern, self.leafProjected)
-            return
 
         # --- expand each candidate pattern ---
-        old_size = pattern.size()
-
+        new_leaf_pattern_found = False
         for extension, new_proj in candidates.items():
             candidate_prefix, candidate_label = extension
+
             # built the candidate pattern using the extension
             pattern.extend(candidate_prefix, candidate_label)
 
-            # if the right most node of the pattern is a leaf then keep track this pattern
-            if candidate_label < -1:
-                self.keep_leaf_pattern(pattern, new_proj)
-            # store leaf pattern
-            old_leaf_pattern = self.leafPattern
-            old_leaf_projected = self.leafProjected
-
-            #Constraint.check_cobol_constraints(pattern, candidates, new_proj, self._labelIndex_dict,self._transaction_list)
-            # check obligatory children constraint
+            # Constraint.check_cobol_constraints(largestPattern, candidates_dict, keys, self._labelIndex_dict, self._transaction_list)
             if self.constraints.authorized_pattern(pattern, candidate_prefix):
                 # check constraints on maximal number of leaves and real leaf
                 if self.constraints.stop_expand_pattern(pattern):
-                    if self.constraints.satisfy_post_expansion_constraint(self.leafPattern):
-                        # store the pattern
-                        self.add_tree(self.leafPattern, self.leafProjected)
+                    if candidate_label < -1:
+                        if self.constraints.satisfy_post_expansion_constraint(pattern):
+                            new_leaf_pattern_found = True
+                            self.add_tree(pattern.copy(), new_proj)
+                    # else:
+                    # No leaf pattern found
                 else:
                     # continue expanding pattern
-                    self.expand_pattern(pattern, new_proj)
+                    did_found_leaf_pattern = self.expand_pattern(pattern, new_proj)
+                    if did_found_leaf_pattern:
+                        new_leaf_pattern_found = True
+                        # Don't add pattern because we found a bigger pattern
+                    elif candidate_label < -1:
+                        if self.constraints.satisfy_post_expansion_constraint(pattern):
+                            new_leaf_pattern_found = True
+                            self.add_tree(pattern.copy(), new_proj)
 
-            # restore the original pattern
-            self.restore_leaf_pattern(old_leaf_pattern, old_leaf_projected)
+            # restore the pattern
             pattern.undo_extend(candidate_prefix)
+
+        return new_leaf_pattern_found
 
     """
          * get initial locations of a projected

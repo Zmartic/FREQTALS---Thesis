@@ -87,8 +87,6 @@ class DefaultStrategy(FreqTStrategy):
         return Constraint.satisfy_max_leaf(pattern, self.max_leaf) or Constraint.is_not_full_leaf(pattern)
 
     def satisfy_post_expansion_constraint(self, pattern):
-        if pattern is None:
-            return False
         # * Minimum size constraints
         # * Right mandatory children
         return Constraint.satisfy_min_leaf(pattern, self.min_leaf) and \

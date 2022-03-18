@@ -58,7 +58,10 @@ class FreqT1Class(FreqTCore):
          * @param: pat FTArray
          * @param: projected, Projected
         """
-        self.add_maximal_pattern(pat, proj, self.mfp)
+        if self.constraints.satisfy_post_expansion_constraint(pat):
+            self.add_maximal_pattern(pat, proj, self.mfp)
+            return True
+        return False
 
     def post_mining_process(self, report):
         self.outputPatternInTheFirstStep(self.mfp, self._config, self._grammar_dict, self.label_str2int,
