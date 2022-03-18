@@ -103,9 +103,8 @@ class FreqT1ClassExt(FreqT1Class):
                 # check constraints on maximal number of leaves and real leaf
                 if self.constraints.stop_expand_pattern(pattern):
                     if candidate_label < -1:
-                        if self.constraints.satisfy_post_expansion_constraint(pattern):
-                            new_leaf_pattern_found = True
-                            self.add_tree(pattern.copy(), new_proj)
+                        if self.add_tree(pattern.copy(), new_proj):
+                            new_leaf_pattern_found = True  # added successfully
                     # else:
                     # No leaf pattern found
                 else:
@@ -115,9 +114,8 @@ class FreqT1ClassExt(FreqT1Class):
                         new_leaf_pattern_found = True
                         # Don't add pattern because we found a bigger pattern
                     elif candidate_label < -1:
-                        if self.constraints.satisfy_post_expansion_constraint(pattern):
-                            new_leaf_pattern_found = True
-                            self.add_tree(pattern.copy(), new_proj)
+                        if self.add_tree(pattern.copy(), new_proj):
+                            new_leaf_pattern_found = True  # added successfully
 
             # restore the pattern
             pattern.undo_extend(candidate_prefix)
