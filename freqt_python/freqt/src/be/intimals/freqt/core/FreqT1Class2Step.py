@@ -2,7 +2,7 @@
 import sys
 import traceback
 
-from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import DefaultStrategy
+from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT1Strategy
 from freqt.src.be.intimals.freqt.core.FreqT1ClassExt import FreqT1ClassExt
 from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
 
@@ -15,20 +15,25 @@ class FreqT1Class2Step(FreqTCore):
     def __init__(self, config):
         super().__init__(config)
 
-        self.label_str2int = dict()  # label encoder
-        # self.label_int2str = dict()  # label decoder
-
         self.root_ids_list = list()
 
     def init_data(self):
         """
          * read input data
         """
+        self._transaction_list = list()
+        self._grammar_dict = dict()
+        self._xmlCharacters_dict = dict()
+        self._transactionClassID_list = list()
+
+        self.label_encoder = dict()
+        # self.label_decoder = dict()
+
         try:
             readXML = ReadXMLInt()
             # remove black labels when reading ASTs
             readXML.readDatabase(self._transaction_list, 1,
-                                 self._config.getInputFiles(), self.label_str2int,
+                                 self._config.getInputFiles(), self.label_encoder,
                                  self._transactionClassID_list, self._config.getWhiteLabelFile())
             # create grammar (labels are strings) which is used to print patterns
             initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
@@ -37,8 +42,8 @@ class FreqT1Class2Step(FreqTCore):
             # read list of special XML characters
             readXMLCharacter(self._config.getXmlCharacterFile(), self._xmlCharacters_dict)
 
-            grammar_int = convert_grammar_keys2int(self._grammar_dict, self.label_str2int)
-            self.constraints = DefaultStrategy(self._config, grammar_int)
+            grammar_int = convert_grammar_keys2int(self._grammar_dict, self.label_encoder)
+            self.constraints = FreqT1Strategy(self._config, grammar_int)
 
         except:
             e = sys.exc_info()[0]
@@ -52,10 +57,7 @@ class FreqT1Class2Step(FreqTCore):
          * @param: pat FTArray
          * @param: projected, Projected
         """
-        if self.constraints.satisfy_post_expansion_constraint(pat):
-            self.addRootIDs(pat, proj, self.root_ids_list)
-            return True
-        return False
+        self.addRootIDs(pat, proj, self.root_ids_list)
 
     def post_mining_process(self, report):
         self.expandPatternFromRootIDs(self.root_ids_list, report)
@@ -105,7 +107,7 @@ class FreqT1Class2Step(FreqTCore):
 
         # run second step
         freqt_ext = FreqT1ClassExt(self._config, root_ids_list, self._grammar_dict, self.constraints.grammar,
-                                   self._xmlCharacters_dict, self.label_str2int, self._transaction_list)
+                                   self._xmlCharacters_dict, self.label_encoder, self._transaction_list)
         freqt_ext.run()
 
         # report result

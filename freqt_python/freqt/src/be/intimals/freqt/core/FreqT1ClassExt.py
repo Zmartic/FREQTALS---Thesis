@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import time
 
-from freqt.src.be.intimals.freqt.constraint import Constraint
-from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqTExtStrategy
+from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT1ExtStrategy
 from freqt.src.be.intimals.freqt.core.FreqT1Class import FreqT1Class
 from freqt.src.be.intimals.freqt.structure.FTArray import FTArray
 from freqt.src.be.intimals.freqt.structure.Location import Location
@@ -11,19 +10,22 @@ from freqt.src.be.intimals.freqt.structure.Projected import Projected
 
 class FreqT1ClassExt(FreqT1Class):
 
-    def __init__(self, _config, root_ids_list, _grammar_dict, _grammarInt_dict, _xmlCharacters_dict, _labelIndex_dict,
+    def __init__(self, _config, root_ids_list, _grammar_dict, _grammarInt_dict, _xmlCharacters_dict, label_encoder,
                  _transaction_list):
         super().__init__(_config)
 
         self.root_ids_list = root_ids_list
-        self.constraints = FreqTExtStrategy(_config, _grammarInt_dict)
 
+        self.constraints = FreqT1ExtStrategy(_config, _grammarInt_dict)
+
+        self._transaction_list = _transaction_list
         self._grammar_dict = _grammar_dict
         self._xmlCharacters_dict = _xmlCharacters_dict
-        self._labelIndex_dict = _labelIndex_dict
-        self._transaction_list = _transaction_list
 
-        # FreqTExt timeout variable
+        self.label_encoder = label_encoder
+        # self.label_decoder = dict()
+
+        # -- FreqTExt timeout variable --
         self.__interruptedRootIDs = None
 
     def run(self):
@@ -71,56 +73,8 @@ class FreqT1ClassExt(FreqT1Class):
 
         # print the largest patterns
         if len(self.mfp) != 0:
-            self.output_patterns(self.mfp, self._config, self._grammar_dict, self._labelIndex_dict,
+            self.output_patterns(self.mfp, self._config, self._grammar_dict, self.label_encoder,
                                  self._xmlCharacters_dict)
-
-    def expand_pattern(self, pattern, projected):
-        """
-         * expand pattern
-         * @param: pattern, FTArray
-         * @param: projected, Projected
-        """
-        # check running for the current group
-        if self.is_timeout():
-            self.finished = False
-            return
-
-        # --- find candidates of the current pattern ---
-        candidates = FreqT1ClassExt.generate_candidates(projected, self._transaction_list)
-        # prune candidate based on minSup
-        Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
-
-        # --- expand each candidate pattern ---
-        new_leaf_pattern_found = False
-        for extension, new_proj in candidates.items():
-            candidate_prefix, candidate_label = extension
-
-            # built the candidate pattern using the extension
-            pattern.extend(candidate_prefix, candidate_label)
-
-            # Constraint.check_cobol_constraints(largestPattern, candidates_dict, keys, self._labelIndex_dict, self._transaction_list)
-            if self.constraints.authorized_pattern(pattern, candidate_prefix):
-                # check constraints on maximal number of leaves and real leaf
-                if self.constraints.stop_expand_pattern(pattern):
-                    if candidate_label < -1:
-                        if self.add_tree(pattern.copy(), new_proj):
-                            new_leaf_pattern_found = True  # added successfully
-                    # else:
-                    # No leaf pattern found
-                else:
-                    # continue expanding pattern
-                    did_found_leaf_pattern = self.expand_pattern(pattern, new_proj)
-                    if did_found_leaf_pattern:
-                        new_leaf_pattern_found = True
-                        # Don't add pattern because we found a bigger pattern
-                    elif candidate_label < -1:
-                        if self.add_tree(pattern.copy(), new_proj):
-                            new_leaf_pattern_found = True  # added successfully
-
-            # restore the pattern
-            pattern.undo_extend(candidate_prefix)
-
-        return new_leaf_pattern_found
 
     """
          * get initial locations of a projected

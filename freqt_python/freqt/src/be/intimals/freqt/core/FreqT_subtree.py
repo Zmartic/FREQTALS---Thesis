@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from freqt.src.be.intimals.freqt.input.ReadFileInt import *
+from freqt.src.be.intimals.freqt.structure.FTArray import FTArray
 from freqt.src.be.intimals.freqt.structure.Projected import *
 
 import collections

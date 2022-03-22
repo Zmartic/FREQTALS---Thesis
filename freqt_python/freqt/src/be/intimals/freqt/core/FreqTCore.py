@@ -21,16 +21,20 @@ class FreqTCore:
         self._config = _config
         self.constraints = None
 
-        self._transaction_list = list()  # list of list of NodeFreqT
-        self._grammar_dict = dict()  # dictionary with String as keys and List of String as value
-        self._xmlCharacters_dict = dict()  # dictionary with String as keys and String as value
+        self._transaction_list = None  # list of list of NodeFreqT
+        self._grammar_dict = None  # dictionary with String as keys and List of String as value
+        self._xmlCharacters_dict = None  # dictionary with String as keys and String as value
 
         # new variables for Integer
         # self._blackLabelsInt_dict = dict()  # dictionary with Integer as keys and List of Integer as value
         # self._whiteLabelsInt_dict = dict()  # dictionary with Integer as keys and List of Integer as value
 
         # store transaction ids and their correspond class ids
-        self._transactionClassID_list = list()  # list of Integer
+        self._transactionClassID_list = None  # list of Integer
+
+        # store the conversion of labels : str <-> int
+        self.label_encoder = None  # str -> int
+        self.label_decoder = None  # int -> str
 
         self.time_start = -1
         self.timeout = -1
@@ -44,17 +48,25 @@ class FreqTCore:
         """
          * Called before run
         """
+        self.constraints = None
+
+        self._transaction_list = list()
+        self._grammar_dict = dict()
+        self._xmlCharacters_dict = dict()
+        self._transactionClassID_list = list()
+
+        self.label_encoder = dict()
+        self.label_decoder = dict()
         pass
 
     def add_tree(self, pat, projected):
         """
          * Is called every time a frequent pattern (satisfying the constraints) is found
+         !!! note: this function should copy pat
          * @param: pat FTArray
          * @param: projected, Projected
         """
-        if self.constraints.satisfy_post_expansion_constraint(pat):
-            return True
-        return False
+        pass
 
     def post_mining_process(self, report):
         """
@@ -118,18 +130,16 @@ class FreqTCore:
          * @param: _rootLabels_set, a list of String
          * @param: _transactionClassID_list, a list of Integer
         """
-        FP1: OrderedDict[FTArray, Projected] = collections.OrderedDict()
+        FP1 = collections.OrderedDict()  # OrderedDict[Int, Projected]
         trans = self._transaction_list
 
         for trans_id in range(len(trans)):
-            # get transaction label
-            class_id = self._transactionClassID_list[trans_id]
 
             for loc in range(len(trans[trans_id])):
                 node = trans[trans_id][loc]
-                node_label = node.getNodeLabel()
 
-                if self.constraints.allowed_label_as_root(node_label):
+                if self.constraints.allowed_label_as_root(node.getNodeLabel()):
+                    class_id = self._transactionClassID_list[trans_id]
                     new_location = Location(loc, loc, trans_id, class_id)
                     FreqTCore.update_FP1(FP1, node.getNode_label_int(), new_location)
 
@@ -143,24 +153,23 @@ class FreqTCore:
         :param root_label: int, id of the label corresponding to the root node
         :param new_location: Location
         """
-        new_tree = FTArray.make_root_pattern(root_label)
-
-        if new_tree in FP1:
-            FP1[new_tree].add(new_location)
+        if root_label in FP1:
+            FP1[root_label].add(new_location)
         else:
             projected = Projected()
             projected.set_depth(0)
             projected.add(new_location)
-            FP1[new_tree] = projected
+            FP1[root_label] = projected
 
     def expand_FP1(self, freq1):
         """
          * expand FP1 to find frequent subtrees based on input constraints
         :param freq1: dict[FTArray, Projected]
         """
-        for pat in freq1:
-            # expand pat to find maximal patterns
-            self.expand_pattern(pat.copy(), freq1[pat])
+        for root in freq1:
+            # expand root patterns to find maximal patterns
+            root_pat = FTArray.make_root_pattern(root)
+            _ = self.expand_pattern(root_pat, freq1[root])
 
     def expand_pattern(self, pattern, projected):
         """
@@ -189,11 +198,11 @@ class FreqTCore:
             # built the candidate pattern using the extension
             pattern.extend(candidate_prefix, candidate_label)
 
-            if self.constraints.authorized_pattern(pattern, candidate_prefix):
+            if not self.constraints.is_pruned_pattern(pattern, candidate_prefix):
                 # check constraints on maximal number of leaves and real leaf
                 if self.constraints.stop_expand_pattern(pattern):
                     if candidate_label < -1:
-                        _ = self.add_tree(pattern.copy(), new_proj)
+                        _ = self.add_tree_requested(pattern, new_proj)
                     else:
                         did_ever_stop_extend = True
 
@@ -202,7 +211,7 @@ class FreqTCore:
                     did_stop_extend = self.expand_pattern(pattern, new_proj)
                     if did_stop_extend:
                         if candidate_label < -1:
-                            _ = self.add_tree(pattern.copy(), new_proj)
+                            self.add_tree_requested(pattern, new_proj)
                         else:
                             did_ever_stop_extend = True
 
@@ -290,6 +299,12 @@ class FreqTCore:
             projected.set_depth(depth)
             projected.add(new_location)
             freq1_dict[extension] = projected
+
+    def add_tree_requested(self, pat, proj):
+        if self.constraints.satisfy_post_expansion_constraint(pat):
+            self.add_tree(pat, proj)
+            return True
+        return False
 
     # --- UTIL --- #
 

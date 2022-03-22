@@ -19,7 +19,7 @@ class FreqTStrategy(ABC):
         pass
 
     @abstractmethod
-    def authorized_pattern(self, pattern, candidate_prefix):
+    def is_pruned_pattern(self, pattern, candidate_prefix):
         """
 
         :param pattern:
@@ -47,7 +47,7 @@ class FreqTStrategy(ABC):
         pass
 
 
-class DefaultStrategy(FreqTStrategy):
+class FreqT1Strategy(FreqTStrategy):
 
     def __init__(self, config, grammar, root_label_set=None):
         self.min_supp = config.getMinSupport()
@@ -61,10 +61,6 @@ class DefaultStrategy(FreqTStrategy):
         #if root_label_set is not None:
         self.root_labels_set = set()
         readRootLabel(config.getRootLabelFile(), self.root_labels_set)
-        '''if len(self.root_labels_set) == 0:
-            self.is_root_allowed = lambda root: root != "" and root[0] != '*' and root[0].isupper()
-        else:
-            self.is_root_allowed = lambda root: root in self.root_labels_set'''
 
         if config.getWeighted():  # TODO maybe doesn't work
             self.prune_method = lambda proj: Constraint.prune_min_w_supp(proj, self.min_supp)
@@ -79,9 +75,9 @@ class DefaultStrategy(FreqTStrategy):
     def prune(self, proj):  # maybe doesn't work
         return self.prune_method(proj)
 
-    def authorized_pattern(self, pattern, candidate_prefix):
+    def is_pruned_pattern(self, pattern, candidate_prefix):
         # * check obligatory children constraint
-        return not Constraint.missing_left_obligatory_child(pattern, candidate_prefix, self.grammar)
+        return Constraint.missing_left_obligatory_child(pattern, candidate_prefix, self.grammar)
 
     def stop_expand_pattern(self, pattern):
         return Constraint.satisfy_max_leaf(pattern, self.max_leaf) or Constraint.is_not_full_leaf(pattern)
@@ -94,7 +90,18 @@ class DefaultStrategy(FreqTStrategy):
             not Constraint.missing_right_obligatory_child(pattern, self.grammar)
 
 
-class FreqTExtStrategy(DefaultStrategy):
+class FreqT1ExtStrategy(FreqT1Strategy):
+
+    # Constraint.check_cobol_constraints(largestPattern, candidates_dict, keys, self._labelIndex_dict, self._transaction_list) TODO
+
+    def allowed_label_as_root(self, label):
+        pass
 
     def stop_expand_pattern(self, pattern):
         return Constraint.is_not_full_leaf(pattern)
+
+
+class FreqT2Strategy(FreqT1Strategy):
+
+    def satisfy_post_expansion_constraint(self, pattern):
+        return super().satisfy_post_expansion_constraint(pattern)

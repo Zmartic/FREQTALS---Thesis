@@ -2,7 +2,7 @@
 import sys
 import traceback
 
-from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import DefaultStrategy
+from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT1Strategy
 from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
 from freqt.src.be.intimals.freqt.core.CheckSubtree import check_subtree
 
@@ -18,9 +18,6 @@ class FreqT1Class(FreqTCore):
     def __init__(self, config):
         super().__init__(config)
 
-        self.label_str2int = dict()  # label encoder
-        # self.label_int2str = dict()  # label decoder
-
         # dictionary of maximal frequent patterns
         self.mfp = dict()
         # set of pattern that are not maximal ( used for add_maximal_pattern() )
@@ -30,11 +27,19 @@ class FreqT1Class(FreqTCore):
         """
          * read input data
         """
+        self._transaction_list = list()
+        self._grammar_dict = dict()
+        self._xmlCharacters_dict = dict()
+        self._transactionClassID_list = list()
+
+        self.label_encoder = dict()
+        # self.label_decoder = dict()
+
         try:
             readXML = ReadXMLInt()
             # remove black labels when reading ASTs
             readXML.readDatabase(self._transaction_list, 1,
-                                 self._config.getInputFiles(), self.label_str2int,
+                                 self._config.getInputFiles(), self.label_encoder,
                                  self._transactionClassID_list, self._config.getWhiteLabelFile())
             # create grammar (labels are strings) which is used to print patterns
             initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
@@ -43,8 +48,8 @@ class FreqT1Class(FreqTCore):
             # read list of special XML characters
             readXMLCharacter(self._config.getXmlCharacterFile(), self._xmlCharacters_dict)
 
-            grammar_int = convert_grammar_keys2int(self._grammar_dict, self.label_str2int)
-            self.constraints = DefaultStrategy(self._config, grammar_int)
+            grammar_int = convert_grammar_keys2int(self._grammar_dict, self.label_encoder)
+            self.constraints = FreqT1Strategy(self._config, grammar_int)
 
         except:
             e = sys.exc_info()[0]
@@ -58,13 +63,10 @@ class FreqT1Class(FreqTCore):
          * @param: pat FTArray
          * @param: projected, Projected
         """
-        if self.constraints.satisfy_post_expansion_constraint(pat):
-            self.add_maximal_pattern(pat, proj, self.mfp)
-            return True
-        return False
+        self.add_maximal_pattern(pat, proj, self.mfp)
 
     def post_mining_process(self, report):
-        self.outputPatternInTheFirstStep(self.mfp, self._config, self._grammar_dict, self.label_str2int,
+        self.outputPatternInTheFirstStep(self.mfp, self._config, self._grammar_dict, self.label_encoder,
                                          self._xmlCharacters_dict, report)
 
     # --------------- #
@@ -93,18 +95,9 @@ class FreqT1Class(FreqTCore):
                     del mfp[max_pat]
 
         # add new maximal pattern to the list
-        mfp[pat] = FreqT1Class.get_support_string(pat, proj)  # <-------------------------------------
+        mfp[pat.copy()] = proj
 
-    @staticmethod
-    def get_support_string(pat, proj):
-        """
-         * get a string of support, score, size for a pattern
-         * @param: pat, FTArray
-         * @param: projected, Projected
-        """
-        return str(proj.get_support()) + "," + str(proj.get_root_support()) + "," + str(countNode(pat))
-
-    def outputPatternInTheFirstStep(self, mfp, config, grammar_dict, labelIndex_dict, xmlCharacters_dict, report):
+    def outputPatternInTheFirstStep(self, mfp, config, grammar, label_encoder, xmlCharacters_dict, report):
         """
          * print patterns found in the first step
          * @param: MFP_dict, a dictionary with FTArray as keys and String as value
@@ -121,13 +114,13 @@ class FreqT1Class(FreqTCore):
         else:
             self.log(report, "timeout")
         # print pattern to xml file
-        self.output_patterns(mfp, config, grammar_dict, labelIndex_dict, xmlCharacters_dict)
+        self.output_patterns(mfp, config, grammar, label_encoder, xmlCharacters_dict)
 
         self.log(report, "+ Maximal patterns = " + str(len(mfp)))
         self.log(report, "+ Running times = " + str(self.get_running_time()) + " s")
         report.close()
 
-    def output_patterns(self, output_patterns, config, grammar_dict, labelIndex_dict, xmlCharacters_dict):
+    def output_patterns(self, output_patterns, config, grammar, label_encoder, xmlCharacters_dict):
         """
          * print maximal patterns to XML file
          * @param: MFP_dict, dictionary with FTArray as key and String as values
@@ -141,11 +134,11 @@ class FreqT1Class(FreqTCore):
             # create output file to store patterns for mining common patterns
             outputCommonPatterns = open(out_file + ".txt", 'w+')
             # output maximal patterns
-            outputMaximalPatterns = XMLOutput(out_file, config, grammar_dict, xmlCharacters_dict)
+            outputMaximalPatterns = XMLOutput(out_file, config, grammar, xmlCharacters_dict)
             pattern = Pattern()
             for pat in output_patterns:
-                pat_str = getPatternStr(pat, labelIndex_dict)
-                supports = output_patterns[pat]
+                pat_str = getPatternStr(pat, label_encoder)
+                supports = self.get_support_string(pat, output_patterns[pat])
                 outputMaximalPatterns.report_Int(pat_str, supports)
                 outputCommonPatterns.write(pattern.getPatternString1(pat_str) + "\n")
             outputMaximalPatterns.close()
@@ -157,3 +150,11 @@ class FreqT1Class(FreqTCore):
             print("Print maximal patterns error : " + str(e) + "\n")
             trace = traceback.format_exc()
             print(trace)
+
+    def get_support_string(self, pat, proj):
+        """
+         * get a string of support, score, size for a pattern
+         * @param: pat, FTArray
+         * @param: projected, Projected
+        """
+        return str(proj.get_support()) + "," + str(proj.get_root_support()) + "," + str(countNode(pat))

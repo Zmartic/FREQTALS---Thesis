@@ -3,7 +3,7 @@ import sys
 import traceback
 
 from freqt.src.be.intimals.freqt.constraint.Constraint import satisfy_chi_square
-from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import DefaultStrategy
+from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT2Strategy
 from freqt.src.be.intimals.freqt.core.FreqT1Class import FreqT1Class
 
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
@@ -47,7 +47,7 @@ class FreqT2Class(FreqT1Class):
             readXMLCharacter(self._config.getXmlCharacterFile(), self._xmlCharacters_dict)
 
             grammar_int = convert_grammar_keys2int(self._grammar_dict, self.label_str2int)
-            self.constraints = DefaultStrategy(self._config, grammar_int)
+            self.constraints = FreqT2Strategy(self._config, grammar_int)
 
         except:
             e = sys.exc_info()[0]
@@ -57,7 +57,7 @@ class FreqT2Class(FreqT1Class):
 
     def add_tree(self, pat, projected):
         """
-         * add the tree to the root IDs or the MFP
+         * add the tree to the MFP
          * @param: pat FTArray
          * @param: projected, Projected
         """

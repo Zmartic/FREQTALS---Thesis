@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from freqt.src.be.intimals.freqt.structure.FTArray import *
 
 """
  * A location is an FTArray plus an identifier of this location
