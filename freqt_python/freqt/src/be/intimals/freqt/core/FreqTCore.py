@@ -171,15 +171,17 @@ class FreqTCore:
         # if timeout then stop expand the pattern;
         if self.is_timeout():
             self.finished = False
-            return
+            return False
 
         # --- find candidates of the current pattern ---
         candidates: OrderedDict[Tuple, Projected] = FreqTCore.generate_candidates(projected, self._transaction_list)
         # prune candidate based on minSup
         Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
+        if len(candidates) == 0:
+            return True
 
         # --- expand each candidate pattern ---
-        new_leaf_pattern_found = False
+        did_ever_stop_extend = False
 
         for extension, new_proj in candidates.items():
             candidate_prefix, candidate_label = extension
@@ -187,45 +189,27 @@ class FreqTCore:
             # built the candidate pattern using the extension
             pattern.extend(candidate_prefix, candidate_label)
 
-            # --- OLD ---
-            # if the right most node of the pattern is a leaf then keep track this pattern
-            '''if candidate_label < -1:
-                self.keep_leaf_pattern(pattern, new_proj)
-
-            # check obligatory children constraint
-            if self.constraints.authorized_pattern(pattern, candidate_prefix):
-                # check constraints on maximal number of leaves and real leaf
-                if self.constraints.stop_expand_pattern(pattern):
-                    if self.constraints.satisfy_post_expansion_constraint(self.leafPattern):
-                        # store the pattern
-                        self.add_tree(self.leafPattern, self.leafProjected)
-                else:
-                    # continue expanding pattern
-                    self.expand_pattern(pattern, new_proj)
-            '''
-            # --- NEW ---
             if self.constraints.authorized_pattern(pattern, candidate_prefix):
                 # check constraints on maximal number of leaves and real leaf
                 if self.constraints.stop_expand_pattern(pattern):
                     if candidate_label < -1:
-                        if self.add_tree(pattern.copy(), new_proj):
-                            new_leaf_pattern_found = True  # added successfully
-                    # else:
-                        # No leaf pattern found
+                        _ = self.add_tree(pattern.copy(), new_proj)
+                    else:
+                        did_ever_stop_extend = True
+
                 else:
                     # continue expanding pattern
-                    did_found_leaf_pattern = self.expand_pattern(pattern, new_proj)
-                    if did_found_leaf_pattern:
-                        new_leaf_pattern_found = True
-                        # Don't add pattern because we found a bigger pattern
-                    elif candidate_label < -1:
-                        if self.add_tree(pattern.copy(), new_proj):
-                            new_leaf_pattern_found = True  # added successfully
+                    did_stop_extend = self.expand_pattern(pattern, new_proj)
+                    if did_stop_extend:
+                        if candidate_label < -1:
+                            _ = self.add_tree(pattern.copy(), new_proj)
+                        else:
+                            did_ever_stop_extend = True
 
             # restore the pattern
             pattern.undo_extend(candidate_prefix)
 
-        return new_leaf_pattern_found
+        return did_ever_stop_extend
 
     @staticmethod
     def generate_candidates(projected, _transaction_list):
