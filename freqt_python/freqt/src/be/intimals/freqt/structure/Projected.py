@@ -69,7 +69,7 @@ class Projected:
             self.__locations.append(loc)
 
     def add(self, new_loc):
-        if new_loc not in self.__locations:
+        if new_loc not in self.__locations:  # always true ?
             self.__locations.append(new_loc)
 
     def __str__(self):

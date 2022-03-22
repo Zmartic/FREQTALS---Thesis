@@ -4,7 +4,7 @@ import copy
 
 class FTArray:
     """
-    FTArray represent a subtree/pattern (using an array).
+    This class represent a subtree/pattern (using an array).
     ex:
          1
         / \

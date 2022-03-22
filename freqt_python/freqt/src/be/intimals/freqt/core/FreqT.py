@@ -121,7 +121,7 @@ class FreqT:
                                 self._config.buildGrammar())
                 initGrammar_Str(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict,
                                 self._config.buildGrammar())
-                initGrammar_Int2(self._grammarInt_dict, self._grammar_dict, self._labelIndex_dict)
+                self._grammarInt_dict = convert_grammar_label2int(self._grammar_dict, self._labelIndex_dict)
             else:
                 readXML.readDatabase(self._transaction_list, 1,
                                      self._config.getInputFiles(), self._labelIndex_dict,
@@ -130,7 +130,7 @@ class FreqT:
                 initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
                                 self._config.buildGrammar())
                 # create grammar (labels are integers) which is used in the mining process
-                initGrammar_Int2(self._grammarInt_dict, self._grammar_dict, self._labelIndex_dict)
+                self._grammarInt_dict = convert_grammar_label2int(self._grammar_dict, self._labelIndex_dict)
 
             # read root labels (AST Nodes)
             readRootLabel(self._config.getRootLabelFile(), self.rootLabels_set)

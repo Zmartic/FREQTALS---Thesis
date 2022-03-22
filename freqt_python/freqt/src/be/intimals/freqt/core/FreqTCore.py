@@ -32,9 +32,8 @@ class FreqTCore:
         # store transaction ids and their correspond class ids
         self._transactionClassID_list = None  # list of Integer
 
-        # store the conversion of labels : str <-> int
-        self.label_encoder = None  # str -> int
-        self.label_decoder = None  # int -> str
+        # store the conversion of labels : str -> int
+        self.label_decoder = None
 
         self.time_start = -1
         self.timeout = -1

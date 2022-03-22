@@ -9,7 +9,7 @@ from freqt.src.be.intimals.freqt.core.CheckSubtree import check_subtree
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
 from freqt.src.be.intimals.freqt.output.XMLOutput import XMLOutput
 from freqt.src.be.intimals.freqt.structure.Pattern import Pattern
-from freqt.src.be.intimals.freqt.util.Initial_Int import initGrammar_Str, readXMLCharacter, convert_grammar_keys2int
+from freqt.src.be.intimals.freqt.util.Initial_Int import initGrammar_Str, readXMLCharacter, convert_grammar_label2int
 
 
 class FreqT1Class(FreqTCore):
@@ -47,7 +47,7 @@ class FreqT1Class(FreqTCore):
             # read list of special XML characters
             readXMLCharacter(self._config.getXmlCharacterFile(), self._xmlCharacters_dict)
 
-            grammar_int = convert_grammar_keys2int(self._grammar_dict, self.label_decoder)
+            grammar_int = convert_grammar_label2int(self._grammar_dict, self.label_decoder)
             self.constraints = FreqT1Strategy(self._config, grammar_int)
 
         except:

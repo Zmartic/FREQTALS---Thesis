@@ -6,7 +6,7 @@ from freqt.src.be.intimals.freqt.constraint.Constraint import satisfy_chi_square
 from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT2Strategy
 from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
-from freqt.src.be.intimals.freqt.util.Initial_Int import initGrammar_Str, readXMLCharacter, convert_grammar_keys2int
+from freqt.src.be.intimals.freqt.util.Initial_Int import initGrammar_Str, readXMLCharacter, convert_grammar_label2int
 from freqt.src.be.intimals.freqt.util.Util import Util
 
 
@@ -44,7 +44,7 @@ class FreqT2Class2Step(FreqTCore):
             # read list of special XML characters
             readXMLCharacter(self._config.getXmlCharacterFile(), self._xmlCharacters_dict)
 
-            grammar_int = convert_grammar_keys2int(self._grammar_dict, self.label_str2int)
+            grammar_int = convert_grammar_label2int(self._grammar_dict, self.label_str2int)
             self.constraints = FreqT2Strategy(self._config, grammar_int)
 
         except:
