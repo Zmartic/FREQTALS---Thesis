@@ -452,8 +452,7 @@ class FreqT:
         """
         try:
             # find root occurrences of current pattern
-            util = Util()
-            rootOccurrences = util.getStringRootOccurrence(projected)
+            rootOccurrences = self.getStringRootOccurrence(projected)
 
             # check the current root occurrences existing in the rootID or not
             isAdded = True
@@ -461,7 +460,7 @@ class FreqT:
 
             to_remove_list = list()
             for key in _rootIDs_dict:
-                rootOccurrence1 = util.getStringRootOccurrence(key)
+                rootOccurrence1 = self.getStringRootOccurrence(key)
                 l2 = rootOccurrence1.split(";")
                 # if l1 is super set of l2 then we don't need to add l1 to rootIDs
                 if util.containsAll(l1, l2):
@@ -482,6 +481,16 @@ class FreqT:
             print("Error: adding rootIDs " + str(e) + "\n")
             trace = traceback.format_exc()
             print(trace)
+
+    def getStringRootOccurrence(self, projected):
+        rootOccurrences = ""
+        for i in range(projected.size()):
+            rootOccurrences = rootOccurrences + str(projected.get_location(i).get_class_id()) +\
+                              "-" + str(projected.get_location(i).get_location_id()) + "-" + \
+                              str(projected.get_location(i).get_root())
+            if i < projected.size() - 1:
+                rootOccurrences = rootOccurrences + ";"
+        return rootOccurrences
 
     def add_maximal_pattern(self, pat, projected, _MFP_dict):
         """

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+import traceback
 
 from freqt.src.be.intimals.freqt.structure.Pattern import *
+from freqt.src.be.intimals.freqt.structure.Projected import Projected
 from freqt.src.be.intimals.freqt.util.Util import *
 from freqt.src.be.intimals.freqt.output.AoutFormatter import *
 
