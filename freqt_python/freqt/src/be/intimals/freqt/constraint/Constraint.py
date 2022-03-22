@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from freqt.src.be.intimals.freqt.structure.PatternInt import *
 from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 
 import sys
@@ -112,16 +111,6 @@ def check_black_list_label(label, black_labels):  # UNUSED
             return True
     return False
 
-
-def check_output(pat, min_leaf, min_node):
-    """
-     * check output constraints: minLeaf and minNode
-     * @param pat
-     * @return
-    """
-    return satisfy_min_leaf(pat, min_leaf) and satisfy_min_node(pat, min_node)
-
-
 def satisfy_min_node(pat, min_node):
     """
      * return true if the number of nodes is larger or equal to minNode
@@ -171,7 +160,7 @@ def is_not_full_leaf(pat):
     return False
 
 
-def missing_left_obligatory_child(pat, candidate, grammar):
+def missing_left_obligatory_child(pat, candidate_prefix, grammar):
     """
      * return true if pattern misses obligatory child at the left side of the current node
      * @param: pat, FTArray
@@ -179,13 +168,13 @@ def missing_left_obligatory_child(pat, candidate, grammar):
      * @param: _grammarInt_dict, dictionary with Integer as keys and list of String as values
     """
     # find parent's position of candidate in the patterns
-    parent_pos = findParentPosition(pat, candidate)
+    parent_pos = pat.find_parent_position(candidate_prefix)
     # find all children of patternLabel in grammar
     children_grammar = grammar[pat.get(parent_pos)]
 
     if children_grammar[0] == "ordered" and not children_grammar[1] == "1":
         # find all children of parentPos in pattern
-        children_pos = findChildrenPosition(pat, parent_pos)
+        children_pos = pat.find_children_position(parent_pos)
         # compare children in pattern and children in grammar
         i = 0
         j = 2
@@ -222,7 +211,7 @@ def missing_right_obligatory_child(pat, grammar):
             children_grammar = grammar[current_label]
             if children_grammar[0] == "ordered" and not children_grammar[1] == "1":
                 # get all children of the current pos in pattern
-                children_pos = findChildrenPosition(pat, pos)
+                children_pos = pat.find_children_position(pos)
                 if len(children_pos) > 0:
                     # check leaf children
                     # compare two sets of children to determine this pattern misses mandatory child or not
@@ -282,9 +271,9 @@ def check_continuous_paragraph(pat, entry_dict, key, _transaction_list):
     try:
         projected = entry_dict[key]
         # find parent's location of Paragraph
-        parent_pos = findParentPosition(pat, key)
+        parent_pos = pat.find_parent_position(key)
         # find Paragraph locations
-        children_pos = findChildrenPosition(pat, parent_pos)
+        children_pos = pat.find_children_position(parent_pos)
 
         if len(children_pos) == 1:
             return
@@ -351,3 +340,29 @@ def check_black_section(entry_dict, key, _transaction_list):
     except:
         e = sys.exc_info()[0]
         print("Error: Delete SectionStatementBlock " + str(e) + "\n")
+
+# TODO delete
+def countLeafNode(patFTArray):
+    """
+     * return number of leafs in the pattern
+     * @param patFTArray, FTArray
+     * @return
+    """
+    count = 0
+    for i in range(0, patFTArray.size()):
+        if patFTArray.get(i) < -1:
+            count += 1
+    return count
+
+def countNode(patFTArray):
+    """
+     * return total number of nodes in the pattern
+     * @param patFTArray, FTArray
+     * @return
+    """
+    count = 0
+    for i in range(0, patFTArray.size()):
+        if patFTArray.get(i) != -1:
+            count += 1
+    return count
+

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import sys
+
+from freqt.src.be.intimals.freqt.constraint.Constraint import countNode
 from freqt.src.be.intimals.freqt.structure.NodeFreqT import *
-from freqt.src.be.intimals.freqt.structure.PatternInt import countNode
 
 
 class ReadFileInt:

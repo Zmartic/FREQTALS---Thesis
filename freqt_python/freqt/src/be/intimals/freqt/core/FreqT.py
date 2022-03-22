@@ -9,7 +9,6 @@ from freqt.src.be.intimals.freqt.util.Util import *
 from freqt.src.be.intimals.freqt.structure.FTArray import *
 from freqt.src.be.intimals.freqt.structure.Pattern import *
 
-from freqt.src.be.intimals.freqt.structure.PatternInt import countNode, getPatternStr
 from freqt.src.be.intimals.freqt.constraint import Constraint
 
 import time
@@ -635,7 +634,7 @@ class FreqT:
             outputMaximalPatterns = XMLOutput(outFile, config, grammar_dict, xmlCharacters_dict)
             pattern = Pattern()
             for key in MFP_dict:
-                pat = getPatternStr(key, labelIndex_dict)
+                pat = key.get_decoded_str(labelIndex_dict)
                 supports = MFP_dict[key]
                 outputMaximalPatterns.report_Int(pat, supports)
                 outputCommonPatterns.write(pattern.getPatternString1(pat) + "\n")

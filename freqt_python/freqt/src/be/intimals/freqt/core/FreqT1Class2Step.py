@@ -26,14 +26,14 @@ class FreqT1Class2Step(FreqTCore):
         self._xmlCharacters_dict = dict()
         self._transactionClassID_list = list()
 
-        self.label_encoder = dict()
-        # self.label_decoder = dict()
+        #self.label_encoder = dict()
+        self.label_decoder = dict()
 
         try:
             readXML = ReadXMLInt()
             # remove black labels when reading ASTs
             readXML.readDatabase(self._transaction_list, 1,
-                                 self._config.getInputFiles(), self.label_encoder,
+                                 self._config.getInputFiles(), self.label_decoder,
                                  self._transactionClassID_list, self._config.getWhiteLabelFile())
             # create grammar (labels are strings) which is used to print patterns
             initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
@@ -42,7 +42,7 @@ class FreqT1Class2Step(FreqTCore):
             # read list of special XML characters
             readXMLCharacter(self._config.getXmlCharacterFile(), self._xmlCharacters_dict)
 
-            grammar_int = convert_grammar_keys2int(self._grammar_dict, self.label_encoder)
+            grammar_int = convert_grammar_keys2int(self._grammar_dict, self.label_decoder)
             self.constraints = FreqT1Strategy(self._config, grammar_int)
 
         except:
@@ -107,7 +107,7 @@ class FreqT1Class2Step(FreqTCore):
 
         # run second step
         freqt_ext = FreqT1ClassExt(self._config, root_ids_list, self._grammar_dict, self.constraints.grammar,
-                                   self._xmlCharacters_dict, self.label_encoder, self._transaction_list)
+                                   self._xmlCharacters_dict, self.label_decoder, self._transaction_list)
         freqt_ext.run()
 
         # report result

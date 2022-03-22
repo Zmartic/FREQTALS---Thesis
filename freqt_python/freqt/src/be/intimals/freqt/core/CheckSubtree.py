@@ -94,7 +94,7 @@ def has_subtree(big, small):
 
         # * Continue looping with the rest of the array
         start_idx += root_idx + 1
-        big_part = big.sub_list(start_idx, big.size())
+        big_part = big.sub_list(start_idx, big.size())  # :: could be avoided
 
 
 def skip_over(tree, offset):

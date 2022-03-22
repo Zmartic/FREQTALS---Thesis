@@ -10,7 +10,7 @@ from freqt.src.be.intimals.freqt.structure.Projected import Projected
 
 class FreqT1ClassExt(FreqT1Class):
 
-    def __init__(self, _config, root_ids_list, _grammar_dict, _grammarInt_dict, _xmlCharacters_dict, label_encoder,
+    def __init__(self, _config, root_ids_list, _grammar_dict, _grammarInt_dict, _xmlCharacters_dict, label_decoder,
                  _transaction_list):
         super().__init__(_config)
 
@@ -22,8 +22,8 @@ class FreqT1ClassExt(FreqT1Class):
         self._grammar_dict = _grammar_dict
         self._xmlCharacters_dict = _xmlCharacters_dict
 
-        self.label_encoder = label_encoder
-        # self.label_decoder = dict()
+        #self.label_encoder = label_encoder
+        self.label_decoder = label_decoder
 
         # -- FreqTExt timeout variable --
         self.__interruptedRootIDs = None
@@ -73,7 +73,7 @@ class FreqT1ClassExt(FreqT1Class):
 
         # print the largest patterns
         if len(self.mfp) != 0:
-            self.output_patterns(self.mfp, self._config, self._grammar_dict, self.label_encoder,
+            self.output_patterns(self.mfp, self._config, self._grammar_dict, self.label_decoder,
                                  self._xmlCharacters_dict)
 
     """

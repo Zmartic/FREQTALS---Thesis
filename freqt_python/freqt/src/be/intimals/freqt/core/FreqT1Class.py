@@ -9,7 +9,6 @@ from freqt.src.be.intimals.freqt.core.CheckSubtree import check_subtree
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
 from freqt.src.be.intimals.freqt.output.XMLOutput import XMLOutput
 from freqt.src.be.intimals.freqt.structure.Pattern import Pattern
-from freqt.src.be.intimals.freqt.structure.PatternInt import countNode, getPatternStr
 from freqt.src.be.intimals.freqt.util.Initial_Int import initGrammar_Str, readXMLCharacter, convert_grammar_keys2int
 
 
@@ -32,14 +31,14 @@ class FreqT1Class(FreqTCore):
         self._xmlCharacters_dict = dict()
         self._transactionClassID_list = list()
 
-        self.label_encoder = dict()
-        # self.label_decoder = dict()
+        #self.label_encoder = dict()
+        self.label_decoder = dict()
 
         try:
             readXML = ReadXMLInt()
             # remove black labels when reading ASTs
             readXML.readDatabase(self._transaction_list, 1,
-                                 self._config.getInputFiles(), self.label_encoder,
+                                 self._config.getInputFiles(), self.label_decoder,
                                  self._transactionClassID_list, self._config.getWhiteLabelFile())
             # create grammar (labels are strings) which is used to print patterns
             initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
@@ -48,7 +47,7 @@ class FreqT1Class(FreqTCore):
             # read list of special XML characters
             readXMLCharacter(self._config.getXmlCharacterFile(), self._xmlCharacters_dict)
 
-            grammar_int = convert_grammar_keys2int(self._grammar_dict, self.label_encoder)
+            grammar_int = convert_grammar_keys2int(self._grammar_dict, self.label_decoder)
             self.constraints = FreqT1Strategy(self._config, grammar_int)
 
         except:
@@ -66,7 +65,7 @@ class FreqT1Class(FreqTCore):
         self.add_maximal_pattern(pat, proj, self.mfp)
 
     def post_mining_process(self, report):
-        self.outputPatternInTheFirstStep(self.mfp, self._config, self._grammar_dict, self.label_encoder,
+        self.outputPatternInTheFirstStep(self.mfp, self._config, self._grammar_dict, self.label_decoder,
                                          self._xmlCharacters_dict, report)
 
     # --------------- #
@@ -97,7 +96,7 @@ class FreqT1Class(FreqTCore):
         # add new maximal pattern to the list
         mfp[pat.copy()] = proj
 
-    def outputPatternInTheFirstStep(self, mfp, config, grammar, label_encoder, xmlCharacters_dict, report):
+    def outputPatternInTheFirstStep(self, mfp, config, grammar, label_decoder, xmlCharacters_dict, report):
         """
          * print patterns found in the first step
          * @param: MFP_dict, a dictionary with FTArray as keys and String as value
@@ -114,13 +113,13 @@ class FreqT1Class(FreqTCore):
         else:
             self.log(report, "timeout")
         # print pattern to xml file
-        self.output_patterns(mfp, config, grammar, label_encoder, xmlCharacters_dict)
+        self.output_patterns(mfp, config, grammar, label_decoder, xmlCharacters_dict)
 
         self.log(report, "+ Maximal patterns = " + str(len(mfp)))
         self.log(report, "+ Running times = " + str(self.get_running_time()) + " s")
         report.close()
 
-    def output_patterns(self, output_patterns, config, grammar, label_encoder, xmlCharacters_dict):
+    def output_patterns(self, output_patterns, config, grammar, label_decoder, xmlCharacters_dict):
         """
          * print maximal patterns to XML file
          * @param: MFP_dict, dictionary with FTArray as key and String as values
@@ -137,7 +136,7 @@ class FreqT1Class(FreqTCore):
             outputMaximalPatterns = XMLOutput(out_file, config, grammar, xmlCharacters_dict)
             pattern = Pattern()
             for pat in output_patterns:
-                pat_str = getPatternStr(pat, label_encoder)
+                pat_str = pat.get_decoded_str(label_decoder)
                 supports = self.get_support_string(pat, output_patterns[pat])
                 outputMaximalPatterns.report_Int(pat_str, supports)
                 outputCommonPatterns.write(pattern.getPatternString1(pat_str) + "\n")
@@ -157,4 +156,4 @@ class FreqT1Class(FreqTCore):
          * @param: pat, FTArray
          * @param: projected, Projected
         """
-        return str(proj.get_support()) + "," + str(proj.get_root_support()) + "," + str(countNode(pat))
+        return str(proj.get_support()) + "," + str(proj.get_root_support()) + "," + str(pat.n_node)

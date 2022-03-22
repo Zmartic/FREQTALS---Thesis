@@ -153,40 +153,6 @@ class Pattern:
         return size
 
     """
-     * find parent's position of a given candidate in a pattern
-     * @param pat
-     * @param candidate
-     * @return
-    """
-    def findParentPosition(self, patListOfStr, candidateStr):
-        parentPos = 0
-        nodeLevel = 0
-        candidateSize = 0
-        try:
-            p = candidateStr.split(UNICHAR)
-            for i in range(0, len(p)):
-                if p[i] == ")":
-                    nodeLevel += 1
-                if len(p[i]) != 0:
-                    candidateSize += 1
-
-            size = len(patListOfStr) - candidateSize
-            if nodeLevel == 0:
-                parentPos = size - 1
-            else:
-                for i in range(size - 1, 0, -1):
-                    if patListOfStr[i] == ")":
-                        nodeLevel += 1
-                    else:
-                        nodeLevel -= 1
-                    if nodeLevel == -1:
-                        parentPos = i
-                        break
-        except:
-            print("find parent position error ")
-        return parentPos
-
-    """
      * find all children of the node at the parentPos
      * @param patListOfStr, a list of String
      * @param parentPos, int

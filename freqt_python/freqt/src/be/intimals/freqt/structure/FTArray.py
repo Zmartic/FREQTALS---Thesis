@@ -37,6 +37,51 @@ class FTArray:
         """
         return self.memory[i]
 
+    def find_parent_position(self, candidate_prefix):
+        """
+         * return parent's position of the candidate in the pattern
+         * @param patFTArray, FTArray
+         * @param candidateFTArray, FTArray
+         * @return
+        """
+        node_level = candidate_prefix
+        candidate_size = candidate_prefix + 1
+        original_size = self.size() - candidate_size
+
+        if node_level == 0:
+            # right most node of the original pattern
+            return original_size - 1
+        else:
+            for i in range(original_size - 1, 0, -1):
+                node_level = (node_level + 1) if self.get(i) == -1 else (node_level - 1)
+                if node_level == -1:
+                    return i
+
+        return None
+
+    def find_children_position(self, parentPosInt):
+        """
+         * return all children's positions of parentPos in the pat
+         * @param patFTArray, FTArray
+         * @param parentPosInt, Integer
+         * @return
+        """
+        top = -1
+        tmp = list()
+        if parentPosInt < self.size() - 1:
+            count = parentPosInt
+            for i in range(parentPosInt + 1, self.size()):
+                if self.get(i) == -1:
+                    top -= 1
+                else:
+                    top += 1
+                    count += 1
+                if top == 0 and self.get(i) != -1:
+                    tmp.append(i)
+                if top == -2:
+                    break
+        return tmp
+
     def get_last(self):
         """
          Get the last element store in self.memory
@@ -77,9 +122,10 @@ class FTArray:
          :param start: int, index where we start to include element
          :param stop:  int, index where we stop to include element
          :return: FTArray, the sub_list
+         note : this function is only used in has_subtree()
+                this function shouldn't be used
         """
-        # TODO
-        return FTArray(self.memory[start:stop], self.n_node, self.n_leaf)
+        return FTArray(self.memory[start:stop], -1, -1)
 
     def __eq__(self, other):
         return self.memory == other.memory
@@ -115,3 +161,6 @@ class FTArray:
             return self.memory.index(element)
         except ValueError:
             return -1
+
+    def get_decoded_str(self, label_decoder):
+        return [")" if elem == -1 else label_decoder[elem] for elem in self.memory]
