@@ -17,27 +17,38 @@ def convert_grammar_label2int(gram_str, label_index):
     gram_int = dict()
 
     for key in gram_str:
-        nodeChildren_list = gram_str[key]  # list of string
+        node_children_list = gram_str[key]  # list of string
         # find index of the current label
         index = find_index(key, label_index)
         # new int children
-        newChildren_list = list()  # list of string
-        newChildren_list.append(nodeChildren_list[0])
-        newChildren_list.append(nodeChildren_list[1])
+        new_children_list = [node_children_list[0], node_children_list[1]]
+
         # find new int children
-        for i in range(2, len(nodeChildren_list)):
-            temp = nodeChildren_list[i].split(UNICHAR)
+        for i in range(2, len(node_children_list)):
+            temp = node_children_list[i].split(UNICHAR)
             if temp[0] != "leaf-node":
-                childIndex = find_index(temp[0], label_index)
-                newChild = str(childIndex) + UNICHAR + str(temp[1])
-                newChildren_list.append(newChild)
+                child_index = find_index(temp[0], label_index)
+                new_child = str(child_index) + UNICHAR + str(temp[1])
+                new_children_list.append(new_child)
             else:
-                newChild = str(0) + UNICHAR + str(temp[1])
-                newChildren_list.append(newChild)
+                new_child = str(0) + UNICHAR + str(temp[1])
+                new_children_list.append(new_child)
         # add current int label and int children into gramInt
-        gram_int[index] = newChildren_list
+        gram_int[index] = new_children_list
 
     return gram_int
+
+
+def find_index(label, label_index):
+    """
+     * find the position of a label in a dictionary
+     * @param: label, String
+     * @param: labelIndex_dict, a dictionary with Integer as keys and String as values
+    """
+    for index in label_index:
+        if label_index[index] == label:
+            return index
+    return -1
 
 
 def initGrammar_Str(path, white, gram_dict, _buildGrammar):
@@ -60,12 +71,13 @@ def initGrammar_Str(path, white, gram_dict, _buildGrammar):
         print("Error: reading grammar " + str(e) + "\n")
 
 
-def readRootLabel(path, rootLabels_set):
+def read_root_label(path):
     """
      * read list of root labels
      * @param: path, String
      * @param: rootLabels_set, a set of String
     """
+    root_labels_set = set()
     try:
         with open(path) as f:
             line = f.readline()
@@ -73,11 +85,13 @@ def readRootLabel(path, rootLabels_set):
                 if len(line) != 0 and line[0] != '#' and line != "\n":
                     line = line.replace("\n", "")
                     str_tmp = line.split(" ")
-                    rootLabels_set.add(str_tmp[0])
+                    root_labels_set.add(str_tmp[0])
                 line = f.readline()
     except:
         e = sys.exc_info()[0]
         print("Error: reading listRootLabel " + str(e) + "\n")
+
+    return root_labels_set
 
 
 def readXMLCharacter(path, listCharacters_dict):
@@ -98,15 +112,3 @@ def readXMLCharacter(path, listCharacters_dict):
         e = sys.exc_info()[0]
         print("Error: reading XMLCharater " + str(e) + "\n")
 
-
-def find_index(label, labelIndex_dict):
-    """
-     * find the position of a label in a dictionary
-     * @param: label, String
-     * @param: labelIndex_dict, a dictionary with Integer as keys and String as values
-    """
-    index = -1
-    for key in labelIndex_dict:
-        if labelIndex_dict[key] == label:
-            index = key
-    return index

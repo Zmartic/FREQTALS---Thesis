@@ -131,24 +131,24 @@ class FreqT1Class(FreqTCore):
         try:
             out_file = config.getOutputFile()
             # create output file to store patterns for mining common patterns
-            outputCommonPatterns = open(out_file + ".txt", 'w+')
+            output_common_patterns = open(out_file + ".txt", 'w+')
             # output maximal patterns
-            outputMaximalPatterns = XMLOutput(out_file, config, grammar, xmlCharacters_dict)
+            output_maximal_patterns = XMLOutput(out_file, config, grammar, xmlCharacters_dict)
             pattern = Pattern()
             for pat in output_patterns:
                 pat_str = pat.get_decoded_str(label_decoder)
                 supports = self.get_support_string(pat, output_patterns[pat])
-                outputMaximalPatterns.report_Int(pat_str, supports)
-                outputCommonPatterns.write(pattern.getPatternString1(pat_str) + "\n")
-            outputMaximalPatterns.close()
-            outputCommonPatterns.flush()
-            outputCommonPatterns.close()
+                output_maximal_patterns.report_Int(pat_str, supports)
+                output_common_patterns.write(pattern.getPatternString1(pat_str) + "\n")
+
+            output_maximal_patterns.close()
+            output_common_patterns.flush()
+            output_common_patterns.close()
 
         except:
             e = sys.exc_info()[0]
             print("Print maximal patterns error : " + str(e) + "\n")
-            trace = traceback.format_exc()
-            print(trace)
+            print(traceback.format_exc())
 
     def get_support_string(self, pat, proj):
         """

@@ -100,17 +100,6 @@ def prune_min_w_supp(proj, min_supp):
     return False
 
 
-def check_black_list_label(label, black_labels):  # UNUSED
-    """
-     * return true if the label_int is in the set of black labels
-     * @param: label_int, an integer
-     * @param: _blackLabels, une liste de liste d'Integer
-    """
-    for labels in black_labels:
-        if label in labels:
-            return True
-    return False
-
 def satisfy_min_node(pat, min_node):
     """
      * return true if the number of nodes is larger or equal to minNode

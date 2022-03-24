@@ -57,14 +57,14 @@ class FreqT1Class2Step(FreqTCore):
          * @param: pat FTArray
          * @param: projected, Projected
         """
-        self.addRootIDs(pat, proj, self.root_ids_list)
+        self.add_root_ids(pat, proj, self.root_ids_list)
 
     def post_mining_process(self, report):
         self.expandPatternFromRootIDs(self.root_ids_list, report)
 
     # --------------- #
 
-    def addRootIDs(self, pat, proj, root_ids_list):
+    def add_root_ids(self, pat, proj, root_ids_list):
         """
          * store root occurrences of pattern
          * @param: pat, FTArray

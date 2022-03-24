@@ -133,7 +133,7 @@ class FreqT:
                 self._grammarInt_dict = convert_grammar_label2int(self._grammar_dict, self._labelIndex_dict)
 
             # read root labels (AST Nodes)
-            readRootLabel(self._config.getRootLabelFile(), self.rootLabels_set)
+            self.rootLabels_set = read_root_label(self._config.getRootLabelFile())
             # read list of special XML characters
             readXMLCharacter(self._config.getXmlCharacterFile(), self._xmlCharacters_dict)
 
