@@ -135,7 +135,7 @@ class FreqT:
             # read root labels (AST Nodes)
             self.rootLabels_set = read_root_label(self._config.getRootLabelFile())
             # read list of special XML characters
-            readXMLCharacter(self._config.getXmlCharacterFile(), self._xmlCharacters_dict)
+            self._xmlCharacters_dict = read_XML_character(self._config.getXmlCharacterFile())
 
         except:
             e = sys.exc_info()[0]

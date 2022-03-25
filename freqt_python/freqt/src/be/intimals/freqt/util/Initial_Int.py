@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from freqt.src.be.intimals.freqt.grammar.CreateGrammar import *
-from freqt.src.be.intimals.freqt.grammar.ReadGrammar import *
+from freqt.src.be.intimals.freqt.grammar.CreateGrammar import createGrammar
+from freqt.src.be.intimals.freqt.grammar.ReadGrammar import readGrammar
 from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 
 import sys
@@ -9,11 +9,11 @@ import sys
 
 def convert_grammar_label2int(gram_str, label_index):
     """
-         * convert grammar in form of String to Int
-         * @param: gramInt_dict, a dictionary with Integer as keys and list of String as values
-         * @param: gramStr_dict, a dictionary with String as keys and list of String as values
-         * @param: labelIndex_dict, a dictionary with Integer as keys and String as values
-        """
+     * convert grammar in form of String to Int
+     * @param: gramInt_dict, a dictionary with Integer as keys and list of String as values
+     * @param: gramStr_dict, a dictionary with String as keys and list of String as values
+     * @param: labelIndex_dict, a dictionary with Integer as keys and String as values
+    """
     gram_int = dict()
 
     for key in gram_str:
@@ -61,11 +61,9 @@ def initGrammar_Str(path, white, gram_dict, _buildGrammar):
     """
     try:
         if _buildGrammar:
-            createGrammar = CreateGrammar()
-            createGrammar.createGrammar(path, white, gram_dict)
+            createGrammar(path, white, gram_dict)
         else:
-            read = ReadGrammar()
-            read.readGrammar(path, gram_dict)
+            readGrammar(path, gram_dict)
     except:
         e = sys.exc_info()[0]
         print("Error: reading grammar " + str(e) + "\n")
@@ -94,21 +92,24 @@ def read_root_label(path):
     return root_labels_set
 
 
-def readXMLCharacter(path, listCharacters_dict):
+def read_XML_character(path):
     """
      * read list of special XML characters
      * @param: path, String
      * @param: listCharacters_dict, dictionary with String as keys and String as values
     """
+    xml_characters = dict()
     try:
         with open(path) as f:
             line = f.readline()
             while line:
                 if len(line) != 0 and line[0] != '#':
                     str_tmp = line.split("\t")
-                    listCharacters_dict[str_tmp[0]] = str_tmp[1]
+                    xml_characters[str_tmp[0]] = str_tmp[1]
                 line = f.readline()
     except:
         e = sys.exc_info()[0]
         print("Error: reading XMLCharater " + str(e) + "\n")
+
+    return xml_characters
 
