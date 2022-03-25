@@ -16,10 +16,15 @@ def init_grammar(path, white, gram_dict, _build_grammar):
      * @param: gram_dict, a dictionary with String as keys and list of string as values
      * @gram: _buildGrammar, boolean
     """
-    if _build_grammar:
-        createGrammar(path, white, gram_dict)
-    else:
-        readGrammar(path, gram_dict)
+    try:
+        if _build_grammar:
+            createGrammar(path, gram_dict, white)
+        else:
+            readGrammar(path, gram_dict)
+    except:
+        e = sys.exc_info()[0]
+        print("init grammar error " + str(e) + "\n")
+        print(traceback.format_exc())
 
 
 def convert_grammar_label2int(gram_str, label_index):

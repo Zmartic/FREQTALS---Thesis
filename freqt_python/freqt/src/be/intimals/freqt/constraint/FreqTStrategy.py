@@ -115,8 +115,3 @@ class FreqT1ExtStrategy(FreqTStrategy):
             Constraint.satisfy_min_node(pattern, self.min_node) and \
             not Constraint.missing_right_obligatory_child(pattern, self.grammar)
 
-
-class FreqT2Strategy(FreqT1Strategy):
-
-    def satisfy_post_expansion_constraint(self, pattern):
-        return super().satisfy_post_expansion_constraint(pattern)

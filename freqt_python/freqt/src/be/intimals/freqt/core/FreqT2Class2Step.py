@@ -3,7 +3,7 @@ import sys
 import traceback
 
 from freqt.src.be.intimals.freqt.constraint.Constraint import satisfy_chi_square, chi_square
-from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT2Strategy
+from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT1Strategy
 from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
 
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
@@ -46,7 +46,7 @@ class FreqT2Class2Step(FreqTCore):
             self._xmlCharacters_dict = read_XML_character(self._config.getXmlCharacterFile())
 
             grammar_int = convert_grammar_label2int(self._grammar_dict, self.label_str2int)
-            self.constraints = FreqT2Strategy(self._config, grammar_int)
+            self.constraints = FreqT1Strategy(self._config, grammar_int)
 
         except:
             e = sys.exc_info()[0]

@@ -22,7 +22,6 @@ class FreqT1ClassExt(FreqT1Class):
         self._grammar_dict = _grammar_dict
         self._xmlCharacters_dict = _xmlCharacters_dict
 
-        #self.label_encoder = label_encoder
         self.label_decoder = label_decoder
 
         # -- FreqTExt timeout variable --

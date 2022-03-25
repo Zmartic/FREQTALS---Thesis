@@ -9,6 +9,7 @@ from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
 from freqt.src.be.intimals.freqt.input.Initial_Int import convert_grammar_label2int, \
     read_XML_character, init_grammar
+from freqt.src.be.intimals.freqt.util.Util import read_white_label
 
 
 class FreqT1Class2Step(FreqTCore):
@@ -22,35 +23,27 @@ class FreqT1Class2Step(FreqTCore):
         """
          * read input data
         """
+        white_label = read_white_label(self._config.getWhiteLabelFile())
+
+        # remove black labels when reading ASTs
         self._transaction_list = list()
-        self._grammar_dict = dict()
-        self._xmlCharacters_dict = dict()
         self._transactionClassID_list = list()
-
-        #self.label_encoder = dict()
         self.label_decoder = dict()
+        readXML = ReadXMLInt()
+        readXML.readDatabase(self._transaction_list, 1,
+                             self._config.getInputFiles(), self.label_decoder,
+                             self._transactionClassID_list, white_label)
 
-        try:
-            readXML = ReadXMLInt()
-            # remove black labels when reading ASTs
-            readXML.readDatabase(self._transaction_list, 1,
-                                 self._config.getInputFiles(), self.label_decoder,
-                                 self._transactionClassID_list, self._config.getWhiteLabelFile())
-            # create grammar (labels are strings) which is used to print patterns
-            init_grammar(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
-                            self._config.buildGrammar())
+        # create grammar (labels are strings) which is used to print patterns
+        self._grammar_dict = dict()
+        init_grammar(self._config.getInputFiles(), white_label, self._grammar_dict, self._config.buildGrammar())
 
-            # read list of special XML characters
-            self._xmlCharacters_dict = read_XML_character(self._config.getXmlCharacterFile())
+        # read list of special XML characters
+        self._xmlCharacters_dict = dict()
+        self._xmlCharacters_dict = read_XML_character(self._config.getXmlCharacterFile())
 
-            grammar_int = convert_grammar_label2int(self._grammar_dict, self.label_decoder)
-            self.constraints = FreqT1Strategy(self._config, grammar_int)
-
-        except:
-            e = sys.exc_info()[0]
-            print("read data set error " + str(e) + "\n")
-            trace = traceback.format_exc()
-            print(trace)
+        grammar_int = convert_grammar_label2int(self._grammar_dict, self.label_decoder)
+        self.constraints = FreqT1Strategy(self._config, grammar_int)
 
     def add_tree(self, pat, proj):
         """

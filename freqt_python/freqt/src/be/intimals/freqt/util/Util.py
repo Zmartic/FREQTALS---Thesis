@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-def read_whiteLabel(path):
+def read_white_label(path):
     _whiteLabels = dict()
     try:
         f = open(path, 'r')

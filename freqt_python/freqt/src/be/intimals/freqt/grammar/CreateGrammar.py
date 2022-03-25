@@ -2,7 +2,6 @@
 """
 create grammar for ASTs
 """
-from freqt.src.be.intimals.freqt.util.Util import read_whiteLabel
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import *
 from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 
@@ -12,28 +11,16 @@ import os
 import collections
 
 
-
-def createGrammar(path, white, grammar_dict):
-    """
-     * constructor
-     * @param: path, String
-     * @param: white, String
-     * @param: grammar_dict, dictionary with String as keys and list of String as grammar
-    """
-    white = read_whiteLabel(white)
-    createGrammar2(path, grammar_dict, white)
-
-
-def createGrammar2(f, grammar_dict, white_labels):
+def createGrammar(path, grammar_dict, white_labels):
     """
      * create grammar from multiple files
      * @param: f, string
      * @param: grammar_dict, dictionary with String as keys and list of string as values
     """
-    subdir = [fi for fi in os.listdir(f) if os.path.isfile(os.path.join(f, fi))]
+    subdir = [fi for fi in os.listdir(path) if os.path.isfile(os.path.join(path, fi))]
     subdir.sort()
     for i in range(len(subdir)):
-        subdir[i] = f + '/' + subdir[i]
+        subdir[i] = path + '/' + subdir[i]
     for fi in subdir:
         if os.path.isfile(fi):
             if fi.endswith(".xml"):
@@ -42,12 +29,12 @@ def createGrammar2(f, grammar_dict, white_labels):
                 # create grammar
                 readGrammarDepthFirst(doc.documentElement, grammar_dict, white_labels)
 
-    directories = [fi for fi in os.listdir(f) if os.path.isdir(os.path.join(f, fi))]
+    directories = [fi for fi in os.listdir(path) if os.path.isdir(os.path.join(path, fi))]
     for i in range(len(directories)):
-        directories[i] = f + '/' + directories[i]
+        directories[i] = path + '/' + directories[i]
     for dir in directories:
         if os.path.isdir(dir):
-            createGrammar2(dir, grammar_dict)
+            createGrammar(dir, grammar_dict, white_labels)
 
 
 def readGrammarDepthFirst(node, grammar_dict, white_labels):

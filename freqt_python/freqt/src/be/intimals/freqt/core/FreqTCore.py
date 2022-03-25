@@ -210,7 +210,7 @@ class FreqTCore:
                     did_stop_extend = self.expand_pattern(pattern, new_proj)
                     if did_stop_extend:
                         if candidate_label < -1:
-                            self.add_tree_requested(pattern, new_proj)
+                            _ = self.add_tree_requested(pattern, new_proj)
                         else:
                             did_ever_stop_extend = True
 

@@ -28,7 +28,7 @@ class ReadXMLInt:
         self.countSection = -1
         self._abstractLeafs = False
 
-    def readDatabase(self, database, class_id, root_directory, labelIndex, classIndex_list, whiteLabelPath):
+    def readDatabase(self, database, class_id, root_directory, labelIndex, classIndex_list, white_labels):
         """
          * read 2-class ASTs, and remove black labels
          * @param database_list, a list of list of NodeFreqT
@@ -42,7 +42,6 @@ class ReadXMLInt:
         self.populate_file_list(root_directory, files)
         files.sort()
 
-        white_labels = self.read_whiteLabel(whiteLabelPath)  # dictionary with String as Key and set of String as value
         try:
             for fi in files:
                 self.countSection = 0
