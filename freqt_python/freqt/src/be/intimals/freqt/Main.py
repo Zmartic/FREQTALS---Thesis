@@ -7,14 +7,11 @@ This algorithm was implemented by PHAM Hoang Son in May 2018.
 python implementation: 12 June 2021
    by Quinet Loïc
 """
-
-from freqt.src.be.intimals.freqt.config.Config import *
-from freqt.src.be.intimals.freqt.core.FreqT import *
 from freqt.src.be.intimals.freqt.core.FreqT1Class import FreqT1Class
 from freqt.src.be.intimals.freqt.core.FreqT1Class2Step import FreqT1Class2Step
 from freqt.src.be.intimals.freqt.core.FreqT2Class import FreqT2Class
 from freqt.src.be.intimals.freqt.core.FreqT2Class2Step import FreqT2Class2Step
-from freqt.src.be.intimals.freqt.core.FreqT_common import *
+from freqt.src.be.intimals.freqt.core.FreqTUtil.FreqT_common import *
 
 import sys
 import os

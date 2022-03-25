@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import traceback
 
 from freqt.src.be.intimals.freqt.grammar.CreateGrammar import createGrammar
 from freqt.src.be.intimals.freqt.grammar.ReadGrammar import readGrammar
@@ -108,4 +109,3 @@ def read_XML_character(path):
         print("Error: reading XMLCharater " + str(e) + "\n")
 
     return xml_characters
-

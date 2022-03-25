@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from freqt.src.be.intimals.freqt.core.FreqT_subtree import *
+from freqt.src.be.intimals.freqt.core.FreqTUtil.FreqT_subtree import *
 
 
 def check_subtree(pat1, pat2):

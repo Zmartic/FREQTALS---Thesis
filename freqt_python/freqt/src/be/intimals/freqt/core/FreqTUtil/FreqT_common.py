@@ -2,7 +2,6 @@
 
 from freqt.src.be.intimals.freqt.config.Config import *
 import freqt.src.be.intimals.freqt.structure.Projected as proj
-from freqt.src.be.intimals.freqt.structure.Pattern import *
 from freqt.src.be.intimals.freqt.input.ReadFile import *
 from freqt.src.be.intimals.freqt.output.XMLOutput import *
 

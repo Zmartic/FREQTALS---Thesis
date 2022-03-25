@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys
+import time
 import unittest
 
 from freqt.src.be.intimals.freqt.Main import *

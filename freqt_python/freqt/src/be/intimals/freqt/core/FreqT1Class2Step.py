@@ -7,7 +7,7 @@ from freqt.src.be.intimals.freqt.core.FreqT1ClassExt import FreqT1ClassExt
 from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
 
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
-from freqt.src.be.intimals.freqt.util.Initial_Int import convert_grammar_label2int, \
+from freqt.src.be.intimals.freqt.input.Initial_Int import convert_grammar_label2int, \
     read_XML_character, init_grammar
 
 

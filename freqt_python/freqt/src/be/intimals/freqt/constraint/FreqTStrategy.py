@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 
 from freqt.src.be.intimals.freqt.constraint import Constraint
-from freqt.src.be.intimals.freqt.util.Initial_Int import read_root_label
+from freqt.src.be.intimals.freqt.input.Initial_Int import read_root_label
 
 
 class FreqTStrategy(ABC):

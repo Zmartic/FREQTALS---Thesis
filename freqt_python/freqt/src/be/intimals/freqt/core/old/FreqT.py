@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 from collections import OrderedDict
 
-from typing import Dict, Tuple
+from typing import Tuple
 
 from freqt.src.be.intimals.freqt.output.XMLOutput import *
-from freqt.src.be.intimals.freqt.util.Initial_Int import *
-from freqt.src.be.intimals.freqt.util.Util import *
+from freqt.src.be.intimals.freqt.input.Initial_Int import *
 from freqt.src.be.intimals.freqt.structure.FTArray import *
 from freqt.src.be.intimals.freqt.structure.Pattern import *
 
@@ -209,7 +208,7 @@ class FreqT:
             self.log(report, "- Step 2: Mining maximal patterns WITHOUT max size constraint:")
 
             # run the second step
-            from freqt.src.be.intimals.freqt.core.FreqT_ext import FreqT_ext
+            from freqt.src.be.intimals.freqt.core.old.FreqT_ext import FreqT_ext
             freqT_ext = FreqT_ext(self._config, self._grammar_dict, self._grammarInt_dict, self._blackLabelsInt_dict,
                                   self._whiteLabelsInt_dict, self._xmlCharacters_dict, self._labelIndex_dict,
                                   self._transaction_list, self.sizeClass1, self.sizeClass2)

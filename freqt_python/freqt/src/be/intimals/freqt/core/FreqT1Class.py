@@ -9,7 +9,7 @@ from freqt.src.be.intimals.freqt.core.CheckSubtree import check_subtree
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
 from freqt.src.be.intimals.freqt.output.XMLOutput import XMLOutput
 from freqt.src.be.intimals.freqt.structure.Pattern import Pattern
-from freqt.src.be.intimals.freqt.util.Initial_Int import convert_grammar_label2int, \
+from freqt.src.be.intimals.freqt.input.Initial_Int import convert_grammar_label2int, \
     read_XML_character, init_grammar
 
 

@@ -7,7 +7,7 @@ from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT2Strategy
 from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
 
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
-from freqt.src.be.intimals.freqt.util.Initial_Int import convert_grammar_label2int, \
+from freqt.src.be.intimals.freqt.input.Initial_Int import convert_grammar_label2int, \
     read_XML_character, init_grammar
 
 
@@ -200,7 +200,7 @@ class FreqT2Class2Step(FreqTCore):
             self.log(report, "- Step 2: Mining maximal patterns WITHOUT max size constraint:")
 
             # run the second step
-            from freqt.src.be.intimals.freqt.core.FreqT_ext import FreqT_ext
+            from freqt.src.be.intimals.freqt.core.old.FreqT_ext import FreqT_ext
             freqT_ext = FreqT_ext(self._config, self._grammar_dict, self.constraints.grammar,
                                   None,
                                   None, self._xmlCharacters_dict, self.label_str2int,

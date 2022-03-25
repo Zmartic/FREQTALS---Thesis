@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 import traceback
 
-from freqt.src.be.intimals.freqt.util.Util import *
-import freqt.src.be.intimals.freqt.core.FreqT as freqt
+from freqt.src.be.intimals.freqt.core.old.FreqT import FreqT
+from freqt.src.be.intimals.freqt.structure.FTArray import FTArray
 from freqt.src.be.intimals.freqt.structure.Projected import *
-from freqt.src.be.intimals.freqt.structure.Location import *
 
 from freqt.src.be.intimals.freqt.constraint import Constraint
 
@@ -16,7 +15,7 @@ import time
 """
 
 
-class FreqT_ext(freqt.FreqT):
+class FreqT_ext(FreqT.FreqT):
 
     __interruptedRootIDs_dict = dict()  # dictionary with Projected as keys and FTArray as value
 
