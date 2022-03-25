@@ -5,9 +5,10 @@ import traceback
 from freqt.src.be.intimals.freqt.constraint.Constraint import satisfy_chi_square, chi_square
 from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT2Strategy
 from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
+
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
-from freqt.src.be.intimals.freqt.util.Initial_Int import initGrammar_Str, convert_grammar_label2int, \
-    read_XML_character
+from freqt.src.be.intimals.freqt.util.Initial_Int import convert_grammar_label2int, \
+    read_XML_character, init_grammar
 
 
 class FreqT2Class2Step(FreqTCore):
@@ -36,9 +37,9 @@ class FreqT2Class2Step(FreqTCore):
                                  self._transactionClassID_list, self._config.getWhiteLabelFile())
             self.sizeClass1 = sum(self._transactionClassID_list)
             self.sizeClass2 = len(self._transactionClassID_list) - self.sizeClass1
-            initGrammar_Str(self._config.getInputFiles1(), self._config.getWhiteLabelFile(), self._grammar_dict,
+            init_grammar(self._config.getInputFiles1(), self._config.getWhiteLabelFile(), self._grammar_dict,
                             self._config.buildGrammar())
-            initGrammar_Str(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict,
+            init_grammar(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict,
                             self._config.buildGrammar())
 
             # read list of special XML characters

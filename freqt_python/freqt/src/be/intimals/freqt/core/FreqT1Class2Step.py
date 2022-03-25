@@ -7,8 +7,8 @@ from freqt.src.be.intimals.freqt.core.FreqT1ClassExt import FreqT1ClassExt
 from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
 
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
-from freqt.src.be.intimals.freqt.util.Initial_Int import initGrammar_Str, convert_grammar_label2int, \
-    read_XML_character
+from freqt.src.be.intimals.freqt.util.Initial_Int import convert_grammar_label2int, \
+    read_XML_character, init_grammar
 
 
 class FreqT1Class2Step(FreqTCore):
@@ -37,7 +37,7 @@ class FreqT1Class2Step(FreqTCore):
                                  self._config.getInputFiles(), self.label_decoder,
                                  self._transactionClassID_list, self._config.getWhiteLabelFile())
             # create grammar (labels are strings) which is used to print patterns
-            initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
+            init_grammar(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
                             self._config.buildGrammar())
 
             # read list of special XML characters

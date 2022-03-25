@@ -7,6 +7,20 @@ from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 import sys
 
 
+def init_grammar(path, white, gram_dict, _build_grammar):
+    """
+     * Load the grammar from a given file or build it from a set of ASTs
+     * @param: path, String
+     * @param: white, String
+     * @param: gram_dict, a dictionary with String as keys and list of string as values
+     * @gram: _buildGrammar, boolean
+    """
+    if _build_grammar:
+        createGrammar(path, white, gram_dict)
+    else:
+        readGrammar(path, gram_dict)
+
+
 def convert_grammar_label2int(gram_str, label_index):
     """
      * convert grammar in form of String to Int
@@ -49,24 +63,6 @@ def find_index(label, label_index):
         if label_index[index] == label:
             return index
     return -1
-
-
-def initGrammar_Str(path, white, gram_dict, _buildGrammar):
-    """
-     * Load the grammar from a given file or build it from a set of ASTs
-     * @param: path, String
-     * @param: white, String
-     * @param: gram_dict, a dictionary with String as keys and list of string as values
-     * @gram: _buildGrammar, boolean
-    """
-    try:
-        if _buildGrammar:
-            createGrammar(path, white, gram_dict)
-        else:
-            readGrammar(path, gram_dict)
-    except:
-        e = sys.exc_info()[0]
-        print("Error: reading grammar " + str(e) + "\n")
 
 
 def read_root_label(path):

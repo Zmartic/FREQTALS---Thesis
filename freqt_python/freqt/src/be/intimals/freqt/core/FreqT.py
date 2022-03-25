@@ -117,9 +117,9 @@ class FreqT:
                                      self.__transactionClassID_list, self._config.getWhiteLabelFile())
                 self.sizeClass1 = sum(self.__transactionClassID_list)
                 self.sizeClass2 = len(self.__transactionClassID_list) - self.sizeClass1
-                initGrammar_Str(self._config.getInputFiles1(), self._config.getWhiteLabelFile(), self._grammar_dict,
+                init_grammar(self._config.getInputFiles1(), self._config.getWhiteLabelFile(), self._grammar_dict,
                                 self._config.buildGrammar())
-                initGrammar_Str(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict,
+                init_grammar(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict,
                                 self._config.buildGrammar())
                 self._grammarInt_dict = convert_grammar_label2int(self._grammar_dict, self._labelIndex_dict)
             else:
@@ -127,7 +127,7 @@ class FreqT:
                                      self._config.getInputFiles(), self._labelIndex_dict,
                                      self.__transactionClassID_list, self._config.getWhiteLabelFile())
                 # create grammar (labels are strings) which is used to print patterns
-                initGrammar_Str(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
+                init_grammar(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
                                 self._config.buildGrammar())
                 # create grammar (labels are integers) which is used in the mining process
                 self._grammarInt_dict = convert_grammar_label2int(self._grammar_dict, self._labelIndex_dict)
