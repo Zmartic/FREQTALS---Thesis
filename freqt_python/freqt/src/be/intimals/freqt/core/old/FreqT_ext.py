@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+import sys
 import traceback
 
+from freqt.src.be.intimals.freqt.constraint.Constraint import satisfy_chi_square, chi_square
 from freqt.src.be.intimals.freqt.core.old.FreqT import FreqT
 from freqt.src.be.intimals.freqt.structure.FTArray import FTArray
 from freqt.src.be.intimals.freqt.structure.Projected import *
@@ -15,7 +17,7 @@ import time
 """
 
 
-class FreqT_ext(FreqT.FreqT):
+class FreqT_ext(FreqT):
 
     __interruptedRootIDs_dict = dict()  # dictionary with Projected as keys and FTArray as value
 
@@ -25,7 +27,7 @@ class FreqT_ext(FreqT.FreqT):
     __timeStartGroup = -1
 
     __finishedGroup = False
-    __interrupted_pattern = FTArray()
+    __interrupted_pattern = None
     __interrupted_projected = Projected()
 
     """
@@ -43,7 +45,6 @@ class FreqT_ext(FreqT.FreqT):
     def __init__(self, _config, _grammar_dict, _grammarInt_dict, _blackLabelsInt_dict, _whiteLabelsInt_dict,
                   _xmlCharacters_dict, _labelIndex_dict, _transaction_list, _sizeClass1, _sizeClass2):
         super().__init__(_config)
-        #self._config = _config
         self._grammar_dict = _grammar_dict
         self._grammarInt_dict = _grammarInt_dict
         self._blackLabelsInt_dict = _blackLabelsInt_dict
@@ -74,17 +75,19 @@ class FreqT_ext(FreqT.FreqT):
                 # calculate running time for each group in the current round
                 self.__timePerGroup = (self.timeout - self.__timeSpent) / len(_rootIDs_dict)
                 for keys in _rootIDs_dict:
+                    root, occ = keys
+                    root_pat = FTArray.make_root_pattern(root)
                     # start expanding a group of rootID
                     self.__timeStartGroup = time.time()
                     self.__finishedGroup = True
 
-                    projected = self.getProjected(keys)
+                    projected = self.getProjected(occ)
 
                     # keep current pattern and location if this group cannot finish
-                    self.__interrupted_pattern = _rootIDs_dict[keys].sub_list(0, 1)
-                    self.__interrupted_projected = keys
+                    self.__interrupted_pattern = root_pat.copy()
+                    self.__interrupted_projected = projected
                     # expand the current root occurrences to find maximal patterns
-                    self.expand_pattern(_rootIDs_dict[keys], projected)
+                    self.expand_pattern(root_pat.copy(), projected)
 
                 # update running time
                 self.__timeSpent = time.time() - self.__timeStart2nd
@@ -176,7 +179,8 @@ class FreqT_ext(FreqT.FreqT):
         # check output constraints and right mandatory children before storing pattern
         if self._config.get2Class():
             # check chi-square score
-            if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(), self._config.getWeighted()):
+            score = chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
+            if satisfy_chi_square(score, self._config.getDSScore()):
                 self.add_maximal_pattern(pat, projected, self.MFP_dict)
         else:
             self.add_maximal_pattern(pat, projected, self.MFP_dict)
@@ -185,16 +189,14 @@ class FreqT_ext(FreqT.FreqT):
      * get initial locations of a projected
      * @param: projected, Projected
     """
-    def getProjected(self, projected):
+
+    def getProjected(self, root_occ):
         # create location for the current pattern
-        ouputProjected = Projected()
-        ouputProjected.set_depth(0)
-        for i in range(projected.size()):
-            classID = projected.get_location(i).get_class_id()
-            locationID = projected.get_location(i).get_location_id()
-            rootID = projected.get_location(i).get_root()
-            ouputProjected.add_location(classID, locationID, rootID, None)
-        return ouputProjected
+        proj = Projected()
+        proj.set_depth(0)
+        for loc, root in root_occ:
+            proj.add(Location(root, root, loc, 1))
+        return proj
 
     def reportResult(self, _report):
         if self.finished:

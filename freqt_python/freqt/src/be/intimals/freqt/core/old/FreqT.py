@@ -3,9 +3,13 @@ from collections import OrderedDict
 
 from typing import Tuple
 
+from freqt.src.be.intimals.freqt.constraint.Constraint import countNode, satisfy_chi_square, chi_square
+from freqt.src.be.intimals.freqt.core.AddTree import add_root_ids
+from freqt.src.be.intimals.freqt.core.CheckSubtree import check_subtree
 from freqt.src.be.intimals.freqt.output.XMLOutput import *
 from freqt.src.be.intimals.freqt.core.InitData import *
 from freqt.src.be.intimals.freqt.structure.FTArray import *
+from freqt.src.be.intimals.freqt.structure.Location import Location
 from freqt.src.be.intimals.freqt.structure.Pattern import *
 
 from freqt.src.be.intimals.freqt.constraint import Constraint
@@ -33,7 +37,7 @@ class FreqT:
         # store root labels
         self.rootLabels_set = set()  # set of string
         # store root occurrences of patterns
-        self.rootIDs_dict = dict()  # dictionary with Projected as keys and FTArray as value
+        self.rootIDs_dict = list()  # dictionary with Projected as keys and FTArray as value
         # store file ids of patterns
         self.fileIDs_dict = dict()  # dictionary with String as keys and String as value
         # int nbInputFiles;
@@ -74,7 +78,7 @@ class FreqT:
             self.disconnect_not_whitelisted_node()
 
             # remove node SourceFile because it is not AST node ##
-            not_ast_node = FTArray(init_memory=[0])
+            not_ast_node = FTArray.make_root_pattern(0)
             if not_ast_node in FP1:
                 del FP1[not_ast_node]
 
@@ -252,7 +256,7 @@ class FreqT:
         :param root_label: int, id of the label corresponding to the root node
         :param new_location: Location
         """
-        new_tree = FTArray(init_memory=[root_label])
+        new_tree = FTArray.make_root_pattern(root_label)
 
         if new_tree in FP1:
             FP1[new_tree].add(new_location)
@@ -320,7 +324,7 @@ class FreqT:
 
             # restore the original pattern
             self.restore_leaf_pattern(old_leaf_pattern, old_leaf_projected)
-            pattern = pattern.sub_list(0, old_size)
+            pattern.undo_extend(candidate_prefix)
 
     @staticmethod
     def generate_candidates(projected, _transaction_list):
@@ -426,8 +430,8 @@ class FreqT:
         """
         if self._config.get2Class():
             # check chi-square score
-            if Constraint.satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(),
-                                             self._config.getWeighted()):
+            score = chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
+            if satisfy_chi_square(score, self._config.getDSScore()):
                 if self._config.getTwoStep():
                     # add pattern to the list of 1000-highest chi-square score patterns
                     self.addHighScorePattern(pat, projected, self.__HSP_dict)
@@ -437,59 +441,10 @@ class FreqT:
         else:
             if self._config.getTwoStep():
                 # add root occurrences of the current pattern to rootIDs
-                self.addRootIDs(pat, projected, self.rootIDs_dict)
+                add_root_ids(pat, projected, self.rootIDs_dict)
             else:
                 # add pattern to maximal pattern list
                 self.add_maximal_pattern(pat, projected, self.MFP_dict)
-
-    def addRootIDs(self, pat, projected, _rootIDs_dict):
-        """
-         * add root occurrences of pattern to rootIDs
-         * @param: pat, FTArray
-         * @param: projected, Projected
-         * @param: _rootIDs_dict, a dictionary with Projected as keys and FTArray as values
-        """
-        try:
-            # find root occurrences of current pattern
-            rootOccurrences = self.getStringRootOccurrence(projected)
-
-            # check the current root occurrences existing in the rootID or not
-            isAdded = True
-            l1 = rootOccurrences.split(";")
-
-            to_remove_list = list()
-            for key in _rootIDs_dict:
-                rootOccurrence1 = self.getStringRootOccurrence(key)
-                l2 = rootOccurrence1.split(";")
-                # if l1 is super set of l2 then we don't need to add l1 to rootIDs
-                if util.containsAll(l1, l2):
-                    isAdded = False
-                    break
-                else:
-                    # if l2 is a super set of l1 then remove l2 from rootIDs
-                    if util.containsAll(l2, l1):
-                        to_remove_list.append(key)
-            for elem in to_remove_list:
-                _rootIDs_dict.pop(elem, -1)
-            if isAdded:
-                # store root occurrences and root label
-                rootLabel_int = pat.sub_list(0, 1)
-                _rootIDs_dict[projected] = rootLabel_int
-        except:
-            e = sys.exc_info()[0]
-            print("Error: adding rootIDs " + str(e) + "\n")
-            trace = traceback.format_exc()
-            print(trace)
-
-    def getStringRootOccurrence(self, projected):
-        rootOccurrences = ""
-        for i in range(projected.size()):
-            rootOccurrences = rootOccurrences + str(projected.get_location(i).get_class_id()) +\
-                              "-" + str(projected.get_location(i).get_location_id()) + "-" + \
-                              str(projected.get_location(i).get_root())
-            if i < projected.size() - 1:
-                rootOccurrences = rootOccurrences + ";"
-        return rootOccurrences
 
     def add_maximal_pattern(self, pat, projected, _MFP_dict):
         """
@@ -548,7 +503,7 @@ class FreqT:
         """
         _rootIDs_dict = dict()
         for key in _HSP_dict:
-            self.addRootIDs(key, _HSP_dict[key], _rootIDs_dict)
+            add_root_ids(key, _HSP_dict[key], _rootIDs_dict)
         return _rootIDs_dict
 
     def addHighScorePattern(self, pat, projected, _HSP_dict):
