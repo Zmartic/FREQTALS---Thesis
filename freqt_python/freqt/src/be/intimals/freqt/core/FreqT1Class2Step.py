@@ -9,7 +9,7 @@ from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
 from freqt.src.be.intimals.freqt.input.Initial_Int import convert_grammar_label2int, \
     read_XML_character, init_grammar
-from freqt.src.be.intimals.freqt.util.Util import read_white_label
+from freqt.src.be.intimals.freqt.input.Initial_Int import read_white_label
 
 
 class FreqT1Class2Step(FreqTCore):
@@ -30,8 +30,7 @@ class FreqT1Class2Step(FreqTCore):
         self._transactionClassID_list = list()
         self.label_decoder = dict()
         readXML = ReadXMLInt()
-        readXML.readDatabase(self._transaction_list, 1,
-                             self._config.getInputFiles(), self.label_decoder,
+        readXML.readDatabase(self._transaction_list, 1, self._config.getInputFiles(), self.label_decoder,
                              self._transactionClassID_list, white_label)
 
         # create grammar (labels are strings) which is used to print patterns

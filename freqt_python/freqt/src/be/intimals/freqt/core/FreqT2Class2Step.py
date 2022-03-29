@@ -8,7 +8,7 @@ from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
 
 from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
 from freqt.src.be.intimals.freqt.input.Initial_Int import convert_grammar_label2int, \
-    read_XML_character, init_grammar
+    read_XML_character, init_grammar, read_white_label
 
 
 class FreqT2Class2Step(FreqTCore):
@@ -26,35 +26,33 @@ class FreqT2Class2Step(FreqTCore):
         """
          * read input data
         """
-        try:
-            readXML = ReadXMLInt()
-            # remove black labels when reading ASTs
-            readXML.readDatabase(self._transaction_list, 1,
-                                 self._config.getInputFiles1(), self.label_str2int,
-                                 self._transactionClassID_list, self._config.getWhiteLabelFile())
-            readXML.readDatabase(self._transaction_list, 0,
-                                 self._config.getInputFiles2(), self.label_str2int,
-                                 self._transactionClassID_list, self._config.getWhiteLabelFile())
-            self.sizeClass1 = sum(self._transactionClassID_list)
-            self.sizeClass2 = len(self._transactionClassID_list) - self.sizeClass1
-            init_grammar(self._config.getInputFiles1(), self._config.getWhiteLabelFile(), self._grammar_dict,
-                            self._config.buildGrammar())
-            init_grammar(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict,
-                            self._config.buildGrammar())
+        white_label = read_white_label(self._config.getWhiteLabelFile())
 
-            # read list of special XML characters
-            self._xmlCharacters_dict = read_XML_character(self._config.getXmlCharacterFile())
+        # remove black labels when reading ASTs
+        self._transaction_list = list()
+        self._transactionClassID_list = list()
+        self.label_decoder = dict()
+        readXML = ReadXMLInt()
+        readXML.readDatabase(self._transaction_list, 1, self._config.getInputFiles1(), self.label_decoder,
+                             self._transactionClassID_list, white_label)
+        readXML.readDatabase(self._transaction_list, 0, self._config.getInputFiles2(), self.label_decoder,
+                             self._transactionClassID_list, white_label)
+        self.sizeClass1 = sum(self._transactionClassID_list)
+        self.sizeClass2 = len(self._transactionClassID_list) - self.sizeClass1
 
-            grammar_int = convert_grammar_label2int(self._grammar_dict, self.label_str2int)
-            self.constraints = FreqT1Strategy(self._config, grammar_int)
+        # init grammar
+        self._grammar_dict = dict()
+        init_grammar(self._config.getInputFiles1(), white_label, self._grammar_dict, self._config.buildGrammar())
+        init_grammar(self._config.getInputFiles2(), white_label, self._grammar_dict, self._config.buildGrammar())
 
-        except:
-            e = sys.exc_info()[0]
-            print("read data set error " + str(e) + "\n")
-            trace = traceback.format_exc()
-            print(trace)
+        # read list of special XML characters
+        self._xmlCharacters_dict = dict()
+        self._xmlCharacters_dict = read_XML_character(self._config.getXmlCharacterFile())
 
-    def add_tree(self, pat, projected):
+        grammar_int = convert_grammar_label2int(self._grammar_dict, self.label_decoder)
+        self.constraints = FreqT1Strategy(self._config, grammar_int)
+
+    def add_tree_requested(self, pat, proj):
         """
          * add the tree to the root IDs or the MFP
          * @param: pat FTArray
@@ -62,11 +60,14 @@ class FreqT2Class2Step(FreqTCore):
         """
         # check chi-square score
         if self.constraints.satisfy_post_expansion_constraint(pat) and \
-                satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(),
+                satisfy_chi_square(proj, self.sizeClass1, self.sizeClass2, self._config.getDSScore(),
                                    self._config.getWeighted()):
-            self.addHighScorePattern(pat, projected, self.hsp)
+            self.add_tree(pat, proj)
             return True
         return False
+
+    def add_tree(self, pat, proj):
+        self.addHighScorePattern(pat, proj, self.hsp)
 
     def post_mining_process(self, report):
         self.expandPatternFromRootIDs(self.groupRootOcc(self.hsp), report)
@@ -126,59 +127,33 @@ class FreqT2Class2Step(FreqTCore):
           -> return a dictionary with Projected as keys and FTArray as values
          * @param: _HSP_dict, a dictionary with FTArray as keys and Projected as value
         """
-        _rootIDs_dict = dict()
-        for key in _HSP_dict:
-            self.addRootIDs(key, _HSP_dict[key], _rootIDs_dict)
-        return _rootIDs_dict
+        root_ids_list = list()
+        for proj in _HSP_dict:
+            self.add_root_ids(proj, _HSP_dict[proj], root_ids_list)
+        return root_ids_list
 
-    def addRootIDs(self, pat, projected, _rootIDs_dict):
+    def add_root_ids(self, pat, proj, root_ids_list):
         """
-         * add root occurrences of pattern to rootIDs
+         * store root occurrences of pattern
          * @param: pat, FTArray
          * @param: projected, Projected
          * @param: _rootIDs_dict, a dictionary with Projected as keys and FTArray as values
         """
-        try:
-            # find root occurrences of current pattern
-            rootOccurrences = self.getStringRootOccurrence(projected)
+        # set of root occurrences of current pattern
+        root_occ1 = {(loc.get_location_id(), loc.get_root()) for loc in proj.get_locations()}
 
-            # check the current root occurrences existing in the rootID or not
-            isAdded = True
-            l1 = rootOccurrences.split(";")
+        # check whether the current root occurrences existing in the rootID
+        for elem in root_ids_list:
+            root_occ2 = elem[1]
+            if len(root_occ1) <= len(root_occ2):
+                if root_occ1.issubset(root_occ2):
+                    return
+            else:
+                if root_occ1.issuperset(root_occ2):
+                    del elem
 
-            to_remove_list = list()
-            for key in _rootIDs_dict:
-                rootOccurrence1 = self.getStringRootOccurrence(key)
-                l2 = rootOccurrence1.split(";")
-                # if l1 is super set of l2 then we don't need to add l1 to rootIDs
-                if util.containsAll(l1, l2):
-                    isAdded = False
-                    break
-                else:
-                    # if l2 is a super set of l1 then remove l2 from rootIDs
-                    if util.containsAll(l2, l1):
-                        to_remove_list.append(key)
-            for elem in to_remove_list:
-                _rootIDs_dict.pop(elem, -1)
-            if isAdded:
-                # store root occurrences and root label
-                rootLabel_int = pat.sub_list(0, 1)
-                _rootIDs_dict[projected] = rootLabel_int
-        except:
-            e = sys.exc_info()[0]
-            print("Error: adding rootIDs " + str(e) + "\n")
-            trace = traceback.format_exc()
-            print(trace)
-
-    def getStringRootOccurrence(self, projected):
-        rootOccurrences = ""
-        for i in range(projected.size()):
-            rootOccurrences = rootOccurrences + str(projected.get_location(i).get_class_id()) +\
-                              "-" + str(projected.get_location(i).get_location_id()) + "-" + \
-                              str(projected.get_location(i).get_root())
-            if i < projected.size() - 1:
-                rootOccurrences = rootOccurrences + ";"
-        return rootOccurrences
+        # store root occurrences and root label
+        root_ids_list.append((pat.get(0), root_occ1))
 
     def expandPatternFromRootIDs(self, _rootIDs_dict, report):
         """

@@ -54,11 +54,10 @@ class FreqTCore:
         self._xmlCharacters_dict = dict()
         self._transactionClassID_list = list()
 
-        self.label_encoder = dict()
         self.label_decoder = dict()
         pass
 
-    def add_tree(self, pat, projected):
+    def add_tree(self, pattern, projected):
         """
          * Is called every time a frequent pattern (satisfying the constraints) is found
          !!! note: this function should copy pat
