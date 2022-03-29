@@ -2,7 +2,6 @@
 from abc import ABC, abstractmethod
 
 from freqt.src.be.intimals.freqt.constraint import Constraint
-from freqt.src.be.intimals.freqt.input.Initial_Int import read_root_label
 
 
 class FreqTStrategy(ABC):
@@ -49,7 +48,7 @@ class FreqTStrategy(ABC):
 
 class FreqT1Strategy(FreqTStrategy):
 
-    def __init__(self, config, grammar):
+    def __init__(self, config, grammar, root_labels_set=None):
         self.min_supp = config.getMinSupport()
         self.min_node = config.getMinNode()
         self.max_leaf = config.getMaxLeaf()
@@ -58,7 +57,7 @@ class FreqT1Strategy(FreqTStrategy):
         self.grammar = grammar
 
         # read root labels (AST Nodes)
-        self.root_labels_set = read_root_label(config.getRootLabelFile())
+        self.root_labels_set = dict() if root_labels_set is None else root_labels_set
 
     def allowed_label_as_root(self, label):
         if label in self.root_labels_set or len(self.root_labels_set) == 0:

@@ -1,56 +1,23 @@
 #!/usr/bin/env python3
 import sys
-import traceback
-
 from freqt.src.be.intimals.freqt.constraint.Constraint import satisfy_chi_square, chi_square
-from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT1Strategy
-from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
-
-from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
-from freqt.src.be.intimals.freqt.input.Initial_Int import convert_grammar_label2int, \
-    read_XML_character, init_grammar, read_white_label
+from freqt.src.be.intimals.freqt.core.FreqT1Class2Step import FreqT1Class2Step
+from freqt.src.be.intimals.freqt.core.InitData import init_data_2class
 
 
-class FreqT2Class2Step(FreqTCore):
+class FreqT2Class2Step(FreqT1Class2Step):
 
     def __init__(self, config):
         super().__init__(config)
-        self.label_str2int = dict()
         self.sizeClass1 = -1
-        self.sizeClass2 = 1
+        self.sizeClass2 = -1
 
         # Dict of high score pattern
         self.hsp = dict()
 
     def init_data(self):
-        """
-         * read input data
-        """
-        white_label = read_white_label(self._config.getWhiteLabelFile())
-
-        # remove black labels when reading ASTs
-        self._transaction_list = list()
-        self._transactionClassID_list = list()
-        self.label_decoder = dict()
-        readXML = ReadXMLInt()
-        readXML.readDatabase(self._transaction_list, 1, self._config.getInputFiles1(), self.label_decoder,
-                             self._transactionClassID_list, white_label)
-        readXML.readDatabase(self._transaction_list, 0, self._config.getInputFiles2(), self.label_decoder,
-                             self._transactionClassID_list, white_label)
-        self.sizeClass1 = sum(self._transactionClassID_list)
-        self.sizeClass2 = len(self._transactionClassID_list) - self.sizeClass1
-
-        # init grammar
-        self._grammar_dict = dict()
-        init_grammar(self._config.getInputFiles1(), white_label, self._grammar_dict, self._config.buildGrammar())
-        init_grammar(self._config.getInputFiles2(), white_label, self._grammar_dict, self._config.buildGrammar())
-
-        # read list of special XML characters
-        self._xmlCharacters_dict = dict()
-        self._xmlCharacters_dict = read_XML_character(self._config.getXmlCharacterFile())
-
-        grammar_int = convert_grammar_label2int(self._grammar_dict, self.label_decoder)
-        self.constraints = FreqT1Strategy(self._config, grammar_int)
+        self._transaction_list, self._transactionClassID_list, self.label_decoder, self.sizeClass1, self.sizeClass2, \
+            self._grammar_dict, self._xmlCharacters_dict, self.constraints = init_data_2class(self._config)
 
     def add_tree_requested(self, pat, proj):
         """
@@ -178,7 +145,7 @@ class FreqT2Class2Step(FreqTCore):
             from freqt.src.be.intimals.freqt.core.old.FreqT_ext import FreqT_ext
             freqT_ext = FreqT_ext(self._config, self._grammar_dict, self.constraints.grammar,
                                   None,
-                                  None, self._xmlCharacters_dict, self.label_str2int,
+                                  None, self._xmlCharacters_dict, self.label_decoder,
                                   self._transaction_list, self.sizeClass1, self.sizeClass2)
             freqT_ext.run_ext(_rootIDs_dict, report)
 

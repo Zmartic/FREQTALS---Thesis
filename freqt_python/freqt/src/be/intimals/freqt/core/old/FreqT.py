@@ -4,7 +4,7 @@ from collections import OrderedDict
 from typing import Tuple
 
 from freqt.src.be.intimals.freqt.output.XMLOutput import *
-from freqt.src.be.intimals.freqt.input.Initial_Int import *
+from freqt.src.be.intimals.freqt.core.InitData import *
 from freqt.src.be.intimals.freqt.structure.FTArray import *
 from freqt.src.be.intimals.freqt.structure.Pattern import *
 

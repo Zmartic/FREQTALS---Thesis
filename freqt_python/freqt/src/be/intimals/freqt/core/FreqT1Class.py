@@ -2,16 +2,12 @@
 import sys
 import traceback
 
-from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT1Strategy
+from freqt.src.be.intimals.freqt.core.AddTree import add_maximal_pattern
 from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
-from freqt.src.be.intimals.freqt.core.CheckSubtree import check_subtree
+from freqt.src.be.intimals.freqt.core.InitData import init_data_1class
 
-from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
 from freqt.src.be.intimals.freqt.output.XMLOutput import XMLOutput
 from freqt.src.be.intimals.freqt.structure.Pattern import Pattern
-from freqt.src.be.intimals.freqt.input.Initial_Int import convert_grammar_label2int, \
-    read_XML_character, init_grammar
-from freqt.src.be.intimals.freqt.input.Initial_Int import read_white_label
 
 
 class FreqT1Class(FreqTCore):
@@ -25,79 +21,15 @@ class FreqT1Class(FreqTCore):
         self.not_maximal_set = set()
 
     def init_data(self):
-        """
-         * read input data
-        """
-        white_label = read_white_label(self._config.getWhiteLabelFile())
-
-        # remove black labels when reading ASTs
-        self._transaction_list = list()
-        self._transactionClassID_list = list()
-        self.label_decoder = dict()
-        readXML = ReadXMLInt()
-        readXML.readDatabase(self._transaction_list, 1, self._config.getInputFiles(), self.label_decoder,
-                             self._transactionClassID_list, white_label)
-
-        # create grammar (labels are strings) which is used to print patterns
-        self._grammar_dict = dict()
-        init_grammar(self._config.getInputFiles(), white_label, self._grammar_dict, self._config.buildGrammar())
-
-        # read list of special XML characters
-        self._xmlCharacters_dict = dict()
-        self._xmlCharacters_dict = read_XML_character(self._config.getXmlCharacterFile())
-
-        grammar_int = convert_grammar_label2int(self._grammar_dict, self.label_decoder)
-        self.constraints = FreqT1Strategy(self._config, grammar_int)
+        self._transaction_list, self._transactionClassID_list, self.label_decoder, self._grammar_dict, \
+            self._xmlCharacters_dict, self.constraints = init_data_1class(self._config)
 
     def add_tree(self, pat, proj):
-        """
-         * add the tree to the root IDs or the MFP
-         * @param: pat FTArray
-         * @param: projected, Projected
-        """
-        self.add_maximal_pattern(pat, proj, self.mfp)
+        add_maximal_pattern(pat, proj, self.mfp, self.not_maximal_set)
 
     def post_mining_process(self, report):
-        self.outputPatternInTheFirstStep(self.mfp, self._config, self._grammar_dict, self.label_decoder,
-                                         self._xmlCharacters_dict, report)
-
-    # --------------- #
-
-    def add_maximal_pattern(self, pat, proj, mfp):
-        """
-         * add maximal patterns
-         * @param: pat, FTArray
-         * @param: projected, Projected
-         * @param: _MFP_dict, a dictionary with FTArray as keys and String as values
-        """
-        if len(mfp) != 0:
-            if pat in self.not_maximal_set:
-                return
-            if pat in mfp:
-                return
-
-            # check maximal pattern
-            for max_pat in mfp.keys():
-                res = check_subtree(pat, max_pat)
-                if res == 1:  # * pat is a subtree of max_pat
-                    self.not_maximal_set.add(pat)
-                    return
-                elif res == 2:  # * max_pat is a subtree of pat
-                    self.not_maximal_set.add(max_pat)
-                    del mfp[max_pat]
-
-        # add new maximal pattern to the list
-        mfp[pat.copy()] = proj
-
-    def outputPatternInTheFirstStep(self, mfp, config, grammar, label_decoder, xmlCharacters_dict, report):
         """
          * print patterns found in the first step
-         * @param: MFP_dict, a dictionary with FTArray as keys and String as value
-         * @param: config, Config
-         * @param: grammar_dict, dictionary with String as keys and list of String as value
-         * @param: labelIndex_dict, dictionary with Integer as keys and String as values
-         * @param: xmlCharacters_dict, dictionary with String as keys and Sting as values
-         * @param: report, a link to a file ready to be written
         """
         self.log(report, "OUTPUT")
         self.log(report, "===================")
@@ -106,9 +38,9 @@ class FreqT1Class(FreqTCore):
         else:
             self.log(report, "timeout")
         # print pattern to xml file
-        self.output_patterns(mfp, config, grammar, label_decoder, xmlCharacters_dict)
+        self.output_patterns(self.mfp, self._config, self._grammar_dict, self.label_decoder, self._xmlCharacters_dict)
 
-        self.log(report, "+ Maximal patterns = " + str(len(mfp)))
+        self.log(report, "+ Maximal patterns = " + str(len(self.mfp)))
         self.log(report, "+ Running times = " + str(self.get_running_time()) + " s")
         report.close()
 

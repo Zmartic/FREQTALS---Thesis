@@ -1,12 +1,73 @@
 #!/usr/bin/env python3
+import sys
 import traceback
 
+from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import *
 from freqt.src.be.intimals.freqt.grammar.CreateGrammar import createGrammar
 from freqt.src.be.intimals.freqt.grammar.ReadGrammar import readGrammar
 from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
+from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
 
-import sys
 
+def init_data_1class(config):
+    """
+     * read input data
+    """
+    white_label = read_white_label(config.getWhiteLabelFile())
+
+    # remove black labels when reading ASTs
+    transactions = list()
+    trans_class_id = list()  # actually not useful
+    label_decoder = dict()
+    readXML = ReadXMLInt()
+    readXML.readDatabase(transactions, 1, config.getInputFiles(), label_decoder, trans_class_id, white_label)
+
+    # create grammar (labels are strings) which is used to print patterns
+    grammar = dict()
+    init_grammar(config.getInputFiles(), white_label, grammar, config.buildGrammar())
+
+    # read list of special XML characters
+    xml_char_dict = read_XML_character(config.getXmlCharacterFile())
+
+    grammar_int = convert_grammar_label2int(grammar, label_decoder)
+    root_label_set = read_root_label(config.getRootLabelFile())
+    constraints = FreqT1Strategy(config, grammar_int, root_label_set)
+
+    return transactions, trans_class_id, label_decoder, grammar, xml_char_dict, constraints
+
+
+def init_data_2class(config):
+    """
+     * read input data
+    """
+    white_label = read_white_label(config.getWhiteLabelFile())
+
+    # remove black labels when reading ASTs
+    transactions = list()
+    trans_class_id = list()
+    label_decoder = dict()
+    readXML = ReadXMLInt()
+    readXML.readDatabase(transactions, 1, config.getInputFiles1(), label_decoder, trans_class_id, white_label)
+    readXML.readDatabase(transactions, 0, config.getInputFiles2(), label_decoder, trans_class_id, white_label)
+    size_class1 = sum(trans_class_id)
+    size_class2 = len(trans_class_id) - size_class1
+
+    # init grammar
+    grammar = dict()
+    init_grammar(config.getInputFiles1(), white_label, grammar, config.buildGrammar())
+    init_grammar(config.getInputFiles2(), white_label, grammar, config.buildGrammar())
+
+    # read list of special XML characters
+    xml_char_dict = read_XML_character(config.getXmlCharacterFile())
+
+    grammar_int = convert_grammar_label2int(grammar, label_decoder)
+    root_label_set = read_root_label(config.getRootLabelFile())
+    constraints = FreqT1Strategy(config, grammar_int, root_label_set)
+
+    return transactions, trans_class_id, label_decoder, size_class1, size_class2, grammar, xml_char_dict, constraints
+
+
+# --- UTIL FUNCTION --- #
 
 def init_grammar(path, white, gram_dict, _build_grammar):
     """
@@ -79,11 +140,11 @@ def read_white_label(path):
         while line:
             if line != "" and line[0] != '#' and line != "\n":
                 str_tmp = line.split()
-                ASTNode = str_tmp[0]
+                ast_node = str_tmp[0]
                 children_set = set()
                 for i in range(1, len(str_tmp)):
                     children_set.add(str_tmp[i])
-                _whiteLabels[ASTNode] = children_set
+                _whiteLabels[ast_node] = children_set
             line = f.readline()
         f.close()
     except:
@@ -134,6 +195,6 @@ def read_XML_character(path):
                 line = f.readline()
     except:
         e = sys.exc_info()[0]
-        print("Error: reading XMLCharater " + str(e) + "\n")
+        print("Error: reading XMLCharacter " + str(e) + "\n")
 
     return xml_characters
