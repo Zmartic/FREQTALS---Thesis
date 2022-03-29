@@ -16,12 +16,13 @@ class FreqT2Class(FreqT1Class):
         self._transaction_list, self._transactionClassID_list, self.label_decoder, self.sizeClass1, self.sizeClass2, \
             self._grammar_dict, self._xmlCharacters_dict, self.constraints = init_data_2class(self._config)
 
-    def add_tree_requested(self, pat, projected):
+    def add_tree_requested(self, pat, proj):
+        if not self.constraints.satisfy_post_expansion_constraint(pat):
+            return False
         # check chi-square score
-        if self.constraints.satisfy_post_expansion_constraint(pat) and \
-                satisfy_chi_square(projected, self.sizeClass1, self.sizeClass2, self._config.getDSScore(),
-                                   self._config.getWeighted()):
-            self.add_tree(pat, projected)
+        score = chi_square(proj, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
+        if satisfy_chi_square(score, self._config.getDSScore()):
+            self.add_tree(pat, proj)
             return True
         return False
 
@@ -32,7 +33,7 @@ class FreqT2Class(FreqT1Class):
          * @param: projected, Projected
         """
         # note: the pattern score is recomputed once and the support twice here,
-        #       but they were already computed inside add_tree_requested() -> satisfy_chi_square()
+        #       but they were already computed inside add_tree_requested()
         score = chi_square(proj, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
         ac = get_2class_support(proj, self._config.getWeighted())
         return str(ac[0]) + "-" + str(ac[1]) + "," + str(score) + "," + str(pat.n_node)

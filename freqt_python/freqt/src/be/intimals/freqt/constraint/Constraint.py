@@ -5,8 +5,7 @@ from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 import sys
 
 
-def satisfy_chi_square(proj, size_class1, size_class2, chi_square_threshold, weighted):
-    score = chi_square(proj, size_class1, size_class2, weighted)
+def satisfy_chi_square(score, chi_square_threshold):
     return score >= chi_square_threshold
 
 

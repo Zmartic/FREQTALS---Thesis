@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import time
 
-from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT1ExtStrategy
 from freqt.src.be.intimals.freqt.core.FreqT1Class import FreqT1Class
+from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT1ExtStrategy
+
 from freqt.src.be.intimals.freqt.structure.FTArray import FTArray
 from freqt.src.be.intimals.freqt.structure.Location import Location
 from freqt.src.be.intimals.freqt.structure.Projected import Projected

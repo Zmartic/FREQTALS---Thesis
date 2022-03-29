@@ -52,3 +52,40 @@ def add_root_ids(pat, proj, root_ids_list):
 
     # store root occurrences and root label
     root_ids_list.append((pat.get(0), root_occ1))
+
+
+def add_high_score_pattern(pat, proj, score, hsp, num_pattern):
+    """
+     * add pattern to the list of N-highest chi-square score patterns
+     * @param: pat, FTArray
+     * @param: projected, Projected
+     * @param: _HSP_dict, dictionary with FTArray as keys and Projected as values
+    """
+    if pat not in hsp:
+        if len(hsp) >= num_pattern:
+            min_pat = get_min_score_pattern(hsp, score)
+            if min_pat is not None:
+                # remove minScore pattern
+                del min_pat
+                # add new pattern
+                hsp[pat] = (proj, score)
+        else:
+            # add new pattern
+            hsp[pat] = (proj, score)
+
+
+def get_min_score_pattern(hsp, current_score):
+    """
+     * get a pattern which has minimum chi-square score in the list of patterns
+     * @param: _HSP_dict: dictionary with FTArray as key and Projected as values
+    """
+    min_score = current_score
+    min_score_pattern = None
+
+    for key in hsp:
+        score = hsp[key][1]
+        if min_score > score:
+            min_score = score
+            min_score_pattern = key
+
+    return min_score_pattern

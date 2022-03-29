@@ -2,9 +2,10 @@
 import sys
 import traceback
 
-from freqt.src.be.intimals.freqt.core.AddTree import add_maximal_pattern
+from freqt.src.be.intimals.freqt.constraint.Constraint import prune
 from freqt.src.be.intimals.freqt.core.FreqTCore import FreqTCore
 from freqt.src.be.intimals.freqt.core.InitData import init_data_1class
+from freqt.src.be.intimals.freqt.core.AddTree import add_maximal_pattern
 
 from freqt.src.be.intimals.freqt.output.XMLOutput import XMLOutput
 from freqt.src.be.intimals.freqt.structure.Pattern import Pattern
@@ -23,6 +24,50 @@ class FreqT1Class(FreqTCore):
     def init_data(self):
         self._transaction_list, self._transactionClassID_list, self.label_decoder, self._grammar_dict, \
             self._xmlCharacters_dict, self.constraints = init_data_1class(self._config)
+
+    '''def expand_pattern(self, pattern, projected):
+        # if timeout then stop expand the pattern;
+        if self.is_timeout():
+            self.finished = False
+            return False
+
+        # --- find candidates of the current pattern ---
+        candidates = FreqTCore.generate_candidates(projected, self._transaction_list)
+        # prune candidate based on minSup
+        prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
+
+        # --- expand each candidate pattern ---
+        super_tree_added = False
+
+        for extension, new_proj in candidates.items():
+            candidate_prefix, candidate_label = extension
+
+            # built the candidate pattern using the extension
+            pattern.extend(candidate_prefix, candidate_label)
+
+            if not self.constraints.is_pruned_pattern(pattern, candidate_prefix):
+                # check constraints on maximal number of leaves and real leaf
+                if self.constraints.stop_expand_pattern(pattern):
+                    if candidate_label < -1:
+                        if self.add_tree_requested(pattern, new_proj):
+                            # pattern was added successfully
+                            super_tree_added = True
+
+                else:
+                    # continue expanding pattern
+                    did_add_tree = self.expand_pattern(pattern, new_proj)
+                    if did_add_tree:
+                        # Super-tree was found, no need to add a subtree
+                        super_tree_added = True
+                    elif candidate_label < -1:
+                        if self.add_tree_requested(pattern, new_proj):
+                            # pattern was added successfully
+                            super_tree_added = True
+
+            # restore the pattern
+            pattern.undo_extend(candidate_prefix)
+
+        return super_tree_added'''
 
     def add_tree(self, pat, proj):
         add_maximal_pattern(pat, proj, self.mfp, self.not_maximal_set)
