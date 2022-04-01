@@ -45,10 +45,10 @@ def add_root_ids(pat, proj, root_ids_list):
         root_occ2 = elem[1]
         if len(root_occ1) <= len(root_occ2):
             if root_occ1.issubset(root_occ2):
-                return
+                del elem
         else:
             if root_occ1.issuperset(root_occ2):
-                del elem
+                return
 
     # store root occurrences and root label
     root_ids_list.append((pat.get(0), root_occ1))

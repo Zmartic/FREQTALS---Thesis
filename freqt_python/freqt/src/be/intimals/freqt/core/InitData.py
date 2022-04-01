@@ -67,7 +67,7 @@ def init_data_2class(config):
     return transactions, trans_class_id, label_decoder, size_class1, size_class2, grammar, xml_char_dict, constraints
 
 
-# --- UTIL FUNCTION --- #
+# --- INITIAL INT --- #
 
 def init_grammar(path, white, gram_dict, _build_grammar):
     """
