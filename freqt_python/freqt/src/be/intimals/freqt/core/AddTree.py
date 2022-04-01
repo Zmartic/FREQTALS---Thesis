@@ -55,7 +55,7 @@ def add_root_ids(pat, proj, root_ids_list):
     # check whether the current root occurrences existing in the rootID
     for elem in root_ids_list:
         root_occ2 = elem[1]
-        if len(root_occ1) <= len(root_occ2):
+        if len(root_occ1) < len(root_occ2):
             if root_occ1.issubset(root_occ2):
                 del elem
         else:
