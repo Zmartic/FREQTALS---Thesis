@@ -15,25 +15,25 @@ from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
 
 
 class FreqTCore:
+    """
+     The core of FreqT algorithm (is a base for other implementation)
+     * Implements the expansion of a pattern
+    """
 
     def __init__(self, _config):
 
         self._config = _config
         self.constraints = None
 
-        self._transaction_list = None  # list of list of NodeFreqT
-        self._grammar_dict = None  # dictionary with String as keys and List of String as value
-        self._xmlCharacters_dict = None  # dictionary with String as keys and String as value
-
-        # new variables for Integer
-        # self._blackLabelsInt_dict = dict()  # dictionary with Integer as keys and List of Integer as value
-        # self._whiteLabelsInt_dict = dict()  # dictionary with Integer as keys and List of Integer as value
+        self._transaction_list = None  # List(List(NodeFreqT)), the set of ASTs
+        self._grammar_dict = None  # Dict(String, String)
+        self._xmlCharacters_dict = None  # Dict(String, String)
 
         # store transaction ids and their correspond class ids
-        self._transactionClassID_list = None  # list of Integer
+        self._transactionClassID_list = None  # List(Int)
 
         # store the conversion of labels : str -> int
-        self.label_decoder = None
+        self.label_decoder = None  # Dict(String, Int)
 
         self.time_start = -1
         self.timeout = -1
@@ -60,9 +60,9 @@ class FreqTCore:
     def add_tree(self, pattern, projected):
         """
          * Is called every time a frequent pattern (satisfying the constraints) is found
-         !!! note: this function should copy pat
-         * @param: pat FTArray
-         * @param: projected, Projected
+             note: this function should copy pattern
+        :param pattern: FTArray, a frequent pattern
+        :param projected: Projected, projection of pattern
         """
         pass
 
@@ -83,7 +83,7 @@ class FreqTCore:
 
         self.disconnect_not_whitelisted_node()
 
-        FP1: OrderedDict[FTArray, Projected] = self.build_FP1()
+        FP1 = self.build_FP1()  # OrderedDict(Int, Projected), the root label and its occurrences
 
         # remove node SourceFile because it is not AST node ##
         not_ast_node = FTArray.make_root_pattern(0)
@@ -91,6 +91,7 @@ class FreqTCore:
             del FP1[not_ast_node]
 
         Constraint.prune(FP1, self._config.getMinSupport(), self._config.getWeighted())
+
         self.expand_FP1(FP1)
 
         self.post_mining_process(report)
@@ -122,11 +123,8 @@ class FreqTCore:
 
     def build_FP1(self):
         """
-         * build subtrees of size 1 based on root labels
-           -> return a dictionary with FTArray as keys and Projected as value
-         * @param: trans_list, a list of list of NodeFreqT
-         * @param: _rootLabels_set, a list of String
-         * @param: _transactionClassID_list, a list of Integer
+         * Build FP1 consisting of "root pattern" (pattern of size 1)
+        :return: OrderedDict(Int, Projected)
         """
         FP1 = collections.OrderedDict()  # OrderedDict[Int, Projected]
         trans = self._transaction_list
@@ -146,10 +144,10 @@ class FreqTCore:
     @staticmethod
     def update_FP1(FP1, root_label, new_location):
         """
-         * update FP1
-        :param FP1: dict[FTArray, Projected]
-        :param root_label: int, id of the label corresponding to the root node
-        :param new_location: Location
+         * Add a new location for some "root pattern" in FP1
+        :param FP1: OrderedDict(Int, Projected)
+        :param root_label: Int, id of the label corresponding to the root node
+        :param new_location: Location, occurrence of root_label in the data
         """
         if root_label in FP1:
             FP1[root_label].add(new_location)
@@ -161,8 +159,8 @@ class FreqTCore:
 
     def expand_FP1(self, freq1):
         """
-         * expand FP1 to find frequent subtrees based on input constraints
-        :param freq1: dict[FTArray, Projected]
+         * Expand FP1 to find frequent subtrees based on input constraints
+        :param freq1: dict(Int, Projected), root label and its occurrences
         """
         for root in freq1:
             # expand root patterns to find maximal patterns
@@ -171,9 +169,16 @@ class FreqTCore:
 
     def expand_pattern(self, pattern, projected):
         """
-         * expand pattern
-         * @param: pattern, FTArray
-         * @param: projected, Projected
+         Expand pattern
+         * Pattern is expanded until stop_expand_pattern() is satisfied.
+         * Pattern that has stop expanding sends "add tree request".
+         * Those requests can be caught by other patterns.
+         * If they satisfy all the constraints, they consume the request an are added to the output.
+         note: If a pattern has a leaf which is not a "leaf node" in the data
+               this pattern should not be add to the output.
+        :param pattern: FTArray, the pattern we are expanding
+        :param projected: Projected, the projection of pattern
+        :return: Boolean, whether a "add tree request" have been sent
         """
         # if timeout then stop expand the pattern;
         if self.is_timeout():
@@ -188,7 +193,7 @@ class FreqTCore:
             return True
 
         # --- expand each candidate pattern ---
-        did_ever_stop_extend = False
+        current_request = False
 
         for extension, new_proj in candidates.items():
             candidate_prefix, candidate_label = extension
@@ -197,39 +202,51 @@ class FreqTCore:
             pattern.extend(candidate_prefix, candidate_label)
 
             if not self.constraints.is_pruned_pattern(pattern, candidate_prefix):
-                # check constraints on maximal number of leaves and real leaf
                 if self.constraints.stop_expand_pattern(pattern):
+                    # * Request generated
                     if candidate_label < -1:
+                        # > Consume request
                         _ = self.add_tree_requested(pattern, new_proj)
                     else:
-                        did_ever_stop_extend = True
+                        # > Passes request to parent
+                        current_request = True
 
                 else:
-                    # continue expanding pattern
-                    did_stop_extend = self.expand_pattern(pattern, new_proj)
-                    if did_stop_extend:
+                    # Continue expanding pattern
+                    add_tree_requested = self.expand_pattern(pattern, new_proj)
+                    if add_tree_requested:
                         if candidate_label < -1:
+                            # > Consume request
                             _ = self.add_tree_requested(pattern, new_proj)
                         else:
-                            did_ever_stop_extend = True
+                            # > Passes request to parent
+                            current_request = True
 
             # restore the pattern
             pattern.undo_extend(candidate_prefix)
 
-        return did_ever_stop_extend
+        return current_request
 
     @staticmethod
     def generate_candidates(projected, _transaction_list):
         """
-         * generate candidates for a pattern, by extending occurrences of this pattern
-        :param projected: Projected, occurrences of the pattern
-        :param _transaction_list: list(list(NodeFreqT))
-        :return: dict[Tuple, Projected], the set of candidates with their location
+         Generate candidates for a pattern
+         For each occurrences, we compute every possible extended version (= one additional node),
+         all those new occurrences are compiled in candidates_dict
+         * patterns are generated from "left to right"
+           (which means that adding a node to some pattern which doesn't correspond to
+           the right most node of the newly created pattern is not allowed)
+        :param projected: Projected, occurrences of a pattern
+        :param _transaction_list: List(List(NodeFreqT))
+        :return: dict(Tuple, Projected), the set of candidates with their occurrences
+                 Candidate = (prefix, label)
+                             :prefix: Int, number of "up" move (-1)
+                             :label: Int, label of the new added node
 
         note: the list of candidate are store in a OrderedDict to allow easy computation of the support
         which assume that (current.loc,current.root) <= (next.loc,next.root)
+        for java implementation
         """
-        # use ordered dictionary to keep the order of the candidates
         candidates_dict: OrderedDict[Tuple, Projected] = collections.OrderedDict()
         depth = projected.get_depth()
 
@@ -244,7 +261,7 @@ class FreqTCore:
             root = occurrences.get_root()
 
             # --- find candidates (from left to right) ---
-            # * try to add a child of the right most node
+            # * try to add a child to the right most node
             candi_id = _transaction_list[loc_id][pos].getNodeChild()
             new_depth = depth + 1
 
@@ -255,7 +272,7 @@ class FreqTCore:
 
                 candi_id = node.getNodeSibling()
 
-            # * try to add a sibling of a parent node
+            # * try to add a sibling to a parent node
             prefix = 1
             for d in range(depth):
                 current_node = _transaction_list[loc_id][pos]
@@ -281,13 +298,15 @@ class FreqTCore:
     @staticmethod
     def update_candidates(freq1_dict, candidate_label, new_location, depth, prefix):
         """
-         * update candidate locations for two-class data
-        :param freq1_dict: dict[Tuple, Projected]
-        :param candidate_label: int
-        :param new_location: Location
-        :param depth: int
-        :param prefix: int, number of time we push -1 to the pattern
+        * Add a new location for some extension (= prefix, label) in freq1_dict
+        :param freq1_dict: Dict(Tuple, Projected), the set of candidates with their occurrences
+                           Candidate = (prefix, candidate_label)
+        :param candidate_label: Int, label of the added node
+        :param new_location: Int, an occurrence of the candidate
+        :param depth: Int
+        :param prefix: Int, number of "up" move (-1) of the extension
         """
+
         extension = (prefix, candidate_label)
 
         if extension in freq1_dict:
@@ -299,6 +318,12 @@ class FreqTCore:
             freq1_dict[extension] = projected
 
     def add_tree_requested(self, pat, proj):
+        """
+         * Request addition of a pattern to the output
+        :param pat: FTArray, the pattern
+        :param proj: Projected, its projection
+        :return: Boolean, whether pat was add to the output
+        """
         if self.constraints.satisfy_post_expansion_constraint(pat):
             self.add_tree(pat, proj)
             return True
@@ -308,9 +333,7 @@ class FreqTCore:
 
     def init_report(self):
         """
-         * create a report
-         * @param: config, Config
-         * @param: dataSize, Integer
+         * Create a report
         """
         data_size = len(self._transaction_list)
         report_file = self._config.getOutputFile().replace("\"", "") + "_report.txt"
@@ -326,23 +349,17 @@ class FreqTCore:
         return report
 
     def get_xml_characters(self):
-        """
-         * return input xmlCharacters
-        """
         return self._xmlCharacters_dict
 
     def get_grammar(self):
-        """
-         * return input grammar
-        """
         return self._grammar_dict
 
     @staticmethod
     def log(report, msg):
         """
-         * write a string to report
-         * @param: report, a file ready to be written
-         * @param: msg, String
+         * Write a string to report
+        :param report: a file ready to be written
+        :param msg: String
         """
         report.write(msg + "\n")
         report.flush()
