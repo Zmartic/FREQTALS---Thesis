@@ -3,7 +3,7 @@ from freqt.src.be.intimals.freqt.core.CheckSubtree import check_subtree
 
 """
  Set of function used to add pattern to some structure
- Usually used inside add_tree() function from FreqT's implementation
+ Usually used inside add_tree() function from FreqT's implementations
 """
 
 
@@ -23,18 +23,24 @@ def add_maximal_pattern(pat, proj, mfp, not_maximal_set):
         if pat in mfp:
             return
 
+        to_remove_list = list()
         # check maximal pattern
         for max_pat in mfp.keys():
             res = check_subtree(pat, max_pat)
             if res == 1:  # * pat is a subtree of max_pat
-                not_maximal_set.add(pat)
+                not_maximal_set.add(pat.copy())
+                # assert(len(to_remove_list) == 0)
                 return
             elif res == 2:  # * max_pat is a subtree of pat
                 not_maximal_set.add(max_pat)
-                del mfp[max_pat]
+                to_remove_list.append(max_pat)
+
+        for max_pat in to_remove_list:
+            del mfp[max_pat]
 
     # add new maximal pattern to the list
     mfp[pat.copy()] = proj
+    return
 
 
 def add_root_ids(pat, proj, root_ids_list):
@@ -52,15 +58,19 @@ def add_root_ids(pat, proj, root_ids_list):
     # set of root occurrences of current pattern
     root_occ1 = {(loc.get_location_id(), loc.get_root()) for loc in proj.get_locations()}
 
+    to_remove_list = list()
     # check whether the current root occurrences existing in the rootID
     for elem in root_ids_list:
         root_occ2 = elem[1]
         if len(root_occ1) < len(root_occ2):
             if root_occ1.issubset(root_occ2):
-                del elem
+                to_remove_list.append(root_occ2)
         else:
             if root_occ1.issuperset(root_occ2):
                 return
+
+    for root_occ in to_remove_list:
+        del root_ids_list[root_occ]
 
     # store root occurrences and root label
     root_ids_list.append((pat.get(0), root_occ1))

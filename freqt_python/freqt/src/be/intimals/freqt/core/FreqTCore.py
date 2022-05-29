@@ -16,8 +16,8 @@ from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
 
 class FreqTCore:
     """
-     The core of FreqT algorithm (is a base for other implementation)
-     * Implements the expansion of a pattern
+     The core of FreqT algorithm (is the base for other implementations)
+     * Implements "the expansion of a patterns"
     """
 
     def __init__(self, _config):
@@ -57,24 +57,28 @@ class FreqTCore:
         self.label_decoder = dict()
         pass
 
-    def add_tree(self, pattern, projected):
+    def add_tree(self, pat, proj):
         """
-         * Is called every time a frequent pattern (satisfying the constraints) is found
-             note: this function should copy pattern
-        :param pattern: FTArray, a frequent pattern
-        :param projected: Projected, projection of pattern
+         * Is called every time a frequent pattern (satisfying every constraints) is found
+         !! note: this function should copy pat
+        :param pat: FTArray, the frequent pattern
+        :param proj: Projected, projection of pat
         """
         pass
 
     def post_mining_process(self, report):
         """
          * Called at the end of the main run
+           > used to output the result or start a 2nd step
         """
         pass
 
     # --- CORE --- #
 
     def run(self):
+        """
+         * Initialise and run the algorithm
+        """
         self.init_data()
         self.set_starting_time()
         report = self.init_report()
@@ -123,8 +127,8 @@ class FreqTCore:
 
     def build_FP1(self):
         """
-         * Build FP1 consisting of "root pattern" (pattern of size 1)
-        :return: OrderedDict(Int, Projected)
+         * Build FP1 th initial set of "root pattern" (pattern of size 1) to be expanded
+        :return: OrderedDict(Int, Projected), set of "root pattern"
         """
         FP1 = collections.OrderedDict()  # OrderedDict[Int, Projected]
         trans = self._transaction_list
@@ -157,15 +161,15 @@ class FreqTCore:
             projected.add(new_location)
             FP1[root_label] = projected
 
-    def expand_FP1(self, freq1):
+    def expand_FP1(self, FP1):
         """
          * Expand FP1 to find frequent subtrees based on input constraints
-        :param freq1: dict(Int, Projected), root label and its occurrences
+        :param FP1: dict(Int, Projected), root label and its occurrences
         """
-        for root in freq1:
+        for root in FP1:
             # expand root patterns to find maximal patterns
             root_pat = FTArray.make_root_pattern(root)
-            _ = self.expand_pattern(root_pat, freq1[root])
+            _ = self.expand_pattern(root_pat, FP1[root])
 
     def expand_pattern(self, pattern, projected):
         """

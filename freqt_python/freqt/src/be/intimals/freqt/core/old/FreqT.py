@@ -62,47 +62,49 @@ class FreqT:
         self.leafProjected = None
         self.notF_set = set()  # set of FTArray
 
+        self.add_tree_count = 0
+        self.maximal_set_hit = 0
+        self.mfp_hit = 0
+        self.n_del = 0
+        self.pat_vist = 0
+        self.check2 = 0
+        self.check3 = 0
+
     # ////////////////////////////////////////////////////////////
 
     def run(self):
-        try:
-            # initialization
-            self.init_data()
-            self.set_starting_time()
-            report = self.init_report()
+        # initialization
+        self.init_data()
+        self.set_starting_time()
+        report = self.init_report()
 
-            print("Mining frequent subtrees ...")
+        print("Mining frequent subtrees ...")
 
-            FP1: OrderedDict[FTArray, Projected] = self.build_FP1()
+        FP1: OrderedDict[FTArray, Projected] = self.build_FP1()
 
-            self.disconnect_not_whitelisted_node()
+        self.disconnect_not_whitelisted_node()
 
-            # remove node SourceFile because it is not AST node ##
-            not_ast_node = FTArray.make_root_pattern(0)
-            if not_ast_node in FP1:
-                del FP1[not_ast_node]
+        # remove node SourceFile because it is not AST node ##
+        not_ast_node = FTArray.make_root_pattern(0)
+        if not_ast_node in FP1:
+            del FP1[not_ast_node]
 
-            # prune FP1 on minimum support
-            Constraint.prune(FP1, self._config.getMinSupport(), self._config.getWeighted())
+        # prune FP1 on minimum support
+        Constraint.prune(FP1, self._config.getMinSupport(), self._config.getWeighted())
 
-            # expand FP1 to find maximal patterns
-            self.expand_FP1(FP1)
+        # expand FP1 to find maximal patterns
+        self.expand_FP1(FP1)
 
-            if self._config.getTwoStep():
-                self.notF_set = set()
-                if self._config.get2Class():
-                    # group root occurrences from 1000-highest chi-square score patterns
-                    self.rootIDs_dict = self.groupRootOcc(self.__HSP_dict)
-                # find pattern from root occurrences
-                self.expandPatternFromRootIDs(self.rootIDs_dict, report)
-            else:
-                self.outputPatternInTheFirstStep(self.MFP_dict, self._config, self._grammar_dict, self._labelIndex_dict,
-                                                 self._xmlCharacters_dict, report)
-        except:
-            e = sys.exc_info()[0]
-            print("Error: running Freqt_Int " + str(e) + "\n")
-            trace = traceback.format_exc()
-            print(trace)
+        if self._config.getTwoStep():
+            self.notF_set = set()
+            if self._config.get2Class():
+                # group root occurrences from 1000-highest chi-square score patterns
+                self.rootIDs_dict = self.groupRootOcc(self.__HSP_dict)
+            # find pattern from root occurrences
+            self.expandPatternFromRootIDs(self.rootIDs_dict, report)
+        else:
+            self.outputPatternInTheFirstStep(self.MFP_dict, self._config, self._grammar_dict, self._labelIndex_dict,
+                                                self._xmlCharacters_dict, report)
 
     def init_data(self):
         """
@@ -110,27 +112,28 @@ class FreqT:
         """
         try:
             readXML = ReadXMLInt()
+            white_label = read_white_label(self._config.getWhiteLabelFile())
             # remove black labels when reading ASTs
             if self._config.get2Class():
                 readXML.readDatabase(self._transaction_list, 1,
                                      self._config.getInputFiles1(), self._labelIndex_dict,
-                                     self.__transactionClassID_list, self._config.getWhiteLabelFile())
+                                     self.__transactionClassID_list, white_label)
                 readXML.readDatabase(self._transaction_list, 0,
                                      self._config.getInputFiles2(), self._labelIndex_dict,
-                                     self.__transactionClassID_list, self._config.getWhiteLabelFile())
+                                     self.__transactionClassID_list, white_label)
                 self.sizeClass1 = sum(self.__transactionClassID_list)
                 self.sizeClass2 = len(self.__transactionClassID_list) - self.sizeClass1
-                init_grammar(self._config.getInputFiles1(), self._config.getWhiteLabelFile(), self._grammar_dict,
+                init_grammar(self._config.getInputFiles1(), white_label, self._grammar_dict,
                                 self._config.buildGrammar())
-                init_grammar(self._config.getInputFiles2(), self._config.getWhiteLabelFile(), self._grammar_dict,
+                init_grammar(self._config.getInputFiles2(), white_label, self._grammar_dict,
                                 self._config.buildGrammar())
                 self._grammarInt_dict = convert_grammar_label2int(self._grammar_dict, self._labelIndex_dict)
             else:
                 readXML.readDatabase(self._transaction_list, 1,
                                      self._config.getInputFiles(), self._labelIndex_dict,
-                                     self.__transactionClassID_list, self._config.getWhiteLabelFile())
+                                     self.__transactionClassID_list, white_label)
                 # create grammar (labels are strings) which is used to print patterns
-                init_grammar(self._config.getInputFiles(), self._config.getWhiteLabelFile(), self._grammar_dict,
+                init_grammar(self._config.getInputFiles(), white_label, self._grammar_dict,
                                 self._config.buildGrammar())
                 # create grammar (labels are integers) which is used in the mining process
                 self._grammarInt_dict = convert_grammar_label2int(self._grammar_dict, self._labelIndex_dict)
@@ -197,30 +200,25 @@ class FreqT:
          * @param: _rootIDs_dict, a dictionary with Projected as keys and FTArray as value
          * @param: report, a open file ready to be writting
         """
-        try:
-            print("Mining maximal frequent subtrees ... \n")
-            self.log(report, "")
-            self.log(report, "OUTPUT")
-            self.log(report, "===================")
+        print("Mining maximal frequent subtrees ... \n")
+        self.log(report, "")
+        self.log(report, "OUTPUT")
+        self.log(report, "===================")
 
-            diff1 = time.time() - self.time_start
-            # report the phase 1
-            self.log(report, "- Step 1: Mining frequent patterns with max size constraints")
-            self.log(report, "\t + running time = " + str(diff1) + "s")
-            self.log(report, "\t + root occurrences groups = " + str(len(_rootIDs_dict)))
-            # phase 2: find maximal patterns from rootIDs
-            self.log(report, "- Step 2: Mining maximal patterns WITHOUT max size constraint:")
+        diff1 = time.time() - self.time_start
+        # report the phase 1
+        self.log(report, "- Step 1: Mining frequent patterns with max size constraints")
+        self.log(report, "\t + running time = " + str(diff1) + "s")
+        self.log(report, "\t + root occurrences groups = " + str(len(_rootIDs_dict)))
+        # phase 2: find maximal patterns from rootIDs
+        self.log(report, "- Step 2: Mining maximal patterns WITHOUT max size constraint:")
 
-            # run the second step
-            from freqt.src.be.intimals.freqt.core.old.FreqT_ext import FreqT_ext
-            freqT_ext = FreqT_ext(self._config, self._grammar_dict, self._grammarInt_dict, self._blackLabelsInt_dict,
-                                  self._whiteLabelsInt_dict, self._xmlCharacters_dict, self._labelIndex_dict,
-                                  self._transaction_list, self.sizeClass1, self.sizeClass2)
-            freqT_ext.run_ext(_rootIDs_dict, report)
-
-        except:
-            e = sys.exc_info()[0]
-            print("expand pattern from root IDs error " + str(e) + "\n")
+        # run the second step
+        from freqt.src.be.intimals.freqt.core.old.FreqT_ext import FreqT_ext
+        freqT_ext = FreqT_ext(self._config, self._grammar_dict, self._grammarInt_dict, self._blackLabelsInt_dict,
+                                self._whiteLabelsInt_dict, self._xmlCharacters_dict, self._labelIndex_dict,
+                                self._transaction_list, self.sizeClass1, self.sizeClass2)
+        freqT_ext.run_ext(_rootIDs_dict, report)
 
     def build_FP1(self):
         """
@@ -281,6 +279,7 @@ class FreqT:
          * @param: pattern, FTArray
          * @param: projected, Projected
         """
+        self.pat_vist += 1
         # if timeout then stop expand the pattern;
         if self.is_timeout():
             return
@@ -292,14 +291,13 @@ class FreqT:
         # if there is no candidate then report the pattern and then stop
         if len(candidates) == 0:
             if self.leafPattern is not None:
-                self.add_tree(self.leafPattern, self.leafProjected)
+                if self.satisfy_post_expansion_constraint(self.leafPattern):
+                    self.add_tree(self.leafPattern, self.leafProjected)
             return
 
         # --- expand each candidate pattern ---
         old_size = pattern.size()
         # store leaf pattern
-        old_leaf_pattern = self.leafPattern
-        old_leaf_projected = self.leafProjected
 
         for extension, new_proj in candidates.items():
             candidate_prefix, candidate_label = extension
@@ -311,10 +309,15 @@ class FreqT:
             if candidate_label < -1:
                 self.keep_leaf_pattern(pattern, new_proj)
 
+            old_leaf_pattern = self.leafPattern
+            old_leaf_projected = self.leafProjected
+
             # check obligatory children constraint
             if self.authorized_pattern(pattern, candidate_prefix):
+                self.check2 += 1
                 # check constraints on maximal number of leaves and real leaf
                 if self.stop_expand_pattern(pattern):
+                    self.check3 += 1
                     if self.satisfy_post_expansion_constraint(self.leafPattern):
                         # store the pattern
                         self.add_tree(self.leafPattern, self.leafProjected)
@@ -453,10 +456,13 @@ class FreqT:
          * @param: projected, Projected
          * @param: _MFP_dict, a dictionary with FTArray as keys and String as values
         """
+        self.add_tree_count += 1
         if len(_MFP_dict) != 0:
             if pat in self.notF_set:
+                self.maximal_set_hit += 1
                 return
             if pat in _MFP_dict:
+                self.mfp_hit += 1
                 return
 
             to_remove_list = list()
@@ -464,17 +470,18 @@ class FreqT:
             for max_pat in _MFP_dict.keys():
                 res = check_subtree(pat, max_pat)
                 if res == 1:  # * pat is a subtree of max_pat
-                    self.notF_set.add(pat)
+                    self.notF_set.add(pat.copy())
                     return
                 elif res == 2:  # * max_pat is a subtree of pat
                     self.notF_set.add(max_pat)
                     to_remove_list.append(max_pat)
+                    self.n_del += 1
 
             for key in to_remove_list:
                 del _MFP_dict[key]
 
         # add new maximal pattern to the list
-        _MFP_dict[pat] = self.get_support_string(pat, projected)
+        _MFP_dict[pat.copy()] = self.get_support_string(pat, projected)
 
     def get_support_string(self, pat, projected):
         """
@@ -573,12 +580,27 @@ class FreqT:
             self.log(report, "timeout")
         # print pattern to xml file
         self.outputPatterns(MFP_dict, config, grammar_dict, labelIndex_dict, xmlCharacters_dict)
-
+        print("size of output  = " + str(len(self.MFP_dict)))
+        print("n add_tree call = " + str(self.add_tree_count))
+        print("maximal_set hit = " + str(self.maximal_set_hit))
+        print("mfp hit         = " + str(self.mfp_hit))
+        print("n_deletion      = " + str(self.n_del))
+        print("n call expand   = " + str(self.pat_vist))
+        print("check2 = "+str(self.check2))
+        print("check3 = " + str(self.check3))
+        for j in self.MFP_dict:
+            print(j.memory)
+            print(self.temp(j))
         end1 = time.time()
         diff1 = end1 - self.time_start
         self.log(report, "+ Maximal patterns = " + str(len(MFP_dict)))
         self.log(report, "+ Running times = " + str(diff1) + " s")
         report.close()
+
+    def temp(self, pat):
+        if not self.satisfy_post_expansion_constraint(pat):
+            return "fail"
+        return "success"
 
     def outputPatterns(self, MFP_dict, config, grammar_dict, labelIndex_dict, xmlCharacters_dict):
         """
