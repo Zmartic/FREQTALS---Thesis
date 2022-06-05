@@ -5,9 +5,9 @@ from freqt.src.be.intimals.freqt.core.FreqT1ClassExt import FreqT1ClassExt
 
 class FreqT2ClassExt(FreqT1ClassExt):
 
-    def __init__(self, _config, root_ids_list, _grammar_dict, _grammarInt_dict, _xmlCharacters_dict, label_decoder,
+    def __init__(self, _config, root_ids_list, _grammar_dict, _grammarInt_dict, _xml_characters_dict, label_decoder,
                  _transaction_list, size_class1, size_class2):
-        super().__init__(_config, root_ids_list, _grammar_dict, _grammarInt_dict, _xmlCharacters_dict, label_decoder,
+        super().__init__(_config, root_ids_list, _grammar_dict, _grammarInt_dict, _xml_characters_dict, label_decoder,
                          _transaction_list)
         self.size_class1 = size_class1
         self.size_class2 = size_class2

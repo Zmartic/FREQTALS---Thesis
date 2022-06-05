@@ -15,10 +15,10 @@ class FreqT1Class2Step(FreqTCore):
          :param config: Config
         """
         self._transaction_list = None
-        self._transactionClassID_list = None
+        self._transaction_class_id_list = None
         self.label_decoder = None
         self._grammar_dict = None
-        self._xmlCharacters_dict = None
+        self._xml_characters_dict = None
         self.constraints = None
 
         super().__init__(config)
@@ -31,10 +31,10 @@ class FreqT1Class2Step(FreqTCore):
          note: this function preprocess the database
         """
         self._transaction_list, \
-        self._transactionClassID_list, \
+        self._transaction_class_id_list, \
         self.label_decoder, \
         self._grammar_dict, \
-        self._xmlCharacters_dict, \
+        self._xml_characters_dict, \
         self.constraints = init_data_1class(self._config)
 
     def add_tree(self, pat, proj):
@@ -62,7 +62,7 @@ class FreqT1Class2Step(FreqTCore):
         # run second step
         freqt_ext = FreqT1ClassExt(self._config, self.root_ids_list,
                                    self._grammar_dict, self.constraints.grammar,
-                                   self._xmlCharacters_dict, self.label_decoder,
+                                   self._xml_characters_dict, self.label_decoder,
                                    self._transaction_list)
         freqt_ext.run()
 

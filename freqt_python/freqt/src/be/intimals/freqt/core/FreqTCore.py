@@ -25,10 +25,10 @@ class FreqTCore:
 
         self._transaction_list = None  # List(List(NodeFreqT)), the set of ASTs
         self._grammar_dict = None  # Dict(String, String)
-        self._xmlCharacters_dict = None  # Dict(String, String)
+        self._xml_characters_dict = None  # Dict(String, String)
 
         # store transaction ids and their correspond class ids
-        self._transactionClassID_list = None  # List(Int)
+        self._transaction_class_id_list = None  # List(Int)
 
         # store the conversion of labels : int -> str
         self.label_decoder = None  # Dict(Int, String)
@@ -49,8 +49,8 @@ class FreqTCore:
 
         self._transaction_list = list()
         self._grammar_dict = dict()
-        self._xmlCharacters_dict = dict()
-        self._transactionClassID_list = list()
+        self._xml_characters_dict = dict()
+        self._transaction_class_id_list = list()
 
         self.label_decoder = dict()
         pass
@@ -112,7 +112,7 @@ class FreqTCore:
                 node = trans[trans_id][loc]
 
                 if self.constraints.allowed_label_as_root(node.getNodeLabel()):
-                    class_id = self._transactionClassID_list[trans_id]
+                    class_id = self._transaction_class_id_list[trans_id]
                     new_location = Location(loc, loc, trans_id, class_id)
                     FreqTCore.update_FP1(FP1, node.getNode_label_int(), new_location)
 
@@ -383,7 +383,7 @@ class FreqTCore:
         return report
 
     def get_xml_characters(self):
-        return self._xmlCharacters_dict
+        return self._xml_characters_dict
 
     def get_grammar(self):
         return self._grammar_dict

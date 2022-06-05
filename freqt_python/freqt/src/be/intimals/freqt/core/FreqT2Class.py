@@ -13,8 +13,8 @@ class FreqT2Class(FreqT1Class):
         self.sizeClass2 = -1
 
     def init_data(self):
-        self._transaction_list, self._transactionClassID_list, self.label_decoder, self.sizeClass1, self.sizeClass2, \
-            self._grammar_dict, self._xmlCharacters_dict, self.constraints = init_data_2class(self._config)
+        self._transaction_list, self._transaction_class_id_list, self.label_decoder, self.sizeClass1, self.sizeClass2, \
+            self._grammar_dict, self._xml_characters_dict, self.constraints = init_data_2class(self._config)
 
     def add_tree_requested(self, pat, proj):
         if not self.constraints.satisfy_post_expansion_constraint(pat):

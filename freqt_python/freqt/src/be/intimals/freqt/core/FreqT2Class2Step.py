@@ -18,8 +18,13 @@ class FreqT2Class2Step(FreqT1Class2Step):
         self.hsp = dict()
 
     def init_data(self):
-        self._transaction_list, self._transactionClassID_list, self.label_decoder, self.sizeClass1, self.sizeClass2, \
-            self._grammar_dict, self._xmlCharacters_dict, self.constraints = init_data_2class(self._config)
+        self._transaction_list, \
+        self._transaction_class_id_list, \
+        self.label_decoder, \
+        self.sizeClass1, self.sizeClass2, \
+        self._grammar_dict, \
+        self._xml_characters_dict, \
+        self.constraints = init_data_2class(self._config)
 
     def add_tree_requested(self, pat, proj):
         if not self.constraints.satisfy_post_expansion_constraint(pat):
@@ -58,7 +63,7 @@ class FreqT2Class2Step(FreqT1Class2Step):
 
             # run second step
             freqt_ext = FreqT2ClassExt(self._config, self.root_ids_list, self._grammar_dict, self.constraints.grammar,
-                                       self._xmlCharacters_dict, self.label_decoder, self._transaction_list,
+                                       self._xml_characters_dict, self.label_decoder, self._transaction_list,
                                        self.sizeClass1, self.sizeClass2)
             freqt_ext.run()
 

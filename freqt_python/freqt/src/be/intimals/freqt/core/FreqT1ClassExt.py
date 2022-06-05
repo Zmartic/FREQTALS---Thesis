@@ -15,7 +15,7 @@ class FreqT1ClassExt(FreqT1Class):
     """
 
     def __init__(self, _config, root_ids_list, _grammar_dict, _grammarInt_dict,
-                 _xmlCharacters_dict, label_decoder, _transaction_list):
+                 _xml_characters_dict, label_decoder, _transaction_list):
         """
          * receive data from the 1st step
         """
@@ -28,7 +28,7 @@ class FreqT1ClassExt(FreqT1Class):
 
         self._transaction_list = _transaction_list
         self._grammar_dict = _grammar_dict
-        self._xmlCharacters_dict = _xmlCharacters_dict
+        self._xml_characters_dict = _xml_characters_dict
 
         self.label_decoder = label_decoder
 
