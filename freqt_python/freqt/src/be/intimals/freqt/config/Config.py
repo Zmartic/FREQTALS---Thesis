@@ -6,6 +6,9 @@ from pyjavaproperties import Properties
 
 
 class Config:
+    """
+        Used to store FreqTals configuration
+    """
 
     def __init__(self, config_path):
         """ init """

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys
 
-from freqt.src.be.intimals.freqt.constraint.Constraint import countNode
+from freqt.src.be.intimals.freqt.constraint.Constraint import count_node
 from freqt.src.be.intimals.freqt.structure.NodeFreqT import *
 
 
@@ -25,7 +25,7 @@ class ReadFileInt:
     """
     def str2node(self, patFTArray, transFreqNodeTList):
         try:
-            size_int = countNode(patFTArray)
+            size_int = count_node(patFTArray)
             # init a list of node
             sibling = [-1] * size_int
             for i in range(0, size_int):
