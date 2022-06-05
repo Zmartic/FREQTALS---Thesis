@@ -8,9 +8,6 @@ from freqt.src.be.intimals.freqt.Comparator import *
 
 import cProfile
 
-from freqt.src.be.intimals.freqt.core import CheckSubtree
-from freqt.src.be.intimals.freqt.core.old.FreqT import FreqT
-
 DO_PROFILE = True
 WARM_UP = 0
 VALIDATION = 1
@@ -33,7 +30,7 @@ def single_run(args_list):
     debugFile = None  # args[5]
     finalConfig = None
 
-    finalConfig = parseConfig(args_list)
+    finalConfig = parse_config(args_list)
     if len(args_list) > 3:
         for i in range(3, len(args_list)):
             if args_list[i] == "--memory":
@@ -68,6 +65,7 @@ def single_run(args_list):
 
     sys.stdout.flush()
     time.sleep(0.01)
+
 
 def test_main(args):
 

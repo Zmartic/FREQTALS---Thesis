@@ -4,279 +4,281 @@
 The following code is a translation of the Java implementation of the FREQTALS algorithm.
 This algorithm was implemented by PHAM Hoang Son in May 2018.
 
-python implementation: 12 June 2021
-   by Quinet Loïc
+python implementation: June 2022
+   by Quinet Loïc, Arnaud Spits
 """
+import os
+import sys
+import traceback
+
+from freqt.src.be.intimals.freqt.config.Config import Config
+
 from freqt.src.be.intimals.freqt.core.FreqT1Class import FreqT1Class
 from freqt.src.be.intimals.freqt.core.FreqT1Class2Step import FreqT1Class2Step
 from freqt.src.be.intimals.freqt.core.FreqT2Class import FreqT2Class
 from freqt.src.be.intimals.freqt.core.FreqT2Class2Step import FreqT2Class2Step
-from freqt.src.be.intimals.freqt.core.FreqTUtil.FreqT_common import *
-
-import sys
-import os
-import traceback
+from freqt.src.be.intimals.freqt.core.FreqTUtil.FreqT_common import FreqT_common
 
 
-def main(args):
-    #agg = ["../../../../resources/conf-artifical-data/abstract-data/config.properties", "2", "abstract-data"]
-    #agg = ["../../../../resources/conf-artifical-data/design-patterns/config.properties", "2", "visitor"]
-    #args = agg
-
-    if len(args) == 0:
+def main(args_list):
+    if len(args_list) == 0:
         print("Single-run Freq-T usage:\n" +
-                "CONFIG_FILE [MIN_SUPPORT] [INPUT_FOLDER] (--class) (--memory [VALUE]) (--debug-file) \n")
+              "CONFIG_FILE [MIN_SUPPORT] [INPUT_FOLDER] " +
+              "(--class) (--memory [VALUE]) (--debug-file) \n")
     else:
-        if args[0] == "-multi":
-            # ToDo
+        if args_list[0] == "-multi":
             print("not implemented yet")
         else:
             print("single run")
-            singleRun(args)
+            single_run(args_list)
 
-def singleRun(args_list):
-    try:
-        memory = ""  # args[4]
-        debugFile = None  # args[5]
-        finalConfig = None
 
-        finalConfig = parseConfig(args_list)
-        if len(args_list) > 3:
-            for i in range(3, len(args_list)):
-                if args_list[i] == "--memory":
-                    memory = "-Xmx" + args_list[i + 1]
-                    i += 1
-                if args_list[i] == "--debug-file":
-                    debugFile = args_list[i]
+def single_run(args_list):
+    memory = ""  # args[4]
+    debug_file = None  # args[5]
+    final_config = None
 
-        # load final configuration;
-        config = Config()
-        config.config(finalConfig)
+    final_config = parse_config(args_list)
+    if len(args_list) > 3:
+        for i in range(3, len(args_list)):
+            if args_list[i] == "--memory":
+                memory = "-Xmx" + args_list[i + 1]
+                i += 1
+            if args_list[i] == "--debug-file":
+                debug_file = args_list[i]
 
-        if config.get2Class():
-            if config.getTwoStep():
-                freqt = FreqT2Class2Step(config)
-            else:
-                freqt = FreqT2Class(config)
+    # load final configuration;
+    config = Config()
+    config.config(final_config)
+
+    if config.get2Class():
+        if config.getTwoStep():
+            freqt = FreqT2Class2Step(config)
         else:
-            if config.getTwoStep():
-                freqt = FreqT1Class2Step(config)
-            else:
-                freqt = FreqT1Class(config)
+            freqt = FreqT2Class(config)
+    else:
+        if config.getTwoStep():
+            freqt = FreqT1Class2Step(config)
+        else:
+            freqt = FreqT1Class(config)
 
-        freqt.run()
+    freqt.run()
 
-        # run forestmatcher to find matches of patterns in source code
-        runForestMatcher(config, memory)
+    # run forestmatcher to find matches of patterns in source code
+    run_forest_matcher(config, memory)
 
-        if not config.get2Class():
-            # find common patterns in each cluster
-            findCommonPattern(config, freqt.get_grammar(), freqt.get_xml_characters())
-            # clean up files
-            cleanUp(config)
+    if not config.get2Class():
+        # find common patterns in each cluster
+        find_common_pattern(config, freqt.get_grammar(), freqt.get_xml_characters())
+        # clean up files
+        clean_up(config)
 
-        print("Finished ... \n")
-    except:
-        e = sys.exc_info()[0]
-        print("!!! Error: main " + str(e) + "\n")
-        trace = traceback.format_exc()
-        print(trace)
-        print("\n")
+    print("Finished ... \n")
 
 
-def parseConfig(args_list):
+def parse_config(args_list):
+    """
+     * Initialise the configuration
+    :param args_list: list(String), inputs
+    :return: Config
+    """
     try:
-        configBasic = Config()
-        configBasic.config(args_list[0])
-        inputMinSup = args_list[1]
-        inputFold = args_list[2]
-
-        sep = "/"
         # create final configuration as used by FreqT
-        prop = configBasic.getProp()
+        config_basic = Config()
+        config_basic.config(args_list[0])
+        prop = config_basic.getProp()
+
+        input_min_sup = args_list[1]
+        prop.setProperty("minSupport", input_min_sup)
+
+        input_fold = args_list[2]
+        sep = "/"
+
         # input data
-        inputPath = configBasic.getInputFiles().replace("\"", "") + sep + inputFold
+        input_path = config_basic.getInputFiles().replace("\"", "") + sep + input_fold
+        prop.setProperty("inputPath", input_path)
 
-        inputPath1 = inputPath + sep + configBasic.getInputFiles1()
-        inputPath2 = inputPath + sep + configBasic.getInputFiles2()
+        input_path1 = input_path + sep + config_basic.getInputFiles1()
+        prop.setProperty("inputPath1", input_path1)
 
-        outputDir = configBasic.getOutputFile()
-        if not os.path.exists(outputDir):
-            os.mkdir(outputDir)
+        input_path2 = input_path + sep + config_basic.getInputFiles2()
+        prop.setProperty("inputPath2", input_path2)
 
-        outputPrefix = configBasic.getOutputFile().replace("\"", "") + sep + inputFold.replace(sep, "_") + "_" + str(inputMinSup)
+        output_dir = config_basic.getOutputFile()
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+
+        output_prefix = config_basic.getOutputFile().replace("\"", "") + sep \
+                        + input_fold.replace(sep, "_") + "_" \
+                        + str(input_min_sup)
 
         # output patterns
-        outputPatterns = outputPrefix + "_patterns.xml"
-        if os.path.exists(outputPatterns):
-            os.remove(outputPatterns)
-
-        # final configuration as used by FreqT
-        finalConfig = outputPrefix + "_config.properties"
-        if os.path.exists(finalConfig):
-            os.remove(finalConfig)
+        output_patterns = output_prefix + "_patterns.xml"
+        if os.path.exists(output_patterns):
+            os.remove(output_patterns)
+        prop.setProperty("outputPath", output_patterns)
 
         # create parameters for forest matcher
-        outputMatches = outputPrefix + "_matches.xml"
-        if os.path.exists(outputPrefix):
-            os.remove(outputPrefix)
+        output_matches = output_prefix + "_matches.xml"
+        if os.path.exists(output_prefix):
+            os.remove(output_prefix)
+        prop.setProperty("outputMatches", output_matches)
 
-        outputClusters = outputPrefix + "_clusters.xml"
-        if os.path.exists(outputClusters):
-            os.remove(outputClusters)
+        output_clusters = output_prefix + "_clusters.xml"
+        if os.path.exists(output_clusters):
+            os.remove(output_clusters)
+        prop.setProperty("outputClusters", output_clusters)
 
-        outputMatches1 = outputPrefix + "_matches_1.xml"
-        if os.path.exists(outputPrefix):
-            os.remove(outputPrefix)
+        output_matches1 = output_prefix + "_matches_1.xml"
+        if os.path.exists(output_prefix):
+            os.remove(output_prefix)
+        prop.setProperty("outputMatches1", output_matches1)
 
-        outputClusters1 = outputPrefix + "_clusters_1.xml"
-        if os.path.exists(outputClusters):
-            os.remove(outputClusters)
+        output_clusters1 = output_prefix + "_clusters_1.xml"
+        if os.path.exists(output_clusters):
+            os.remove(output_clusters)
+        prop.setProperty("outputClusters1", output_clusters1)
 
-        outputMatches2 = outputPrefix + "_matches_2.xml"
-        if os.path.exists(outputPrefix):
-            os.remove(outputPrefix)
+        output_matches2 = output_prefix + "_matches_2.xml"
+        if os.path.exists(output_prefix):
+            os.remove(output_prefix)
+        prop.setProperty("outputMatches2", output_matches2)
 
-        outputClusters2 = outputPrefix + "_clusters_2.xml"
-        if os.path.exists(outputClusters):
-            os.remove(outputClusters)
+        output_clusters2 = output_prefix + "_clusters_2.xml"
+        if os.path.exists(output_clusters):
+            os.remove(output_clusters)
+        prop.setProperty("outputClusters2", output_clusters2)
 
-        outputClustersTemp = outputPrefix + "_matches_clusters.xml"
-        if os.path.exists(outputClustersTemp):
-            os.remove(outputClustersTemp)
+        output_clusters_temp = output_prefix + "_matches_clusters.xml"
+        if os.path.exists(output_clusters_temp):
+            os.remove(output_clusters_temp)
+        prop.setProperty("outputClustersTemp", output_clusters_temp)
 
-        outputCommonPatterns = outputPrefix + "_patterns_common.xml"
-        if os.path.exists(outputCommonPatterns):
-            os.remove(outputCommonPatterns)
+        output_common_patterns = output_prefix + "_patterns_common.xml"
+        if os.path.exists(output_common_patterns):
+            os.remove(output_common_patterns)
+        prop.setProperty("outputCommonPatterns", output_common_patterns)
 
-        outputCommonMatches = outputPrefix + "_matches_common.xml"
-        if os.path.exists(outputCommonMatches):
-            os.remove(outputCommonMatches)
+        output_common_matches = output_prefix + "_matches_common.xml"
+        if os.path.exists(output_common_matches):
+            os.remove(output_common_matches)
+        prop.setProperty("outputCommonMatches", output_common_matches)
 
-        outputCommonClusters = outputPrefix + "_common_clusters.xml"
-        if os.path.exists(outputCommonClusters):
-            os.remove(outputCommonClusters)
+        output_common_clusters = output_prefix + "_common_clusters.xml"
+        if os.path.exists(output_common_clusters):
+            os.remove(output_common_clusters)
+        prop.setProperty("outputCommonClusters", output_common_clusters)
 
-        outputCommonClustersMatches = outputPrefix + "_matches_common_clusters.xml"
-        if os.path.exists(outputCommonClustersMatches):
-            os.remove(outputCommonClustersMatches)
+        output_common_clusters_matches = output_prefix + "_matches_common_clusters.xml"
+        if os.path.exists(output_common_clusters_matches):
+            os.remove(output_common_clusters_matches)
 
-        # update properties
-        prop.setProperty("minSupport", inputMinSup)
-
-        prop.setProperty("outputMatches", outputMatches)
-        prop.setProperty("outputClusters", outputClusters)
-
-        prop.setProperty("inputPath", inputPath)
-        prop.setProperty("inputPath1", inputPath1)
-        prop.setProperty("inputPath2", inputPath2)
-        prop.setProperty("outputPath", outputPatterns)
         prop.setProperty("minSupportList", "")
         prop.setProperty("inFilesList", "")
 
-        prop.setProperty("outputMatches1", outputMatches1)
-        prop.setProperty("outputClusters1", outputClusters1)
+        white_file = prop.getProperty("whiteLabelFile")
+        prop.setProperty("whiteLabelFile", white_file)
+        root_label_file = prop.getProperty("rootLabelFile")
+        prop.setProperty("rootLabelFile", root_label_file)
+        xml_chara_file = prop.getProperty("xmlCharacterFile")
+        prop.setProperty("xmlCharacterFile", xml_chara_file)
 
-        prop.setProperty("outputMatches2", outputMatches2)
-        prop.setProperty("outputClusters2", outputClusters2)
-
-        prop.setProperty("outputClustersTemp", outputClustersTemp)
-        prop.setProperty("outputCommonPatterns", outputCommonPatterns)
-        prop.setProperty("outputCommonMatches", outputCommonMatches)
-        prop.setProperty("outputCommonClusters", outputCommonClusters)
-
-        prop.setProperty("outputClustersTemp", outputClustersTemp)
-        prop.setProperty("outputCommonPatterns", outputCommonPatterns)
-        prop.setProperty("outputCommonMatches", outputCommonMatches)
-        prop.setProperty("outputCommonClusters", outputCommonClusters)
-        whitefile = prop.getProperty("whiteLabelFile")
-        prop.setProperty("whiteLabelFile", whitefile)
-        rootLabelFile = prop.getProperty("rootLabelFile")
-        prop.setProperty("rootLabelFile", rootLabelFile)
-        xmlCharacfile = prop.getProperty("xmlCharacterFile")
-        prop.setProperty("xmlCharacterFile", xmlCharacfile)
-
+        # final configuration as used by FreqT
+        final_config = output_prefix + "_config.properties"
+        if os.path.exists(final_config):
+            os.remove(final_config)
         # save new properties in the final configuration
-        prop.store(open(finalConfig, 'w', encoding='utf-8'))
+        with open(final_config, 'w', encoding='utf-8') as f:
+            prop.store(f)
+        f.close()
 
-        return finalConfig
+        return final_config
 
     except:
-        e = sys.exc_info()[0]
-        print("parse args error: " + str(e) + "\n")
+        print("parse args error: " + str(sys.exc_info()[0]) + "\n")
         trace = traceback.format_exc()
         print(trace)
 
 
-"""
- * @param: config, Config
- * @param: memory, String
-"""
-def runForestMatcher(config, memory):
-    # run forestmatcher to create matches.xml and clusters.xml
+def run_forest_matcher(config, memory):
+    """
+     run forestmatcher to create matches.xml and clusters.xml
+     * @param: config, Config
+     * @param: memory, String
+    """
     try:
         print("Running forestmatcher ...")
         if config.get2Class():
-            command1 = "java -jar ../../../../forestmatcher.jar " + str(config.getInputFiles1()) + " " + str(config.getOutputFile())\
-                       + " " + str(config.getOutputMatches1()) + " " + str(config.getOutputClusters1())
+            command1 = "java -jar ../../../../forestmatcher.jar " \
+                       + str(config.getInputFiles1()) + " " \
+                       + str(config.getOutputFile()) + " " \
+                       + str(config.getOutputMatches1()) + " " \
+                       + str(config.getOutputClusters1())
             os.system(command1)
 
-            command2 = "java -jar ../../../../forestmatcher.jar " + str(config.getInputFiles2()) + " " + str(config.getOutputFile())\
-                       + " " + str(config.getOutputMatches2()) + " " + str(config.getOutputClusters2())
+            command2 = "java -jar ../../../../forestmatcher.jar " \
+                       + str(config.getInputFiles2()) + " " \
+                       + str(config.getOutputFile()) + " " \
+                       + str(config.getOutputMatches2()) + " " \
+                       + str(config.getOutputClusters2())
             os.system(command2)
 
         else:
             if len(memory) == 0:
-                command = "java -jar " + memory + " ../../../../forestmatcher.jar" + " " + str(config.getInputFiles()) + " " + \
-                          str(config.getOutputFile()) + " " + str(config.getOutputMatches()) + " " + str(config.getOutputClusters())
+                command = "java -jar " + memory + " ../../../../forestmatcher.jar" + " " \
+                          + str(config.getInputFiles()) + " " \
+                          + str(config.getOutputFile()) + " " \
+                          + str(config.getOutputMatches()) + " " \
+                          + str(config.getOutputClusters())
             else:
-                command = "java -jar ../../../../forestmatcher.jar " + " " + \
-                          str(config.getInputFiles()) + " " + str(config.getOutputFile()) + " " + str(config.getOutputMatches()) \
+                command = "java -jar ../../../../forestmatcher.jar " + " " \
+                          + str(config.getInputFiles()) + " " \
+                          + str(config.getOutputFile()) + " " \
+                          + str(config.getOutputMatches()) \
                           + " " + str(config.getOutputClusters())
             os.system(command)
     except:
-        e = sys.exc_info()[0]
-        print("forestmatcher error: " + str(e) + "\n")
+        print("forestmatcher error: " + str(sys.exc_info()[0]) + "\n")
         trace = traceback.format_exc()
         print(trace)
 
 
-
-"""
- * @param: config, Config
- * @param: grammar_dict, a dictionary with String as keys and list of String as values
- * @param: xmlCharacters_dict, dictionary with String as keys and String as values
-"""
-
-
-def findCommonPattern(config, grammar_dict, xmlCharacters_dict):
+def find_common_pattern(config, grammar_dict, xml_characters_dict):
+    """
+     * @param: config, Config
+     * @param: grammar_dict, a dictionary with String as keys and list of String as values
+     * @param: xml_characters_dict, dictionary with String as keys and String as values
+    """
     pattern = config.getOutputClustersTemp()
+
     if os.path.exists(pattern):
-        #find common patterns in each cluster
+        # find common patterns in each cluster
         print("Mining common patterns in clusters ... \n")
-        outputPatternsTemp = config.getOutputFile() + ".txt"
+        output_patterns_temp = config.getOutputFile() + ".txt"
         common = FreqT_common()
-        common.FreqT_common(config, grammar_dict, xmlCharacters_dict)
-        common.run(outputPatternsTemp, config.getOutputClustersTemp(), config.getOutputCommonPatterns())
+        common.FreqT_common(config, grammar_dict, xml_characters_dict)
+        common.run(output_patterns_temp,
+                   config.getOutputClustersTemp(),
+                   config.getOutputCommonPatterns())
 
-        #find matches for common_patterns
-        command = "java -jar ../../../../forestmatcher.jar " + str(config.getInputFiles()) + " " + \
-                  str(config.getOutputCommonPatterns()) + " " + str(config.getOutputCommonMatches()) + " " + \
-                  str(config.getOutputCommonClusters())
-        value = os.system(command)
+        # find matches for common_patterns
+        command = "java -jar ../../../../forestmatcher.jar " \
+                  + str(config.getInputFiles()) + " " \
+                  + str(config.getOutputCommonPatterns()) + " " \
+                  + str(config.getOutputCommonMatches()) + " " \
+                  + str(config.getOutputCommonClusters())
+        _ = os.system(command)
 
-def cleanUp(config):
+
+def clean_up(config):
     print("Cleaning up ... \n")
     if os.path.exists(config.getOutputFile() + ".txt"):
         os.remove(config.getOutputFile() + ".txt")
     if os.path.exists(config.getOutputCommonPatterns() + ".txt"):
-        os.remove(config.getOutputCommonPatterns()+".txt")
+        os.remove(config.getOutputCommonPatterns() + ".txt")
 
 
 if __name__ == '__main__':
     args = sys.argv[1:]
     main(args)
     sys.exit()
-
-
-

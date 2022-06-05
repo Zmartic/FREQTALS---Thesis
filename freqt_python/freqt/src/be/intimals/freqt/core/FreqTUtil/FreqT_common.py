@@ -22,15 +22,16 @@ import traceback
 
 class FreqT_common:
 
-    __config = Config()
-    __grammar_dict = dict()  # dictionary with String as keys and list of String as values
-    __xmlCharacters_dict = dict()  # dictionary with String as keys and String as values
+    def __init__(self):
+        self.__config = Config()
+        self.__grammar_dict = dict()  # dictionary with String as keys and list of String as values
+        self.__xmlCharacters_dict = dict()  # dictionary with String as keys and String as values
 
-    __commonOutputPatterns_dict = collections.OrderedDict  # ordered dictionary with String as keys and String as values
-    __maximalPattern_list = list()  # list of String
-    __newTransaction_list = list()  # list of list of String
-    __minsup = -1
-    __found = False
+        self.__commonOutputPatterns_dict = collections.OrderedDict  # ordered dictionary with String as keys and String as values
+        self.__maximalPattern_list = list()  # list of String
+        self.__newTransaction_list = list()  # list of list of String
+        self.__minsup = -1
+        self.__found = False
 
     """
      * @param: _config, Config

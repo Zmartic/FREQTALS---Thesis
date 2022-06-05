@@ -11,8 +11,6 @@ from freqt.src.be.intimals.freqt.structure.Projected import Projected
 
 from freqt.src.be.intimals.freqt.constraint import Constraint
 
-from freqt.src.be.intimals.freqt.input.ReadXMLInt import ReadXMLInt
-
 
 class FreqTCore:
     """
