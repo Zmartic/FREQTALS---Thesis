@@ -6,14 +6,14 @@ from pyjavaproperties import Properties
 
 
 class Config:
-    __path = ""
-    __prop = None
 
-    def config(self, configPath):
+    def __init__(self, config_path):
         try:
-            self.__path = configPath
+            self.__path = config_path
             self.__prop = Properties()
-            self.__prop.load(open(configPath))
+            with open(config_path) as f:
+                self.__prop.load(f)
+            f.close()
         except:
             e = sys.exc_info()[0]
             print(e)
@@ -21,12 +21,11 @@ class Config:
             print(trace)
             raise
 
-    def get2Class(self):
-        if self.__prop.getProperty("2Class") is not None and self.__prop.getProperty("2Class").lower() == "true":
-            return True
-        return False
+    def get_2class(self):
+        return self.__prop.getProperty("2Class") is not None \
+               and self.__prop.getProperty("2Class").lower() == "true"
 
-    def getDSScore(self):
+    def get_ds_score(self):
         try:
             return float(self.__prop.getProperty("minDSScore"))
         except:
@@ -34,122 +33,119 @@ class Config:
             print(e)
             raise
 
-    def keepHighestScore(self):
-        if self.__prop.getProperty("keepHighestScore") is not None and self.__prop.getProperty("keepHighestScore").lower() == "true":
-            return True
-        return False
+    def keep_highest_score(self):
+        """ unused """
+        return self.__prop.getProperty("keepHighestScore") is not None \
+               and self.__prop.getProperty("keepHighestScore").lower() == "true"
 
-    def getNumPatterns(self):
+    def get_num_patterns(self):
         return int(self.__prop.getProperty("numPatterns"))
 
-    def getInputFiles1(self):
+    def get_input_files1(self):
         if self.__prop.getProperty("inputPath1") is None:
             return ""
         return self.__prop.getProperty("inputPath1")
 
-    def getInputFiles2(self):
+    def get_input_files2(self):
         if self.__prop.getProperty("inputPath2") is None:
             return ""
         return self.__prop.getProperty("inputPath2")
 
-    def getOutputMatches(self):
+    def get_output_matches(self):
         if self.__prop.getProperty("outputMatches") is None:
             return ""
         return self.__prop.getProperty("outputMatches")
 
-    def getOutputClusters(self):
+    def get_output_clusters(self):
         if self.__prop.getProperty("outputClusters") is None:
             return ""
         return self.__prop.getProperty("outputClusters")
 
-    def getOutputClustersTemp(self):
+    def get_output_clusters_temp(self):
         if self.__prop.getProperty("outputClustersTemp") is None:
             return ""
         return self.__prop.getProperty("outputClustersTemp")
 
-    def getOutputCommonPatterns(self):
+    def get_output_common_patterns(self):
         if self.__prop.getProperty("outputCommonPatterns") is None:
             return ""
         return self.__prop.getProperty("outputCommonPatterns")
 
-    def getOutputCommonMatches(self):
+    def get_output_common_matches(self):
         if self.__prop.getProperty("outputCommonMatches") is None:
             return ""
         return self.__prop.getProperty("outputCommonMatches")
 
-    def getOutputCommonClusters(self):
+    def get_output_common_clusters(self):
         if self.__prop.getProperty("outputCommonClusters") is None:
             return ""
         return self.__prop.getProperty("outputCommonClusters")
 
-    def getOutputMatches1(self):
+    def get_output_matches1(self):
         if self.__prop.getProperty("outputMatches1") is None:
             return ""
         return self.__prop.getProperty("outputMatches1")
 
-    def getOutputClusters1(self):
+    def get_output_clusters1(self):
         if self.__prop.getProperty("outputClusters1") is None:
             return ""
         return self.__prop.getProperty("outputClusters1")
 
-    def getOutputMatches2(self):
+    def get_output_matches2(self):
         if self.__prop.getProperty("outputMatches2") is None:
             return
         return self.__prop.getProperty("outputMatches2")
 
-    def getOutputClusters2(self):
+    def get_output_clusters2(self):
         if self.__prop.getProperty("outputClusters2") is None:
             return ""
         return self.__prop.getProperty("outputClusters2")
 
-    def getWeighted(self):
-        if self.__prop.getProperty("weighted") is not None and self.__prop.getProperty("weighted").lower() == "true":
-            return True
-        return False
+    def get_weighted(self):
+        return self.__prop.getProperty("weighted") is not None \
+               and self.__prop.getProperty("weighted").lower() == "true"
 
     #######
 
-    def getTwoStep(self):
-        if self.__prop.getProperty("twoStep") is not None and self.__prop.getProperty("twoStep") == "true":
-            return True
-        return False
+    def get_two_step(self):
+        return self.__prop.getProperty("twoStep") is not None \
+               and self.__prop.getProperty("twoStep") == "true"
 
-    def getFilter(self):
-        if self.__prop.getProperty("filter") is not None and self.__prop.getProperty("filter") == "true":
-            return True
-        return False
+    def get_filter(self):
+        """ unused """
+        return self.__prop.getProperty("filter") is not None \
+               and self.__prop.getProperty("filter") == "true"
 
-    def getAbstractLeafs(self):
-        if self.__prop.getProperty("abstractLeafs") is not None and self.__prop.getProperty("abstractLeafs") == "true":
-            return True
-        return False
+    def get_abstract_leafs(self):
+        return self.__prop.getProperty("abstractLeafs") is not None \
+               and self.__prop.getProperty("abstractLeafs") == "true"
 
-    def getTimeout(self):
+    def get_timeout(self):
         if self.__prop.getProperty("timeout") is None:
             return sys.maxsize
         return float(self.__prop.getProperty("timeout"))
 
-    def getProp(self):
+    def get_prop(self):
         return self.__prop
 
-    def buildGrammar(self):
-        if self.__prop.getProperty("buildGrammar") is not None and self.__prop.getProperty("buildGrammar") == "true":
-            return True
-        return False
+    def build_grammar(self):
+        return self.__prop.getProperty("buildGrammar") is not None \
+               and self.__prop.getProperty("buildGrammar") == "true"
 
-    def getGrammarFile(self):
+    def get_grammar_file(self):
+        """ unused """
         return self.__prop.getProperty("grammarFile")
 
-    def getRootLabelFile(self):
+    def get_root_label_file(self):
         return self.__prop.getProperty("rootLabelFile")
 
-    def getWhiteLabelFile(self):
+    def get_white_label_file(self):
         return self.__prop.getProperty("whiteLabelFile")
 
-    def getXmlCharacterFile(self):
+    def get_xml_character_file(self):
         return self.__prop.getProperty("xmlCharacterFile")
 
-    def getInputFiles(self):
+    def get_input_files(self):
         return self.__prop.getProperty("inputPath")
 
     def getOutputFile(self):
@@ -157,42 +153,41 @@ class Config:
             return ""
         return self.__prop.getProperty("outputPath")
 
-    def getMinSupport(self):
+    def get_min_support(self):
         return int(self.__prop.getProperty("minSupport"))
 
-    def getMinNode(self):
+    def get_min_node(self):
         return int(self.__prop.getProperty("minNode"))
 
-    def getMaxNode(self):
+    def get_max_node(self):
+        """ unused """
         return int(self.__prop.getProperty("maxNode"))
 
-    def getMinLeaf(self):
+    def get_min_leaf(self):
         return int(self.__prop.getProperty("minLeaf"))
 
-    def getMaxLeaf(self):
+    def get_max_leaf(self):
         return int(self.__prop.getProperty("maxLeaf"))
 
-    def postProcess(self):
-        if self.__prop.getProperty("pos") is not None and self.__prop.getProperty("pos").lower() == "true":
-            return True
-        return False
+    def post_process(self):
+        return self.__prop.getProperty("pos") is not None \
+               and self.__prop.getProperty("pos").lower() == "true"
 
-    """
-     * Returns a list of minimum-support values (only used when executing multiple Freq-T runs in parallel)
-     * @return
-    """
-    def getMinSupportList(self):
-        msList = self.__prop.getProperty("minSupportList")
-        result = list()
-        splitList = msList.split(",")
-        for elem in splitList:
+    def get_min_support_list(self):
+        """
+         unused
+         @return a list of minimum-support values (only used when executing multiple Freq-T runs in parallel)
+        """
+        min_sup_list = self.__prop.getProperty("minSupportList")
+        result = []
+        for elem in min_sup_list.split(","):
             result.append(int(elem))
         return result
 
-    """
-     * Returns a list of input folders (only used when executing multiple Freq-T runs in parallel)
-     * @return
-    """
-    def getInputFilesList(self):
-        ifList = self.__prop.getProperty("inFilesList")
-        return ifList.split(",")
+    def get_input_files_list(self):
+        """
+         unused
+         * @return a list of input folders (only used when executing multiple Freq-T runs in parallel)
+        """
+        in_files_list = self.__prop.getProperty("inFilesList")
+        return in_files_list.split(",")

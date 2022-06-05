@@ -16,8 +16,8 @@ class FreqT2ClassExt(FreqT1ClassExt):
         if not self.constraints.satisfy_post_expansion_constraint(pat):
             return False
         # check chi-square score
-        score = chi_square(proj, self.size_class1, self.size_class2, self._config.getWeighted())
-        if satisfy_chi_square(score, self._config.getDSScore()):
+        score = chi_square(proj, self.size_class1, self.size_class2, self._config.get_weighted())
+        if satisfy_chi_square(score, self._config.get_ds_score()):
             self.add_tree(pat, proj)
             return True
         return False
@@ -30,6 +30,6 @@ class FreqT2ClassExt(FreqT1ClassExt):
         """
         # note: the pattern score is recomputed once and the support twice here,
         #       but they were already computed inside add_tree_requested()
-        score = chi_square(proj, self.size_class1, self.size_class2, self._config.getWeighted())
-        ac = get_2class_support(proj, self._config.getWeighted())
+        score = chi_square(proj, self.size_class1, self.size_class2, self._config.get_weighted())
+        ac = get_2class_support(proj, self._config.get_weighted())
         return str(ac[0]) + "-" + str(ac[1]) + "," + str(score) + "," + str(pat.n_node)

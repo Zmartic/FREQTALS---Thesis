@@ -91,7 +91,7 @@ class FreqTCore:
         if not_ast_node in FP1:
             del FP1[not_ast_node]
 
-        Constraint.prune(FP1, self._config.getMinSupport(), self._config.getWeighted())
+        Constraint.prune(FP1, self._config.get_min_support(), self._config.get_weighted())
 
         self.expand_FP1(FP1)
 
@@ -165,7 +165,7 @@ class FreqTCore:
         # --- find candidates of the current pattern ---
         candidates: OrderedDict[Tuple, Projected] = FreqTCore.generate_candidates(proj, self._transaction_list)
         # prune candidate based on minSup
-        Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
+        Constraint.prune(candidates, self._config.get_min_support(), self._config.get_weighted())
         if len(candidates) == 0:
             return True
 
@@ -228,7 +228,7 @@ class FreqTCore:
         # --- find candidates of the current pattern ---
         candidates = FreqTCore.generate_candidates(proj, self._transaction_list)
         # prune candidate based on minSup
-        Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
+        Constraint.prune(candidates, self._config.get_min_support(), self._config.get_weighted())
 
         # --- expand each candidate pattern ---
         super_tree_added = False
@@ -375,9 +375,9 @@ class FreqTCore:
 
         self.log(report, "INPUT")
         self.log(report, "===================")
-        self.log(report, "- data sources : " + self._config.getInputFiles())
+        self.log(report, "- data sources : " + self._config.get_input_files())
         self.log(report, "- input files : " + str(data_size))
-        self.log(report, "- minSupport : " + str(self._config.getMinSupport()))
+        self.log(report, "- minSupport : " + str(self._config.get_min_support()))
         report.flush()
 
         return report
@@ -405,7 +405,7 @@ class FreqTCore:
          * set time to begin a run
         """
         self.time_start = time.time()
-        self.timeout = self.time_start + self._config.getTimeout() * 60
+        self.timeout = self.time_start + self._config.get_timeout() * 60
         self.finished = True
 
     def is_timeout(self):

@@ -48,16 +48,15 @@ def single_run(args_list):
                 debug_file = args_list[i]
 
     # load final configuration;
-    config = Config()
-    config.config(final_config)
+    config = Config(final_config)
 
-    if config.get2Class():
-        if config.getTwoStep():
+    if config.get_2class():
+        if config.get_two_step():
             freqt = FreqT2Class2Step(config)
         else:
             freqt = FreqT2Class(config)
     else:
-        if config.getTwoStep():
+        if config.get_two_step():
             freqt = FreqT1Class2Step(config)
         else:
             freqt = FreqT1Class(config)
@@ -67,7 +66,7 @@ def single_run(args_list):
     # run forestmatcher to find matches of patterns in source code
     run_forest_matcher(config, memory)
 
-    if not config.get2Class():
+    if not config.get_2class():
         # find common patterns in each cluster
         find_common_pattern(config, freqt.get_grammar(), freqt.get_xml_characters())
         # clean up files
@@ -84,9 +83,8 @@ def parse_config(args_list):
     """
     try:
         # create final configuration as used by FreqT
-        config_basic = Config()
-        config_basic.config(args_list[0])
-        prop = config_basic.getProp()
+        config_basic = Config(args_list[0])
+        prop = config_basic.get_prop()
 
         input_min_sup = args_list[1]
         prop.setProperty("minSupport", input_min_sup)
@@ -95,13 +93,13 @@ def parse_config(args_list):
         sep = "/"
 
         # input data
-        input_path = config_basic.getInputFiles().replace("\"", "") + sep + input_fold
+        input_path = config_basic.get_input_files().replace("\"", "") + sep + input_fold
         prop.setProperty("inputPath", input_path)
 
-        input_path1 = input_path + sep + config_basic.getInputFiles1()
+        input_path1 = input_path + sep + config_basic.get_input_files1()
         prop.setProperty("inputPath1", input_path1)
 
-        input_path2 = input_path + sep + config_basic.getInputFiles2()
+        input_path2 = input_path + sep + config_basic.get_input_files2()
         prop.setProperty("inputPath2", input_path2)
 
         output_dir = config_basic.getOutputFile()
@@ -208,34 +206,34 @@ def run_forest_matcher(config, memory):
     """
     try:
         print("Running forestmatcher ...")
-        if config.get2Class():
+        if config.get_2class():
             command1 = "java -jar ../../../../forestmatcher.jar " \
-                       + str(config.getInputFiles1()) + " " \
+                       + str(config.get_input_files1()) + " " \
                        + str(config.getOutputFile()) + " " \
-                       + str(config.getOutputMatches1()) + " " \
-                       + str(config.getOutputClusters1())
+                       + str(config.get_output_matches1()) + " " \
+                       + str(config.get_output_clusters1())
             os.system(command1)
 
             command2 = "java -jar ../../../../forestmatcher.jar " \
-                       + str(config.getInputFiles2()) + " " \
+                       + str(config.get_input_files2()) + " " \
                        + str(config.getOutputFile()) + " " \
-                       + str(config.getOutputMatches2()) + " " \
-                       + str(config.getOutputClusters2())
+                       + str(config.get_output_matches2()) + " " \
+                       + str(config.get_output_clusters2())
             os.system(command2)
 
         else:
             if len(memory) == 0:
                 command = "java -jar " + memory + " ../../../../forestmatcher.jar" + " " \
-                          + str(config.getInputFiles()) + " " \
+                          + str(config.get_input_files()) + " " \
                           + str(config.getOutputFile()) + " " \
-                          + str(config.getOutputMatches()) + " " \
-                          + str(config.getOutputClusters())
+                          + str(config.get_output_matches()) + " " \
+                          + str(config.get_output_clusters())
             else:
                 command = "java -jar ../../../../forestmatcher.jar " + " " \
-                          + str(config.getInputFiles()) + " " \
+                          + str(config.get_input_files()) + " " \
                           + str(config.getOutputFile()) + " " \
-                          + str(config.getOutputMatches()) \
-                          + " " + str(config.getOutputClusters())
+                          + str(config.get_output_matches()) + " " \
+                          + str(config.get_output_clusters())
             os.system(command)
     except:
         print("forestmatcher error: " + str(sys.exc_info()[0]) + "\n")
@@ -249,7 +247,7 @@ def find_common_pattern(config, grammar_dict, xml_characters_dict):
      * @param: grammar_dict, a dictionary with String as keys and list of String as values
      * @param: xml_characters_dict, dictionary with String as keys and String as values
     """
-    pattern = config.getOutputClustersTemp()
+    pattern = config.get_output_clusters_temp()
 
     if os.path.exists(pattern):
         # find common patterns in each cluster
@@ -258,15 +256,15 @@ def find_common_pattern(config, grammar_dict, xml_characters_dict):
         common = FreqT_common()
         common.FreqT_common(config, grammar_dict, xml_characters_dict)
         common.run(output_patterns_temp,
-                   config.getOutputClustersTemp(),
-                   config.getOutputCommonPatterns())
+                   config.get_output_clusters_temp(),
+                   config.get_output_common_patterns())
 
         # find matches for common_patterns
         command = "java -jar ../../../../forestmatcher.jar " \
-                  + str(config.getInputFiles()) + " " \
-                  + str(config.getOutputCommonPatterns()) + " " \
-                  + str(config.getOutputCommonMatches()) + " " \
-                  + str(config.getOutputCommonClusters())
+                  + str(config.get_input_files()) + " " \
+                  + str(config.get_output_common_patterns()) + " " \
+                  + str(config.get_output_common_matches()) + " " \
+                  + str(config.get_output_common_clusters())
         _ = os.system(command)
 
 
@@ -274,8 +272,8 @@ def clean_up(config):
     print("Cleaning up ... \n")
     if os.path.exists(config.getOutputFile() + ".txt"):
         os.remove(config.getOutputFile() + ".txt")
-    if os.path.exists(config.getOutputCommonPatterns() + ".txt"):
-        os.remove(config.getOutputCommonPatterns() + ".txt")
+    if os.path.exists(config.get_output_common_patterns() + ".txt"):
+        os.remove(config.get_output_common_patterns() + ".txt")
 
 
 if __name__ == '__main__':

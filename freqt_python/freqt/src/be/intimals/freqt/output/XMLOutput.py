@@ -97,7 +97,7 @@ class XMLOutput(AOutputFormatter):
 
             sup = supports.split(",")
 
-            if self.config.get2Class():
+            if self.config.get_2class():
                 self.out.write("<subtree id=\"" + str(self.nbPattern) + "\" support=\"" + str(sup[0]) +
                         "\" score=\"" + str(sup[1]) + "\" size=\"" + str(sup[2]) + "\">\n")
             else:
@@ -218,7 +218,7 @@ class XMLOutput(AOutputFormatter):
             # keep meta-variables in pattern
             metaVariable_dict = dict()  # dictionary with String as keys and Integer as values
             # print support, wsupport, size
-            if self.config.postProcess() and len(self.patSupMap_ord_dict) != 0:
+            if self.config.post_process() and len(self.patSupMap_ord_dict) != 0:
                 patTemp = pattern.getPatternString(pat_list)
                 sup = self.patSupMap_ord_dict[patTemp].split(",")
                 size = pattern.getPatternSize(pat_list)
@@ -339,7 +339,7 @@ class XMLOutput(AOutputFormatter):
      * @param: i, Integer
     """
     def outputLeaf(self, pat_list, i):
-        if self.config.getAbstractLeafs():
+        if self.config.get_abstract_leafs():
             self.out.write("<Dummy>\n")
             self.out.write("<__directives>\n")
             self.out.write("<optional />\n")
@@ -428,7 +428,7 @@ class XMLOutput(AOutputFormatter):
 
             # print support
             sup = supports.split(",")
-            if self.config.get2Class():
+            if self.config.get_2class():
                 self.out.write("<subtree id=\"" + str(self.nbPattern) + "\" support=\"" + str(sup[0]) +
                         "\" score=\"" + str(sup[1]) + "\" size=\"" + str(sup[2]) + "\">\n")
             else:

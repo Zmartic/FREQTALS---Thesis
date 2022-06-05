@@ -13,24 +13,24 @@ def init_data_1class(config):
     """
      * read input data
     """
-    white_label = read_white_label(config.getWhiteLabelFile())
+    white_label = read_white_label(config.get_white_label_file())
 
     # remove black labels when reading ASTs
     transactions = list()
     trans_class_id = list()  # actually not useful
     label_decoder = dict()
     readXML = ReadXMLInt()
-    readXML.readDatabase(transactions, 1, config.getInputFiles(), label_decoder, trans_class_id, white_label)
+    readXML.readDatabase(transactions, 1, config.get_input_files(), label_decoder, trans_class_id, white_label)
 
     # create grammar (labels are strings) which is used to print patterns
     grammar = dict()
-    init_grammar(config.getInputFiles(), white_label, grammar, config.buildGrammar())
+    init_grammar(config.get_input_files(), white_label, grammar, config.build_grammar())
 
     # read list of special XML characters
-    xml_char_dict = read_XML_character(config.getXmlCharacterFile())
+    xml_char_dict = read_XML_character(config.get_xml_character_file())
 
     grammar_int = convert_grammar_label2int(grammar, label_decoder)
-    root_label_set = read_root_label(config.getRootLabelFile())
+    root_label_set = read_root_label(config.get_root_label_file())
     constraints = FreqT1Strategy(config, grammar_int, root_label_set)
 
     return transactions, trans_class_id, label_decoder, grammar, xml_char_dict, constraints
@@ -40,28 +40,28 @@ def init_data_2class(config):
     """
      * read input data
     """
-    white_label = read_white_label(config.getWhiteLabelFile())
+    white_label = read_white_label(config.get_white_label_file())
 
     # remove black labels when reading ASTs
     transactions = list()
     trans_class_id = list()
     label_decoder = dict()
     readXML = ReadXMLInt()
-    readXML.readDatabase(transactions, 1, config.getInputFiles1(), label_decoder, trans_class_id, white_label)
-    readXML.readDatabase(transactions, 0, config.getInputFiles2(), label_decoder, trans_class_id, white_label)
+    readXML.readDatabase(transactions, 1, config.get_input_files1(), label_decoder, trans_class_id, white_label)
+    readXML.readDatabase(transactions, 0, config.get_input_files2(), label_decoder, trans_class_id, white_label)
     size_class1 = sum(trans_class_id)
     size_class2 = len(trans_class_id) - size_class1
 
     # init grammar
     grammar = dict()
-    init_grammar(config.getInputFiles1(), white_label, grammar, config.buildGrammar())
-    init_grammar(config.getInputFiles2(), white_label, grammar, config.buildGrammar())
+    init_grammar(config.get_input_files1(), white_label, grammar, config.build_grammar())
+    init_grammar(config.get_input_files2(), white_label, grammar, config.build_grammar())
 
     # read list of special XML characters
-    xml_char_dict = read_XML_character(config.getXmlCharacterFile())
+    xml_char_dict = read_XML_character(config.get_xml_character_file())
 
     grammar_int = convert_grammar_label2int(grammar, label_decoder)
-    root_label_set = read_root_label(config.getRootLabelFile())
+    root_label_set = read_root_label(config.get_root_label_file())
     constraints = FreqT1Strategy(config, grammar_int, root_label_set)
 
     return transactions, trans_class_id, label_decoder, size_class1, size_class2, grammar, xml_char_dict, constraints

@@ -39,18 +39,17 @@ def single_run(args_list):
             if args_list[i] == "--debug-file":
                 debugFile = args_list[i]
 
-    config = Config()
-    config.config(finalConfig)
+    config = Config(finalConfig)
 
-    if config.get2Class():
-        if config.getTwoStep():
+    if config.get_2class():
+        if config.get_two_step():
             print("doing 2classes 2steps")
             freqt = FreqT2Class2Step(config)
         else:
             print("doing 2classes 1step")
             freqt = FreqT2Class(config)
     else:
-        if config.getTwoStep():
+        if config.get_two_step():
             print("doing 1class 2steps")
             freqt = FreqT1Class2Step(config)
         else:

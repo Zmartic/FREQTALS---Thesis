@@ -25,9 +25,9 @@ class FreqT2Class2Step(FreqT1Class2Step):
         if not self.constraints.satisfy_post_expansion_constraint(pat):
             return False
         # check chi-square score
-        score = chi_square(proj, self.sizeClass1, self.sizeClass2, self._config.getWeighted())
-        if satisfy_chi_square(score, self._config.getDSScore()):
-            add_high_score_pattern(pat, proj, score, self.hsp, self._config.getNumPatterns())
+        score = chi_square(proj, self.sizeClass1, self.sizeClass2, self._config.get_weighted())
+        if satisfy_chi_square(score, self._config.get_ds_score()):
+            add_high_score_pattern(pat, proj, score, self.hsp, self._config.get_num_patterns())
             return True
         return False
 

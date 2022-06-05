@@ -49,10 +49,10 @@ class FreqTStrategy(ABC):
 class FreqT1Strategy(FreqTStrategy):
 
     def __init__(self, config, grammar, root_labels_set=None):
-        self.min_supp = config.getMinSupport()
-        self.min_node = config.getMinNode()
-        self.max_leaf = config.getMaxLeaf()
-        self.min_leaf = config.getMinLeaf()
+        self.min_supp = config.get_min_support()
+        self.min_node = config.get_min_node()
+        self.max_leaf = config.get_max_leaf()
+        self.min_leaf = config.get_min_leaf()
 
         self.grammar = grammar
 
@@ -87,10 +87,10 @@ class FreqT1ExtStrategy(FreqTStrategy):
     # Constraint.check_cobol_constraints(largestPattern, candidates_dict, keys, self._labelIndex_dict, self._transaction_list) TODO
 
     def __init__(self, config, grammar):
-        self.min_supp = config.getMinSupport()
-        self.min_node = config.getMinNode()
+        self.min_supp = config.get_min_support()
+        self.min_node = config.get_min_node()
         # max leaf constraint dropped
-        self.min_leaf = config.getMinLeaf()
+        self.min_leaf = config.get_min_leaf()
 
         self.grammar = grammar
 

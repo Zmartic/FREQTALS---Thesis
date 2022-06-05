@@ -35,7 +35,7 @@ class FreqT1ClassExt(FreqT1Class):
         """
         # set running time for the second steps
         self.set_starting_time()
-        timeout_step2 = self.time_start + self._config.getTimeout() * 60
+        timeout_step2 = self.time_start + self._config.get_timeout() * 60
 
         while len(self.root_ids_list) != 0:
             # note : each group of rootID has a running time budget "timePerGroup"

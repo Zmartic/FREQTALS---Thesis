@@ -23,7 +23,7 @@ import traceback
 class FreqT_common:
 
     def __init__(self):
-        self.__config = Config()
+        self.__config = None
         self.__grammar_dict = dict()  # dictionary with String as keys and list of String as values
         self.__xmlCharacters_dict = dict()  # dictionary with String as keys and String as values
 
