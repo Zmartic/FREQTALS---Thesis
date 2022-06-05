@@ -7,4 +7,4 @@ OUTPUT
 ===================
 finished search
 + Maximal patterns = 13
-+ Running times = 0.15320110321044922 s
++ Running times = 0.12497377395629883 s

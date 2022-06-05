@@ -32,8 +32,8 @@ class FreqTCore:
         # store transaction ids and their correspond class ids
         self._transactionClassID_list = None  # List(Int)
 
-        # store the conversion of labels : str -> int
-        self.label_decoder = None  # Dict(String, Int)
+        # store the conversion of labels : int -> str
+        self.label_decoder = None  # Dict(Int, String)
 
         self.time_start = -1
         self.timeout = -1
@@ -85,11 +85,10 @@ class FreqTCore:
 
         print("Mining frequent subtrees ...")
 
-        self.disconnect_not_whitelisted_node()
+        # FP1 = the root label and its occurrences
+        FP1 = self.build_FP1()  # OrderedDict(Int, Projected)
 
-        FP1 = self.build_FP1()  # OrderedDict(Int, Projected), the root label and its occurrences
-
-        # remove node SourceFile because it is not AST node ##
+        # remove node SourceFile because it is not AST node #
         not_ast_node = FTArray.make_root_pattern(0)
         if not_ast_node in FP1:
             del FP1[not_ast_node]
@@ -100,34 +99,10 @@ class FreqTCore:
 
         self.post_mining_process(report)
 
-    def disconnect_not_whitelisted_node(self):
-        white_labels = ReadXMLInt().read_whiteLabel(self._config.getWhiteLabelFile())
-        for trans in self._transaction_list:
-            for node in trans:
-                label = node.getNodeLabel()
-                if label in white_labels:
-                    white = white_labels[label]
-
-                    child_id = node.getNodeChild()
-                    previous_child = None
-
-                    while child_id != -1:
-                        child = trans[child_id]
-                        if child.getNodeLabel() in white:
-                            if previous_child is None:
-                                node.setNodeChild(child_id)
-                            else:
-                                previous_child.setNodeSibling(child_id)
-                            previous_child = child
-                        child_id = child.getNodeSibling()
-
-                    if previous_child is None:
-                        node.setNodeChild(-1)
-        return
-
     def build_FP1(self):
         """
-         * Build FP1 th initial set of "root pattern" (pattern of size 1) to be expanded
+         * Build FP1 = the initial set of "root pattern" (pattern of size 1) to be expanded
+         note: only stores the label of roots (Int)
         :return: OrderedDict(Int, Projected), set of "root pattern"
         """
         FP1 = collections.OrderedDict()  # OrderedDict[Int, Projected]
@@ -149,7 +124,7 @@ class FreqTCore:
     def update_FP1(FP1, root_label, new_location):
         """
          * Add a new location for some "root pattern" in FP1
-        :param FP1: OrderedDict(Int, Projected)
+        :param FP1: OrderedDict(Int, Projected), root labels and their occurrences
         :param root_label: Int, id of the label corresponding to the root node
         :param new_location: Location, occurrence of root_label in the data
         """
@@ -164,24 +139,24 @@ class FreqTCore:
     def expand_FP1(self, FP1):
         """
          * Expand FP1 to find frequent subtrees based on input constraints
-        :param FP1: dict(Int, Projected), root label and its occurrences
+        :param FP1: dict(Int, Projected), root labels and their occurrences
         """
         for root in FP1:
             # expand root patterns to find maximal patterns
             root_pat = FTArray.make_root_pattern(root)
             _ = self.expand_pattern(root_pat, FP1[root])
 
-    def expand_pattern(self, pattern, projected):
+    def old_expand_pattern(self, pat, proj):
         """
          Expand pattern
          * Pattern is expanded until stop_expand_pattern() is satisfied.
          * Pattern that has stop expanding sends "add tree request".
-         * Those requests can be caught by other patterns.
-         * If they satisfy all the constraints, they consume the request an are added to the output.
+         * Those requests can be received by other patterns.
+         * If they satisfy all the constraints, they consume the request and are added to the output.
          note: If a pattern has a leaf which is not a "leaf node" in the data
                this pattern should not be add to the output.
-        :param pattern: FTArray, the pattern we are expanding
-        :param projected: Projected, the projection of pattern
+        :param pat: FTArray, the pattern we are expanding
+        :param proj: Projected, the projection of pattern
         :return: Boolean, whether a "add tree request" have been sent
         """
         # if timeout then stop expand the pattern;
@@ -190,7 +165,7 @@ class FreqTCore:
             return False
 
         # --- find candidates of the current pattern ---
-        candidates: OrderedDict[Tuple, Projected] = FreqTCore.generate_candidates(projected, self._transaction_list)
+        candidates: OrderedDict[Tuple, Projected] = FreqTCore.generate_candidates(proj, self._transaction_list)
         # prune candidate based on minSup
         Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
         if len(candidates) == 0:
@@ -203,44 +178,101 @@ class FreqTCore:
             candidate_prefix, candidate_label = extension
 
             # built the candidate pattern using the extension
-            pattern.extend(candidate_prefix, candidate_label)
+            pat.extend(candidate_prefix, candidate_label)
 
-            if not self.constraints.is_pruned_pattern(pattern, candidate_prefix):
-                if self.constraints.stop_expand_pattern(pattern):
+            if not self.constraints.is_pruned_pattern(pat, candidate_prefix):
+                if self.constraints.stop_expand_pattern(pat):
                     # * Request generated
                     if candidate_label < -1:
                         # > Consume request
-                        _ = self.add_tree_requested(pattern, new_proj)
+                        if not self.add_tree_requested(pat, new_proj):
+                            current_request = True  # > Consumption failed
                     else:
                         # > Passes request to parent
                         current_request = True
 
                 else:
                     # Continue expanding pattern
-                    add_tree_requested = self.expand_pattern(pattern, new_proj)
+                    add_tree_requested = self.expand_pattern(pat, new_proj)
                     if add_tree_requested:
                         if candidate_label < -1:
                             # > Consume request
-                            _ = self.add_tree_requested(pattern, new_proj)
+                            if not self.add_tree_requested(pat, new_proj):
+                                current_request = True  # > Consumption failed
                         else:
                             # > Passes request to parent
                             current_request = True
+            else:
+                current_request = True
 
             # restore the pattern
-            pattern.undo_extend(candidate_prefix)
+            pat.undo_extend(candidate_prefix)
 
         return current_request
 
+    def expand_pattern(self, pat, proj):
+        """
+         Expand pattern
+         * If no extended versions of pat has been added to the output,
+           pat is consider for addition to the output
+         note: If a pattern has a leaf which is not a "leaf node" in the data
+               this pattern should not be add to the output.
+        :param pat: FTArray, the pattern we are expanding
+        :param proj: Projected, the projection of pattern
+        :return: Boolean, whether at least one pattern have been added to the output
+         """
+
+        # if timeout then stop expand the pattern;
+        if self.is_timeout():
+            self.finished = False
+            return False
+
+        # --- find candidates of the current pattern ---
+        candidates = FreqTCore.generate_candidates(proj, self._transaction_list)
+        # prune candidate based on minSup
+        Constraint.prune(candidates, self._config.getMinSupport(), self._config.getWeighted())
+
+        # --- expand each candidate pattern ---
+        super_tree_added = False
+
+        for extension, new_proj in candidates.items():
+            candidate_prefix, candidate_label = extension
+
+            # built the candidate pattern using the extension
+            pat.extend(candidate_prefix, candidate_label)
+
+            if not self.constraints.is_pruned_pattern(pat, candidate_prefix):
+                # check constraints on maximal number of leaves and real leaf
+                if self.constraints.stop_expand_pattern(pat):
+                    if candidate_label < -1:
+                        if self.add_tree_requested(pat, new_proj):
+                            # pattern was added successfully
+                            super_tree_added = True
+
+                else:
+                    # continue expanding pattern
+                    did_add_tree = self.expand_pattern(pat, new_proj)
+                    if did_add_tree:
+                        # Super-tree was found, no need to add a subtree
+                        super_tree_added = True
+                    elif candidate_label < -1:
+                        if self.add_tree_requested(pat, new_proj):
+                            # pattern was added successfully
+                            super_tree_added = True
+
+            # restore the pattern
+            pat.undo_extend(candidate_prefix)
+
+        return super_tree_added
+
     @staticmethod
-    def generate_candidates(projected, _transaction_list):
+    def generate_candidates(proj, _transaction_list):
         """
          Generate candidates for a pattern
-         For each occurrences, we compute every possible extended version (= one additional node),
-         all those new occurrences are compiled in candidates_dict
-         * patterns are generated from "left to right"
-           (which means that adding a node to some pattern which doesn't correspond to
-           the right most node of the newly created pattern is not allowed)
-        :param projected: Projected, occurrences of a pattern
+         For each occurrences in proj, we consider every possible extended version (= one additional node)
+         * All those new locations are compiled in candidates_dict
+         * Nodes are only added to the right of the rightmost path
+        :param proj: Projected, occurrences of a pattern
         :param _transaction_list: List(List(NodeFreqT))
         :return: dict(Tuple, Projected), the set of candidates with their occurrences
                  Candidate = (prefix, label)
@@ -252,10 +284,10 @@ class FreqTCore:
         for java implementation
         """
         candidates_dict: OrderedDict[Tuple, Projected] = collections.OrderedDict()
-        depth = projected.get_depth()
+        depth = proj.get_depth()
 
         # --- find candidates for each location ---
-        for occurrences in projected.get_locations():
+        for occurrences in proj.get_locations():
             # store all locations of the labels in the pattern:
             # this uses more memory but need for checking continuous paragraphs
 
@@ -264,8 +296,8 @@ class FreqTCore:
             pos = occurrences.get_position()
             root = occurrences.get_root()
 
-            # --- find candidates (from left to right) ---
-            # * try to add a child to the right most node
+            # --- find candidates ---
+            # * try to add a child to the rightmost node
             candi_id = _transaction_list[loc_id][pos].getNodeChild()
             new_depth = depth + 1
 
@@ -276,7 +308,7 @@ class FreqTCore:
 
                 candi_id = node.getNodeSibling()
 
-            # * try to add a sibling to a parent node
+            # * try to add a sibling to a node
             prefix = 1
             for d in range(depth):
                 current_node = _transaction_list[loc_id][pos]
@@ -300,11 +332,11 @@ class FreqTCore:
         return candidates_dict
 
     @staticmethod
-    def update_candidates(freq1_dict, candidate_label, new_location, depth, prefix):
+    def update_candidates(candidates_dict, candidate_label, new_location, depth, prefix):
         """
-        * Add a new location for some extension (= prefix, label) in freq1_dict
-        :param freq1_dict: Dict(Tuple, Projected), the set of candidates with their occurrences
-                           Candidate = (prefix, candidate_label)
+        * Add a new location for some extension (= prefix, label) to candidates_dict
+        :param candidates_dict: Dict(Tuple, Projected), the set of candidates with their occurrences
+                                Candidate = (prefix, candidate_label)
         :param candidate_label: Int, label of the added node
         :param new_location: Int, an occurrence of the candidate
         :param depth: Int
@@ -313,13 +345,13 @@ class FreqTCore:
 
         extension = (prefix, candidate_label)
 
-        if extension in freq1_dict:
-            freq1_dict[extension].add(new_location)
+        if extension in candidates_dict:
+            candidates_dict[extension].add(new_location)
         else:
             projected = Projected()
             projected.set_depth(depth)
             projected.add(new_location)
-            freq1_dict[extension] = projected
+            candidates_dict[extension] = projected
 
     def add_tree_requested(self, pat, proj):
         """

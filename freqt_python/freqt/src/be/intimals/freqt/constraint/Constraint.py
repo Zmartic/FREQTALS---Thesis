@@ -105,10 +105,10 @@ def satisfy_min_node(pat, min_node):
      * @param pat
      * @return
     """
-    tmp = countNode(pat)
-    if tmp != pat.n_node:
-        print("min_node" + str(tmp) + " =! " + str(pat.n_node))
-    return tmp >= min_node
+    # tmp = countNode(pat)
+    # if tmp != pat.n_node:
+    #     print("min_node" + str(tmp) + " =! " + str(pat.n_node))
+    return pat.n_node >= min_node
 
 
 def satisfy_min_leaf(pat, min_leaf):
@@ -117,10 +117,10 @@ def satisfy_min_leaf(pat, min_leaf):
      * @param pat
      * @return
     """
-    tmp = countLeafNode(pat)
-    if tmp != pat.n_leaf:
-        print("min_leaf" + str(tmp) + " =! " + str(pat.n_leaf))
-    return tmp >= min_leaf
+    # tmp = countLeafNode(pat)
+    # if tmp != pat.n_leaf:
+    #     print("min_leaf" + str(tmp) + " =! " + str(pat.n_leaf))
+    return pat.n_leaf >= min_leaf
 
 
 def satisfy_max_leaf(pat, max_leaf):
@@ -129,10 +129,10 @@ def satisfy_max_leaf(pat, max_leaf):
      * @param pattern
      * @return
     """
-    tmp = countLeafNode(pat)
-    if tmp != pat.n_leaf:
-        print("max_leaf" + str(tmp) + " =! " + str(pat.n_leaf))
-    return tmp >= max_leaf
+    # tmp = countLeafNode(pat)
+    # if tmp != pat.n_leaf:
+    #    print("max_leaf" + str(tmp) + " =! " + str(pat.n_leaf))
+    return pat.n_leaf >= max_leaf
 
 
 def is_not_full_leaf(pat):

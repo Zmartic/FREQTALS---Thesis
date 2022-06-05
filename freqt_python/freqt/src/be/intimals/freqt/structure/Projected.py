@@ -51,10 +51,12 @@ class Projected:
 
     def compute_support(self):
         self.__support = len({loc.get_location_id() for loc in self.__locations})
+        #print(self.__support)
         return self.__support
 
     def compute_root_support(self):
         self.__rootSupport = len({(loc.get_location_id(), loc.get_root()) for loc in self.__locations})
+        #print(self.__rootSupport)
         return self.__rootSupport
 
     # new procedure for 2 - class data

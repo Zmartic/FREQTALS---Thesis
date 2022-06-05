@@ -58,19 +58,18 @@ def add_root_ids(pat, proj, root_ids_list):
     # set of root occurrences of current pattern
     root_occ1 = {(loc.get_location_id(), loc.get_root()) for loc in proj.get_locations()}
 
-    to_remove_list = list()
+    index = 0
     # check whether the current root occurrences existing in the rootID
-    for elem in root_ids_list:
-        root_occ2 = elem[1]
+    while index < len(root_ids_list):
+        root_occ2 = root_ids_list[index][1]
         if len(root_occ1) < len(root_occ2):
             if root_occ1.issubset(root_occ2):
-                to_remove_list.append(root_occ2)
+                del root_ids_list[index]
+                index -= 1
         else:
             if root_occ1.issuperset(root_occ2):
                 return
-
-    for root_occ in to_remove_list:
-        del root_ids_list[root_occ]
+        index += 1
 
     # store root occurrences and root label
     root_ids_list.append((pat.get(0), root_occ1))

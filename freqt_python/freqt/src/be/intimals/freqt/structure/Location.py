@@ -33,6 +33,10 @@ class Location:
         return self.class_id
 
     def __eq__(self, other):
-        return self.location_id == other.location_id \
-               and self.root_pos == other.root_pos \
-               and self.right_most_pos == other.right_most_pos
+        if self.location_id != other.location_id:
+            return False
+        if self.root_pos != other.root_pos:
+            return False
+        if self.right_most_pos != other.right_most_pos:
+            return False
+        return True
