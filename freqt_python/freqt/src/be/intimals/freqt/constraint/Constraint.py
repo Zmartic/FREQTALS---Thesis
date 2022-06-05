@@ -138,7 +138,7 @@ def satisfy_max_leaf(pat, max_leaf):
 def is_not_full_leaf(pat):
     """
     :param pat: FTArray, pattern
-    :return: whether every leaf of pat are leaves in the data
+    :return: whether pat have miss real leaf
     """
     for i in range(0, pat.size() - 1):
         if pat.get(i) != -1 and pat.get(i + 1) == -1:
