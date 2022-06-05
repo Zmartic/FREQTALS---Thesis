@@ -339,7 +339,7 @@ class XMLOutput(AOutputFormatter):
      * @param: i, Integer
     """
     def outputLeaf(self, pat_list, i):
-        if self.config.get_abstract_leafs():
+        if self.config.get_abstract_leaves():
             self.out.write("<Dummy>\n")
             self.out.write("<__directives>\n")
             self.out.write("<optional />\n")

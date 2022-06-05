@@ -55,7 +55,7 @@ class FreqT1Class(FreqTCore):
          * @param: xmlCharacters_dict, dictionary with String as keys et String as values
         """
         try:
-            out_file = config.getOutputFile()
+            out_file = config.get_output_file()
             # create output file to store patterns for mining common patterns
             output_common_patterns = open(out_file + ".txt", 'w+')
             # output maximal patterns

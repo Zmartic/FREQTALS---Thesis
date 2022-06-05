@@ -370,7 +370,7 @@ class FreqTCore:
          * Create a report
         """
         data_size = len(self._transaction_list)
-        report_file = self._config.getOutputFile().replace("\"", "") + "_report.txt"
+        report_file = self._config.get_output_file().replace("\"", "") + "_report.txt"
         report = open(report_file, 'w+')
 
         self.log(report, "INPUT")
