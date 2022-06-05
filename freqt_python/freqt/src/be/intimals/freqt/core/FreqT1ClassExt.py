@@ -10,9 +10,16 @@ from freqt.src.be.intimals.freqt.structure.Projected import Projected
 
 
 class FreqT1ClassExt(FreqT1Class):
+    """
+      Implementation of the 2nd step of the FREQTALS algorithm on 1 class data
+    """
 
-    def __init__(self, _config, root_ids_list, _grammar_dict, _grammarInt_dict, _xmlCharacters_dict, label_decoder,
-                 _transaction_list):
+    def __init__(self, _config, root_ids_list, _grammar_dict, _grammarInt_dict,
+                 _xmlCharacters_dict, label_decoder, _transaction_list):
+        """
+         * receive data from the 1st step
+        """
+
         super().__init__(_config)
 
         self.root_ids_list = root_ids_list
@@ -26,7 +33,7 @@ class FreqT1ClassExt(FreqT1Class):
         self.label_decoder = label_decoder
 
         # -- FreqTExt timeout variable --
-        self.__interruptedRootIDs = None
+        self.__interrupted_root_sets = None
 
     def run(self):
         """
@@ -50,13 +57,13 @@ class FreqT1ClassExt(FreqT1Class):
                 break
             time_per_group = remaining_time / len(self.root_ids_list)
 
-            self.__interruptedRootIDs = list()
+            self.__interrupted_root_sets = []
 
             for elem in self.root_ids_list:
                 # start expanding a group of rootID
                 self.set_timeout(time_per_group)
                 root_pat, occ = elem
-                proj = self.getProjected(occ)
+                proj = self.get_projected(occ)
 
                 # keep current pattern and location if this group cannot finish
                 interrupted_pattern = root_pat
@@ -66,22 +73,22 @@ class FreqT1ClassExt(FreqT1Class):
                 # print(self._rootIDs_dict[keys].memory) #-------------
 
                 if not self.finished:
-                    self.__interruptedRootIDs.append((interrupted_pattern, occ))
+                    self.__interrupted_root_sets.append((interrupted_pattern, occ))
 
             # update lists of root occurrences for next round
-            self.root_ids_list = self.__interruptedRootIDs
+            self.root_ids_list = self.__interrupted_root_sets
 
         # print the largest patterns
         if len(self.mfp) != 0:
-            self.output_patterns(self.mfp, self._config, self._grammar_dict, self.label_decoder,
-                                 self._xmlCharacters_dict)
+            self.output_patterns(self.mfp, self._config)
 
-    """
-         * get initial locations of a projected
-         * @param: projected, Projected
+    @staticmethod
+    def get_projected(root_occ):
         """
-
-    def getProjected(self, root_occ):
+         * create the projection corresponding to root_occ
+        :param root_occ: Set(Int), set of root nodes
+        :return: Projected
+        """
         # create location for the current pattern
         proj = Projected()
         proj.set_depth(0)
