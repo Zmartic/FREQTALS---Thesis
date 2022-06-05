@@ -1,10 +1,9 @@
-#!/usr/bin/env python3
-from freqt.src.be.intimals.freqt.core.CheckSubtree import check_subtree
-
 """
  Set of function used to add pattern to some structure
  Usually used inside add_tree() function from FreqT's implementations
 """
+# !/usr/bin/env python3
+from freqt.src.be.intimals.freqt.core.CheckSubtree import check_subtree
 
 
 def add_maximal_pattern(pat, proj, mfp, not_maximal_set):
@@ -23,15 +22,14 @@ def add_maximal_pattern(pat, proj, mfp, not_maximal_set):
         if pat in mfp:
             return
 
-        to_remove_list = list()
+        to_remove_list = []
         # check maximal pattern
         for max_pat in mfp.keys():
             res = check_subtree(pat, max_pat)
             if res == 1:  # * pat is a subtree of max_pat
                 not_maximal_set.add(pat.copy())
-                # assert(len(to_remove_list) == 0)
                 return
-            elif res == 2:  # * max_pat is a subtree of pat
+            if res == 2:  # * max_pat is a subtree of pat
                 not_maximal_set.add(max_pat)
                 to_remove_list.append(max_pat)
 
@@ -87,20 +85,19 @@ def add_high_score_pattern(pat, proj, score, hsp, num_pattern):
     """
 
     if pat not in hsp:
+        # add new pattern
+        hsp[pat] = (proj, score)
+
         if len(hsp) >= num_pattern:
             min_pat = get_min_score_pattern(hsp, pat, score)
-            # remove minScore pattern
-            del min_pat
-            # add new pattern
-            hsp[pat] = (proj, score)
-        else:
-            # add new pattern
-            hsp[pat] = (proj, score)
+            # remove min score pattern
+            del hsp[min_pat]
 
 
 def get_min_score_pattern(hsp, current_pat, current_score):
     """
-     Get the pattern which has minimum chi-square score in the list of patterns (hsp + current_pattern)
+     Get the pattern which has minimum chi-square score
+     from the list of patterns (hsp + current_pattern)
     :param hsp: Dict(FTArray, Tuple), the set of high chi-square score patterns
                 Tuple(Projected, Float) for each pattern we store its projection and its score
     :param current_pat: FTArray, pattern that is currently added to hsp

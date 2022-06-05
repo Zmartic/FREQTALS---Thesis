@@ -1,6 +1,10 @@
-#!/usr/bin/env python3
+"""
+    Collection of function used to check whether a small pattern
+    is a subtree of a big pattern
+"""
+# !/usr/bin/env python3
 
-from freqt.src.be.intimals.freqt.core.FreqTUtil.FreqT_subtree import *
+from freqt.src.be.intimals.freqt.core.FreqTUtil.FreqT_subtree import FreqT_subtree
 
 
 def check_subtree(pat1, pat2):

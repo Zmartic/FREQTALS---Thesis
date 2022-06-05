@@ -14,7 +14,7 @@ class Config:
         """ init """
         try:
             self.__prop = Properties()
-            with open(config_path) as file:
+            with open(config_path, encoding='utf-8') as file:
                 self.__prop.load(file)
             file.close()
         except:
