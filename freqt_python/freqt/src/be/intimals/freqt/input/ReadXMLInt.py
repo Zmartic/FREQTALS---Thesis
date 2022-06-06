@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-import freqt.src.be.intimals.freqt.structure.NodeFreqT as NodeFreqT
-from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
-
-from xml.dom import minidom
-from xml.dom import Node
+from xml.dom import Node, minidom
 import sys
 import os
 import traceback
+
+import freqt.src.be.intimals.freqt.structure.NodeFreqT as NodeFreqT
+from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 
 """
  *
@@ -20,36 +19,36 @@ class ReadXMLInt:
     def __init__(self):
         self._top = 0
         self._id = 0
-        self._sr = list()        # list of int
-        self._sibling = list()   # list of int
+        self._sr = []        # list of int
+        self._sibling = []   # list of int
 
-        self._labels = list()    # list of string
-        self.lineNrs = list()    # list of int
-        self.countSection = -1
-        self._abstractLeafs = False
+        self._labels = []    # list of string
+        self.line_nrs = []    # list of int
+        self.count_section = -1
+        self._abstract_leaves = False
 
-    def readDatabase(self, database, class_id, root_directory, labelIndex, classIndex_list, white_labels):
+    def readDatabase(self, database, class_id, root_directory, label_index, class_index_list, white_labels):
         """
          * read 2-class ASTs, and remove black labels
          * @param database_list, a list of list of NodeFreqT
          * @param classId, an int
          * @param rootDirectory, a string    !!!!! File object in java
-         * @param labelIndex, a dictionnary with Interger as Key and String as value
+         * @param label_index, a dictionnary with Interger as Key and String as value
          * @param classIndex_list, a list of Interger
          * @param whiteLabelPath, a string
         """
-        files = list()
+        files = []
         self.populate_file_list(root_directory, files)
         files.sort()
 
         try:
-            for fi in files:
-                self.countSection = 0
+            for file in files:
+                self.count_section = 0
                 # store class label of transaction id
-                classIndex_list.append(class_id)
+                class_index_list.append(class_id)
 
                 # read XML file
-                doc = minidom.parse(fi)
+                doc = minidom.parse(file)
                 doc.documentElement.normalize()
 
                 # get total number of nodes
@@ -57,23 +56,22 @@ class ReadXMLInt:
                 # initial tree parameters
                 self._id = 0
                 self._top = 0
-                self._sr = list()
-                self._sibling = list()
-                trans = list()
-                for i in range(size):
-                    nodeTemp = NodeFreqT.NodeFreqT()
-                    nodeTemp.nodeFreqtInit(-1, -1, -1, "0", True)
-                    trans.append(nodeTemp)
+                self._sr = []
+                self._sibling = []
+                trans = []
+                for _ in range(size):
+                    node_temp = NodeFreqT.NodeFreqT()
+                    node_temp.nodeFreqtInit(-1, -1, -1, "0", True)
+                    trans.append(node_temp)
                     self._sibling.append(-1)
                 # create tree
-                self.readTreeDepthFirst(doc.documentElement, trans, labelIndex, white_labels)
+                self.readTreeDepthFirst(doc.documentElement, trans, label_index, white_labels)
                 # add tree to database
                 database.append(trans)
 
         except:
             print(" read AST error.")
-            e = sys.exc_info()[0]
-            print(e)
+            print(sys.exc_info()[0])
             raise
 
     def populate_file_list(self, directory, file_list):
@@ -89,67 +87,64 @@ class ReadXMLInt:
         directories = [f for f in os.listdir(directory) if os.path.isdir(os.path.join(directory, f))]
         for direc in directories:
             self.populate_file_list(directory + '/' + direc, file_list)
-        return
 
-    """
-     * ignore black labels when reading tree by breadth first traversal
-     * @param node, a Node
-     * @param trans, a list of NodeFreqT
-     * labelIndex, a dictionary with Integer as key and String as value
-     * whiteLabels, a dictionary with String as key and Set of String as value
-    """
-    def readTreeDepthFirst(self, node, trans, labelIndex, whiteLabels):
+    def readTreeDepthFirst(self, node, trans, label_index, white_labels):
+        """
+         * ignore black labels when reading tree by breadth first traversal
+         * @param node, a Node
+         * @param trans, a list of NodeFreqT
+         * label_index, a dictionary with Integer as key and String as value
+         * white_labels, a dictionary with String as key and Set of String as value
+        """
         try:
             # if this is an internal node
             if node.nodeType == Node.ELEMENT_NODE:
                 # add node label to trans
                 trans[self._id].setNodeLabel(node.nodeName)
                 # update index labels
-                self.updateLabelIndex(node.nodeName, trans, labelIndex)
+                self.updateLabelIndex(node.nodeName, trans, label_index)
                 # find line number of this node.
-                lineNbTemp = self.find_LineNr(node)
+                line_nb_temp = self.find_LineNr(node)
                 # add line number to current node id
-                trans[self._id].setLineNr(lineNbTemp)
+                trans[self._id].setLineNr(line_nb_temp)
                 # count SectionStatementBlock: only using for Cobol
-                self.countSectionStatementBlock(node, lineNbTemp)
+                self.countSectionStatementBlock(node, line_nb_temp)
 
                 # increase id
                 self._sr.append(self._id)
                 self._id = self._id + 1
                 # recursively read children
-                nodeList = node.childNodes
+                node_list = node.childNodes
                 # only read children labels which are in the white list
-                if node.nodeName in whiteLabels:
-                    temp = whiteLabels[node.nodeName]
-                    for i in range(len(nodeList)):
-                        if nodeList[i].nodeName in temp:
-                            self.readTreeDepthFirst(nodeList[i], trans, labelIndex, whiteLabels)
+                if node.nodeName in white_labels:
+                    temp = white_labels[node.nodeName]
+                    for node_i in node_list:
+                        if node_i.nodeName in temp:
+                            self.readTreeDepthFirst(node_i, trans, label_index, white_labels)
                 else:
-                    for i in range(len(nodeList)):
-                        self.readTreeDepthFirst(nodeList.item(i), trans, labelIndex, whiteLabels)
+                    for node_i in node_list:
+                        self.readTreeDepthFirst(node_i, trans, label_index, white_labels)
                 # calculate parent, child, sibling of internal node
                 self.calculatePositions(trans)
             else:
                 # this is a leaf
                 if node.nodeType == Node.TEXT_NODE and len(node.data.strip()) != 0:
                     # if a has sibling it is not a unique leaf
-                    a = node.nextSibling
-                    b = node.previousSibling
 
-                    if a is None and b is None:
-                        if self._abstractLeafs:
-                            leafLabel = "**"
+                    if node.nextSibling is None and node.previousSibling is None:
+                        if self._abstract_leaves:
+                            leaf_label = "**"
                         else:
-                            leafLabel = "*" + node.data.replace(",", UNICHAR).strip()
+                            leaf_label = "*" + node.data.replace(",", UNICHAR).strip()
                         # add leaf node label to trans
-                        trans[self._id].setNodeLabel(leafLabel)
-                        # update labelIndex for leaf labels
-                        if leafLabel not in self._labels:
-                            trans[self._id].setNode_label_int(len(labelIndex)*(-1))
-                            labelIndex[len(labelIndex)*(-1)] = leafLabel
-                            self._labels.append(leafLabel)
+                        trans[self._id].setNodeLabel(leaf_label)
+                        # update label_index for leaf labels
+                        if leaf_label not in self._labels:
+                            trans[self._id].setNode_label_int(len(label_index)*(-1))
+                            label_index[len(label_index)*(-1)] = leaf_label
+                            self._labels.append(leaf_label)
                         else:
-                            trans[self._id].setNode_label_int(self._labels.index(leafLabel)*(-1))
+                            trans[self._id].setNode_label_int(self._labels.index(leaf_label)*(-1))
                         # set line number of leaf node to -1
                         trans[self._id].setLineNr("-1")
                         # increase id
@@ -158,16 +153,15 @@ class ReadXMLInt:
                         # calculate parent, child, sibling of this leaf node
                         self.calculatePositions(trans)
         except:
-            e = sys.exc_info()[0]
-            print("Error in readTreeDepthFirst" + str(e))
+            print("Error in readTreeDepthFirst" + str(sys.exc_info()[0]))
             trace = traceback.format_exc()
             print(trace)
             raise
 
-    """
-     * @param trans, a list of NodeFreqT
-    """
     def calculatePositions(self, trans):
+        """
+         * @param trans, a list of NodeFreqT
+        """
         self._top = len(self._sr) - 1
         if self._top < 1:
             return
@@ -181,74 +175,72 @@ class ReadXMLInt:
         self._sibling[parent] = child
         self._sr.pop(self._top)
 
-    """
-     * @param node, a node
-     * @param lineNbTemp, a String
-    """
-    def countSectionStatementBlock(self, node, lineNbTemp):
-        if node.tagName == "SectionStatementBlock" and self.countSection < 2:
-            self.countSection += 1
+    def countSectionStatementBlock(self, node, line_nb_temp):
+        """
+         * @param node, a node
+         * @param line_nb_temp, a String
+        """
+        if node.tagName == "SectionStatementBlock" and self.count_section < 2:
+            self.count_section += 1
         else:
-            if self.countSection == 2:
-                self.lineNrs.append(int(lineNbTemp))
-                self.countSection += 1
+            if self.count_section == 2:
+                self.line_nrs.append(int(line_nb_temp))
+                self.count_section += 1
 
     def find_LineNr(self, node):
         """
          * @param node, a node
         """
-        nodeMap = node.attributes
-        for i in range(len(nodeMap)):
-            if nodeMap.item(i).name == "LineNr":
-                return nodeMap.item(i).value
+        node_map = node.attributes
+        for i in range(len(node_map)):
+            if node_map.item(i).name == "LineNr":
+                return node_map.item(i).value
         return "0"
 
-    """
-     * @param nodeLabel, a String
-     * @param trans, a list of NodeFreqT
-     * @param labelIndex, a dictionary with Interger as key and String as value
-    """
-    def updateLabelIndex(self, nodeLabel, trans, labelIndex):
-        # update labelIndex for internal labels
-        if len(labelIndex) == 0 and len(self._labels) == 0:
+    def updateLabelIndex(self, node_label, trans, label_index):
+        """
+         * @param nodeLabel, a String
+         * @param trans, a list of NodeFreqT
+         * @param label_index, a dictionary with Interger as key and String as value
+        """
+        # update label_index for internal labels
+        if len(label_index) == 0 and len(self._labels) == 0:
             trans[self._id].setNode_label_int(0)
-            labelIndex[0] = nodeLabel
-            self._labels.append(nodeLabel)
+            label_index[0] = node_label
+            self._labels.append(node_label)
         else:
-            if nodeLabel not in self._labels:
-                trans[self._id].setNode_label_int(len(labelIndex))
-                labelIndex[len(labelIndex)] = nodeLabel
-                self._labels.append(nodeLabel)
+            if node_label not in self._labels:
+                trans[self._id].setNode_label_int(len(label_index))
+                label_index[len(label_index)] = node_label
+                self._labels.append(node_label)
             else:
-                trans[self._id].setNode_label_int(self._labels.index(nodeLabel))
+                trans[self._id].setNode_label_int(self._labels.index(node_label))
 
     def read_whiteLabel(self, path):
         """
          * read white labels from given file
          * @param path, a String
-         * return a dictionary containing the whiteLabels with string as Key and a list of String as value.
+         * return a dictionary containing the white_labels with string as Key and a list of String as value.
         """
-        _whiteLabels = dict()
+        _white_labels = {}
         try:
-            f = open(path, 'r')
-            line = f.readline()
-            while line:
-                if line != "" and line[0] != '#' and line != "\n":
-                    str_tmp = line.split()
-                    ASTNode = str_tmp[0]
-                    children_set = set()
-                    for i in range(1, len(str_tmp)):
-                        children_set.add(str_tmp[i])
-                    _whiteLabels[ASTNode] = children_set
-                line = f.readline()
-            f.close()
+            with open(path, 'r') as file:
+                line = file.readline()
+                while line:
+                    if line != "" and line[0] != '#' and line != "\n":
+                        str_tmp = line.split()
+                        ast_node = str_tmp[0]
+                        children_set = set()
+                        for i in range(1, len(str_tmp)):
+                            children_set.add(str_tmp[i])
+                        _white_labels[ast_node] = children_set
+                    line = file.readline()
         except:
-            e = sys.exc_info()[0]
-            print("Error: reading white list " + str(e))
+            print("Error: reading white list " + str(sys.exc_info()[0]))
             trace = traceback.format_exc()
             print(trace)
             raise
-        return _whiteLabels
+        return _white_labels
 
     def count_children(self, node):
         """
@@ -257,17 +249,17 @@ class ReadXMLInt:
          * return the number of children of a given node
         """
         nb_children = 0
-        for n in node.childNodes:
-            if n.nodeType != Node.TEXT_NODE and n.nodeType == Node.ELEMENT_NODE:
+        for child in node.childNodes:
+            if child.nodeType != Node.TEXT_NODE and child.nodeType == Node.ELEMENT_NODE:
                 nb_children += 1
         return nb_children
 
-    """
-     * count total number of nodes of a Python XML
-     * @param root, the root node of the xml tree
-     * return the number of nodes of a Python XML
-    """
     def countNBNodes(self, root):
+        """
+         * count total number of nodes of a Python XML
+         * @param root, the root node of the xml tree
+         * return the number of nodes of a Python XML
+        """
         count = 0
         if root.nodeType == Node.ELEMENT_NODE:
             count += 1
@@ -276,12 +268,10 @@ class ReadXMLInt:
                 count += self.countNBNodes(child)
         else:
             if root.nodeType == Node.TEXT_NODE and len(root.data.strip()) != 0:
-                a = root.nextSibling
-                b = root.previousSibling
-                if a is None and b is None:
+                if root.nextSibling is None and root.previousSibling is None:
                     count += 1
         return count
 
     # return total number of reading files
     def getlineNrs(self):
-        return self.lineNrs
+        return self.line_nrs
