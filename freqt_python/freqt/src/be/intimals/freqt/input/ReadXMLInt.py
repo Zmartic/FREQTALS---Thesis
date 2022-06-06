@@ -224,7 +224,7 @@ class ReadXMLInt:
         """
         _white_labels = {}
         try:
-            with open(path, 'r') as file:
+            with open(path, 'r', encoding='utf-8') as file:
                 line = file.readline()
                 while line:
                     if line != "" and line[0] != '#' and line != "\n":

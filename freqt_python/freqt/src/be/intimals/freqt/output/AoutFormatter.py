@@ -2,50 +2,43 @@
 
 
 from abc import ABC, abstractmethod
-import collections
 
 
 class AOutputFormatter(ABC):  # abstract class
-    nbPattern = -1
-    fileName = ""
-    out = None  # link to a file ready to be written
-    config = None  # Config structure
-    grammar_dict = dict()  # a dictionary with String as keys and list of String as values
-    xmlCharacters_dict = dict()  # dictionary with String as keys and String as values
-    patSupMap_ord_dict = collections.OrderedDict()  # ordered dictionary with String as keys and values
 
-    """
-     * create a AOutputFormatter element
-     * @param: _fileName, String
-     * @param: _config, Config
-     * @param: _grammar_dict, a dictionary with String as keys and list of String as values
-     * @param: _xmlCharacters_dict, dictionary with String as keys and String as values
-    """
     @abstractmethod
-    def __init__(self, _fileName, _config, _grammar_dict, _xmlCharacters_dict):
-        self.nbPattern = 0
-        self.fileName = _fileName
-        self.config = _config
-        self.grammar_dict = _grammar_dict
-        self.xmlCharacters_dict = _xmlCharacters_dict
+    def __init__(self, filename, _config, _grammar_dict, _xml_characters_dict):
+        """
+         * create a AOutputFormatter element
+         * @param: filename, String
+         * @param: _config, Config
+         * @param: _grammar_dict, a dictionary with String as keys and list of String as values
+         * @param: _xml_characters_dict, dictionary with String as keys and String as values
+        """
+        self.nb_pattern = 0
+        self.filename = filename
+        self.out = None  # link to a file ready to be written
+        self.config = _config  # Config structure
+        self.grammar_dict = _grammar_dict  # a dictionary with String as keys and list of String as values
+        self.xml_characters_dict = _xml_characters_dict  # ordered dictionary with String as keys and values
         self.openOutputFile()
 
     @abstractmethod
     def openOutputFile(self):
-        self.out = open(self.fileName, 'w+')
+        self.out = open(self.filename, 'w+', encoding='utf-8')
 
     @property
     @abstractmethod
     def getNbPattern(self):
-        return self.nbPattern
+        return self.nb_pattern
 
-    """
-     * check if a pattern satisfies output constraints
-     * @param pat, a list of String
-     * @return
-    """
     @abstractmethod
     def checkOutputConstraint(self, pat):
+        """
+         * check if a pattern satisfies output constraints
+         * @param pat, a list of String
+         * @return
+        """
         """
         patternInt = PatternInt()
         if patternInt.checkMissingLeaf(pat) or patternInt.countLeafNode(pat) < self.config.getMinLeaf():
@@ -64,24 +57,22 @@ class AOutputFormatter(ABC):  # abstract class
     """
     @abstractmethod
     def union(self, list1, list2):
-        newList = list()
+        new_list = []
         for elem in list1:
-            newList.append(elem)
+            new_list.append(elem)
         for elem in list2:
-            newList.append(elem)
-        return newList
+            new_list.append(elem)
+        return new_list
 
-    """
-     * print a given pattern
-     * @param: pat, a string
-    """
     @abstractmethod
     def printPattern(self, pat):
-        pass
+        """
+         * print a given pattern
+         * @param: pat, a string
+        """
 
-    """
-     * close a file
-    """
     @abstractmethod
     def close(self):
-        pass
+        """
+         * close a file
+        """
