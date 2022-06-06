@@ -15,20 +15,20 @@ class Projected:
         self.__rootSupport = -1
         self.__locations = list()
 
-    def set_depth(self, d):
-        self.__depth = d
+    def set_depth(self, depth):
+        self.__depth = depth
 
     def get_depth(self):
         return self.__depth
 
-    def set_support(self, s):
-        self.__support = s
+    def set_support(self, support):
+        self.__support = support
 
     def get_support(self):
         return self.__support
 
-    def set_root_support(self, s):
-        self.__rootSupport = s
+    def set_root_support(self, rootSupport):
+        self.__rootSupport = rootSupport
 
     def get_root_support(self):
         return self.__rootSupport
@@ -51,12 +51,10 @@ class Projected:
 
     def compute_support(self):
         self.__support = len({loc.get_location_id() for loc in self.__locations})
-        #print(self.__support)
         return self.__support
 
     def compute_root_support(self):
         self.__rootSupport = len({(loc.get_location_id(), loc.get_root()) for loc in self.__locations})
-        #print(self.__rootSupport)
         return self.__rootSupport
 
     # new procedure for 2 - class data

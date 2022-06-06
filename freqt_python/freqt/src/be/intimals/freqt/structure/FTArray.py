@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import copy
 
 
 class FTArray:
@@ -24,9 +23,17 @@ class FTArray:
 
     @staticmethod
     def make_root_pattern(root):
+        """
+         * make a root pattern with label "root"
+        :param root: Int, label of the root
+        :return: FTArray
+        """
         return FTArray([root], 1, 0)
 
     def copy(self):
+        """
+        :return: FTArray, copy
+        """
         return FTArray(self.memory.copy(), self.n_node, self.n_leaf)
 
     def get(self, i):
@@ -51,11 +58,11 @@ class FTArray:
         if node_level == 0:
             # right most node of the original pattern
             return original_size - 1
-        else:
-            for i in range(original_size - 1, 0, -1):
-                node_level = (node_level + 1) if self.get(i) == -1 else (node_level - 1)
-                if node_level == -1:
-                    return i
+
+        for i in range(original_size - 1, 0, -1):
+            node_level = (node_level + 1) if self.get(i) == -1 else (node_level - 1)
+            if node_level == -1:
+                return i
 
         return None
 

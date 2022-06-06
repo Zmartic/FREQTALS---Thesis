@@ -17,16 +17,16 @@ class Pattern:
     format 2 = (a(b(*1))(c(*2)))
     """
 
-    def covert(self, str):
-        tmp_list = list()  # a list of node labels
+    def covert(self, string):
+        tmp_list = []  # a list of node labels
         try:
-            length = len(str)
+            length = len(string)
             size = 0
             buff = ""  # store a node label
 
-            ii = 0
-            while ii < length:
-                if str[ii] == '(' or str[ii] == ')':
+            index = 0
+            while index < length:
+                if string[index] == '(' or string[index] == ')':
                     if len(buff) != 0:
                         if buff[0] == '*':
                             tmp_list.append(buff)
@@ -35,29 +35,29 @@ class Pattern:
                             tmp_list.append(label[0])
                         buff = ""
                         size += 1
-                    if str[ii] == ')':
+                    if string[index] == ')':
                         tmp_list.append(")")
                 else:
-                    if str[ii] == '\t' or str[ii] == ' ':
+                    if string[index] == '\t' or string[index] == ' ':
                         buff += "_"
                     else:
                         # adding to find leaf node i.e. *X(120)
-                        if str[ii] == '*':
+                        if string[index] == '*':
                             bracket = 0
                             while bracket >= 0:
-                                if str[ii] == '(':
+                                if string[index] == '(':
                                     bracket += 1
-                                elif str[ii] == ')':
+                                elif string[index] == ')':
                                     bracket -= 1
                                 if bracket == -1:
                                     break
                                 else:
-                                    buff += str[ii]
-                                    ii += 1
-                            ii -= 1
+                                    buff += string[index]
+                                    index += 1
+                            index -= 1
                         else:
-                            buff += str[ii]
-                ii += 1
+                            buff += string[index]
+                index += 1
             for i in range(len(tmp_list) - 1, -1, -1):
                 if tmp_list[i] == ")":
                     tmp_list.pop(i)
@@ -65,6 +65,7 @@ class Pattern:
                     break
         except:
             print("Pattern convert ")
+
         tmp_list_str = ", ".join(tmp_list)
         return tmp_list_str
 
@@ -76,7 +77,7 @@ class Pattern:
      * @return
     """
     def removeMissingLeaf(self, pat_list):
-        result_list = list()
+        result_list = []
         # find the last leaf
         pos = 0
         for i in range(0, len(pat_list)):
@@ -107,16 +108,16 @@ class Pattern:
         for i in range(0, len(patListOfstr)):
             if patListOfstr[i][0] == '*':
                 pos = i
-        n = 0
-        for i in range(0, pos +1):
+        node = 0
+        for i in range(0, pos + 1):
             if patListOfstr[i] == ")":
                 result += patListOfstr[i]
-                n -= 1
+                node -= 1
             else:
-                n += 1
+                node += 1
                 result += "(" + patListOfstr[i]
 
-        for i in range(0, n):
+        for i in range(0, node):
             result += ")"
 
         return result
@@ -158,17 +159,17 @@ class Pattern:
      * @param parentPos, int
      * @return list of string
     """
-    def findChildrenLabels(self, patListOfStr, parentPos):
+    def findChildrenLabels(self, pat_list_of_str, parent_pos):
         top = -1
-        children1 = list()
-        if parentPos < len(patListOfStr) - 1:
-            for i in range(parentPos + 1, len(patListOfStr)):
-                if patListOfStr[i] == ")":
+        children1 = []
+        if parent_pos < len(pat_list_of_str) - 1:
+            for i in range(parent_pos + 1, len(pat_list_of_str)):
+                if pat_list_of_str[i] == ")":
                     top -= 1
                 else:
                     top += 1
-                if top == 0 and not patListOfStr[i] == ")":
-                    children1.append(patListOfStr[i])
+                if top == 0 and not pat_list_of_str[i] == ")":
+                    children1.append(pat_list_of_str[i])
                 if top == -2:
                     break
         return children1
