@@ -19,6 +19,9 @@ class FreqTCore:
     """
 
     def __init__(self, _config):
+        """
+         :param config: Config
+        """
 
         self._config = _config
         self.constraints = None
@@ -354,6 +357,7 @@ class FreqTCore:
     def add_tree_requested(self, pat, proj):
         """
          * Request addition of a pattern to the output
+         > ensures that patterns satisfy the post expansion constraints
         :param pat: FTArray, the pattern
         :param proj: Projected, its projection
         :return: Boolean, whether pat was add to the output

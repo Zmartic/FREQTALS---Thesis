@@ -14,7 +14,7 @@ class FreqT1ClassExt(FreqT1Class):
       Implementation of the 2nd step of the FREQTALS algorithm on 1 class data
     """
 
-    def __init__(self, _config, root_ids_list, _grammar_dict, _grammarInt_dict,
+    def __init__(self, _config, root_ids_list, _grammar_dict, _grammar_int_dict,
                  _xml_characters_dict, label_decoder, _transaction_list):
         """
          * receive data from the 1st step
@@ -24,7 +24,7 @@ class FreqT1ClassExt(FreqT1Class):
 
         self.root_ids_list = root_ids_list
 
-        self.constraints = FreqT1ExtStrategy(_config, _grammarInt_dict)
+        self.constraints = FreqT1ExtStrategy(_config, _grammar_int_dict)
 
         self._transaction_list = _transaction_list
         self._grammar_dict = _grammar_dict
@@ -49,7 +49,8 @@ class FreqT1ClassExt(FreqT1Class):
             #        if a group cannot finish search in the given time
             #        this group will be stored in the "interruptedRootID"
             #        after passing over all groups in rootIDs, if still having time budget
-            #        the algorithm will continue exploring patterns from groups stored in interruptedRootID
+            #        the algorithm will continue exploring patterns from groups stored
+            #        in interruptedRootID
 
             # calculate running time for each group in the current round
             remaining_time = timeout_step2 - time.time()
