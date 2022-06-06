@@ -20,7 +20,7 @@ class FreqTCore:
 
     def __init__(self, _config):
         """
-         :param config: Config
+         :param _config: Config
         """
 
         self._config = _config
@@ -50,13 +50,12 @@ class FreqTCore:
         """
         self.constraints = None
 
-        self._transaction_list = list()
-        self._grammar_dict = dict()
-        self._xml_characters_dict = dict()
-        self._transaction_class_id_list = list()
+        self._transaction_list = []
+        self._grammar_dict = {}
+        self._xml_characters_dict = {}
+        self._transaction_class_id_list = []
 
-        self.label_decoder = dict()
-        pass
+        self.label_decoder = {}
 
     def add_tree(self, pat, proj):
         """
@@ -65,14 +64,12 @@ class FreqTCore:
         :param pat: FTArray, the frequent pattern
         :param proj: Projected, projection of pat
         """
-        pass
 
     def post_mining_process(self, report):
         """
          * Called at the end of the main run
            > used to output the result or start a 2nd step
         """
-        pass
 
     # --- CORE --- #
 
@@ -86,27 +83,27 @@ class FreqTCore:
 
         print("Mining frequent subtrees ...")
 
-        # FP1 = the root label and its occurrences
-        FP1 = self.build_FP1()  # OrderedDict(Int, Projected)
+        # fp1 = the root label and its occurrences
+        fp1 = self.build_fp1()  # OrderedDict(Int, Projected)
 
         # remove node SourceFile because it is not AST node #
         not_ast_node = FTArray.make_root_pattern(0)
-        if not_ast_node in FP1:
-            del FP1[not_ast_node]
+        if not_ast_node in fp1:
+            del fp1[not_ast_node]
 
-        Constraint.prune(FP1, self._config.get_min_support(), self._config.get_weighted())
+        Constraint.prune(fp1, self._config.get_min_support(), self._config.get_weighted())
 
-        self.expand_FP1(FP1)
+        self.expand_fp1(fp1)
 
         self.post_mining_process(report)
 
-    def build_FP1(self):
+    def build_fp1(self):
         """
-         * Build FP1 = the initial set of "root pattern" (pattern of size 1) to be expanded
+         * Build fp1 = the initial set of "root pattern" (pattern of size 1) to be expanded
          note: only stores the label of roots (Int)
         :return: OrderedDict(Int, Projected), set of "root pattern"
         """
-        FP1 = collections.OrderedDict()  # OrderedDict[Int, Projected]
+        fp1 = collections.OrderedDict()  # OrderedDict[Int, Projected]
         trans = self._transaction_list
 
         for trans_id in range(len(trans)):
@@ -117,43 +114,44 @@ class FreqTCore:
                 if self.constraints.allowed_label_as_root(node.getNodeLabel()):
                     class_id = self._transaction_class_id_list[trans_id]
                     new_location = Location(loc, loc, trans_id, class_id)
-                    FreqTCore.update_FP1(FP1, node.getNode_label_int(), new_location)
+                    FreqTCore.update_fp1(fp1, node.getNode_label_int(), new_location)
 
-        return FP1
+        return fp1
 
     @staticmethod
-    def update_FP1(FP1, root_label, new_location):
+    def update_fp1(fp1, root_label, new_location):
         """
-         * Add a new location for some "root pattern" in FP1
-        :param FP1: OrderedDict(Int, Projected), root labels and their occurrences
+         * Add a new location for some "root pattern" in fp1
+        :param fp1: OrderedDict(Int, Projected), root labels and their occurrences
         :param root_label: Int, id of the label corresponding to the root node
         :param new_location: Location, occurrence of root_label in the data
         """
-        if root_label in FP1:
-            FP1[root_label].add(new_location)
+        if root_label in fp1:
+            fp1[root_label].add(new_location)
         else:
             projected = Projected()
             projected.set_depth(0)
             projected.add(new_location)
-            FP1[root_label] = projected
+            fp1[root_label] = projected
 
-    def expand_FP1(self, FP1):
+    def expand_fp1(self, fp1):
         """
-         * Expand FP1 to find frequent subtrees based on input constraints
-        :param FP1: dict(Int, Projected), root labels and their occurrences
+         * Expand fp1 to find frequent subtrees based on input constraints
+        :param fp1: dict(Int, Projected), root labels and their occurrences
         """
-        for root in FP1:
+        for root in fp1:
             # expand root patterns to find maximal patterns
             root_pat = FTArray.make_root_pattern(root)
-            _ = self.expand_pattern(root_pat, FP1[root])
+            _ = self.expand_pattern(root_pat, fp1[root])
 
-    def old_expand_pattern(self, pat, proj):
+    '''def old_expand_pattern(self, pat, proj):
         """
          Expand pattern
          * Pattern is expanded until stop_expand_pattern() is satisfied.
          * Pattern that has stop expanding sends "add tree request".
          * Those requests can be received by other patterns.
-         * If they satisfy all the constraints, they consume the request and are added to the output.
+         * If they satisfy all the constraints,
+           they consume the request and are added to the output.
          note: If a pattern has a leaf which is not a "leaf node" in the data
                this pattern should not be add to the output.
         :param pat: FTArray, the pattern we are expanding
@@ -166,7 +164,9 @@ class FreqTCore:
             return False
 
         # --- find candidates of the current pattern ---
-        candidates: OrderedDict[Tuple, Projected] = FreqTCore.generate_candidates(proj, self._transaction_list)
+        candidates = FreqTCore.generate_candidates(proj, self._transaction_list)
+        # = OrderedDict[Tuple, Projected]
+
         # prune candidate based on minSup
         Constraint.prune(candidates, self._config.get_min_support(), self._config.get_weighted())
         if len(candidates) == 0:
@@ -209,7 +209,7 @@ class FreqTCore:
             # restore the pattern
             pat.undo_extend(candidate_prefix)
 
-        return current_request
+        return current_request'''
 
     def expand_pattern(self, pat, proj):
         """
@@ -311,17 +311,17 @@ class FreqTCore:
 
             # * try to add a sibling to a node
             prefix = 1
-            for d in range(depth):
+            for cur_depth in range(depth):
                 current_node = _transaction_list[loc_id][pos]
 
                 candi_id = current_node.getNodeSibling()
-                new_depth = depth - d
+                new_depth = depth - cur_depth
 
                 while candi_id != -1:
                     node = _transaction_list[loc_id][candi_id]
                     new_location = Location(root, candi_id, loc_id, class_id)
-                    FreqTCore.update_candidates(candidates_dict, node.getNode_label_int(), new_location,
-                                                new_depth, prefix)
+                    FreqTCore.update_candidates(candidates_dict, node.getNode_label_int(),
+                                                new_location, new_depth, prefix)
 
                     candi_id = node.getNodeSibling()
 
@@ -375,7 +375,7 @@ class FreqTCore:
         """
         data_size = len(self._transaction_list)
         report_file = self._config.get_output_file().replace("\"", "") + "_report.txt"
-        report = open(report_file, 'w+')
+        report = open(report_file, 'w+', encoding='utf-8')
 
         self.log(report, "INPUT")
         self.log(report, "===================")
@@ -387,9 +387,11 @@ class FreqTCore:
         return report
 
     def get_xml_characters(self):
+        """ getter """
         return self._xml_characters_dict
 
     def get_grammar(self):
+        """ getter """
         return self._grammar_dict
 
     @staticmethod
@@ -414,9 +416,12 @@ class FreqTCore:
 
     def is_timeout(self):
         """
-         * check running time of the algorithm
+         * check timeout
         """
         return time.time() > self.timeout
 
     def get_running_time(self):
+        """
+        :return: the current running time
+        """
         return time.time() - self.time_start

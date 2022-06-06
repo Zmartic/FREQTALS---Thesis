@@ -7,9 +7,9 @@ INPUT
 OUTPUT
 ===================
 - Step 1: Mining frequent patterns with max size constraints
-	 + running time = 0.03126692771911621s
+	 + running time = 0.031203508377075195s
 	 + root occurrences groups = 4
 - Step 2: Mining maximal patterns WITHOUT max size constraint:
 	 + search finished
 	 + maximal patterns: 3
-	 + running time: ...0.03125309944152832s
+	 + running time: ...0.03124213218688965s
