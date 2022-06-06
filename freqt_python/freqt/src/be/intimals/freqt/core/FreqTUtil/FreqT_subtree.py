@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-from freqt.src.be.intimals.freqt.input.ReadFileInt import *
-from freqt.src.be.intimals.freqt.structure.FTArray import FTArray
-from freqt.src.be.intimals.freqt.structure.Projected import *
-
 import collections
+
+from freqt.src.be.intimals.freqt.input.ReadFileInt import ReadFileInt
+from freqt.src.be.intimals.freqt.structure.FTArray import FTArray
+from freqt.src.be.intimals.freqt.structure.Projected import Projected
 
 
 class FreqT_subtree:
@@ -12,7 +12,7 @@ class FreqT_subtree:
     """
 
     def __init__(self, small_pat, big_pat):
-        self.__transactions_list = list()
+        self.__transactions_list = []
         self.__input_pattern = small_pat.copy()
 
         self.init_database([small_pat, big_pat])
@@ -46,29 +46,29 @@ class FreqT_subtree:
         depth = projected.get_depth()
         candidate_dict = collections.OrderedDict()
         for i in range(projected.size()):
-            id = projected.get_location(i).get_location_id()
+            loc_id = projected.get_location(i).get_location_id()
             pos = projected.get_location(i).get_position()
             prefix = 0
-            for d in range(-1, depth):
+            for cur_d in range(-1, depth):
                 if pos != -1:
-                    if d == -1:
-                        start = self.__transactions_list[id][pos].getNodeChild()
+                    if cur_d == -1:
+                        start = self.__transactions_list[loc_id][pos].getNodeChild()
                     else:
-                        start = self.__transactions_list[id][pos].getNodeSibling()
-                    newdepth = depth - d
-                    l = start
-                    while l != -1:
-                        extension = (prefix, self.__transactions_list[id][l].getNode_label_int())
+                        start = self.__transactions_list[loc_id][pos].getNodeSibling()
+                    newdepth = depth - cur_d
+                    l_node = start
+                    while l_node != -1:
+                        extension = (prefix, self.__transactions_list[loc_id][l_node].getNode_label_int())
                         if extension in candidate_dict:
-                            candidate_dict[extension].set_location(id, l)  # store right most positions
+                            candidate_dict[extension].set_location(loc_id, l_node)  # store right most positions
                         else:
                             tmp = Projected()
                             tmp.set_depth(newdepth)
-                            tmp.set_location(id, l)  # store right most positions
+                            tmp.set_location(loc_id, l_node)  # store right most positions
                             candidate_dict[extension] = tmp
-                        l = self.__transactions_list[id][l].getNodeSibling()
-                    if d != -1:
-                        pos = self.__transactions_list[id][pos].getNodeParent()
+                        l_node = self.__transactions_list[loc_id][l_node].getNodeSibling()
+                    if cur_d != -1:
+                        pos = self.__transactions_list[loc_id][pos].getNodeParent()
                     prefix += 1
         return candidate_dict
 
@@ -116,4 +116,3 @@ class FreqT_subtree:
         """
         read_file = ReadFileInt()
         read_file.createTransactionFromMap(patterns_list, self.__transactions_list)
-
