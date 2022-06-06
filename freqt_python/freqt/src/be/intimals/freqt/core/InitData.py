@@ -2,7 +2,7 @@
 import sys
 import traceback
 
-from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import *
+from freqt.src.be.intimals.freqt.constraint.FreqTStrategy import FreqT1Strategy
 from freqt.src.be.intimals.freqt.grammar.CreateGrammar import createGrammar
 from freqt.src.be.intimals.freqt.grammar.ReadGrammar import readGrammar
 from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
@@ -16,18 +16,19 @@ def init_data_1class(config):
     white_label = read_white_label(config.get_white_label_file())
 
     # remove black labels when reading ASTs
-    transactions = list()
-    trans_class_id = list()  # actually not useful
-    label_decoder = dict()
-    readXML = ReadXMLInt()
-    readXML.readDatabase(transactions, 1, config.get_input_files(), label_decoder, trans_class_id, white_label)
+    transactions = []
+    trans_class_id = []  # actually not useful
+    label_decoder = {}
+    read_xml = ReadXMLInt()
+    read_xml.readDatabase(transactions, 1, config.get_input_files(),
+                          label_decoder, trans_class_id, white_label)
 
     # create grammar (labels are strings) which is used to print patterns
-    grammar = dict()
+    grammar = {}
     init_grammar(config.get_input_files(), white_label, grammar, config.build_grammar())
 
     # read list of special XML characters
-    xml_char_dict = read_XML_character(config.get_xml_character_file())
+    xml_char_dict = read_xml_character(config.get_xml_character_file())
 
     grammar_int = convert_grammar_label2int(grammar, label_decoder)
     root_label_set = read_root_label(config.get_root_label_file())
@@ -43,28 +44,31 @@ def init_data_2class(config):
     white_label = read_white_label(config.get_white_label_file())
 
     # remove black labels when reading ASTs
-    transactions = list()
-    trans_class_id = list()
-    label_decoder = dict()
-    readXML = ReadXMLInt()
-    readXML.readDatabase(transactions, 1, config.get_input_files1(), label_decoder, trans_class_id, white_label)
-    readXML.readDatabase(transactions, 0, config.get_input_files2(), label_decoder, trans_class_id, white_label)
+    transactions = []
+    trans_class_id = []
+    label_decoder = {}
+    read_xml = ReadXMLInt()
+    read_xml.readDatabase(transactions, 1, config.get_input_files1(),
+                          label_decoder, trans_class_id, white_label)
+    read_xml.readDatabase(transactions, 0, config.get_input_files2(),
+                          label_decoder, trans_class_id, white_label)
     size_class1 = sum(trans_class_id)
     size_class2 = len(trans_class_id) - size_class1
 
     # init grammar
-    grammar = dict()
+    grammar = {}
     init_grammar(config.get_input_files1(), white_label, grammar, config.build_grammar())
     init_grammar(config.get_input_files2(), white_label, grammar, config.build_grammar())
 
     # read list of special XML characters
-    xml_char_dict = read_XML_character(config.get_xml_character_file())
+    xml_char_dict = read_xml_character(config.get_xml_character_file())
 
     grammar_int = convert_grammar_label2int(grammar, label_decoder)
     root_label_set = read_root_label(config.get_root_label_file())
     constraints = FreqT1Strategy(config, grammar_int, root_label_set)
 
-    return transactions, trans_class_id, label_decoder, size_class1, size_class2, grammar, xml_char_dict, constraints
+    return transactions, trans_class_id, label_decoder, size_class1, size_class2, \
+           grammar, xml_char_dict, constraints
 
 
 # --- INITIAL INT --- #
@@ -83,8 +87,7 @@ def init_grammar(path, white, gram_dict, _build_grammar):
         else:
             readGrammar(path, gram_dict)
     except:
-        e = sys.exc_info()[0]
-        print("init grammar error " + str(e) + "\n")
+        print("init grammar error " + str(sys.exc_info()[0]) + "\n")
         print(traceback.format_exc())
 
 
@@ -95,7 +98,7 @@ def convert_grammar_label2int(gram_str, label_index):
      * @param: gramStr_dict, a dictionary with String as keys and list of String as values
      * @param: labelIndex_dict, a dictionary with Integer as keys and String as values
     """
-    gram_int = dict()
+    gram_int = {}
 
     for key in gram_str:
         node_children_list = gram_str[key]  # list of string
@@ -133,26 +136,29 @@ def find_index(label, label_index):
 
 
 def read_white_label(path):
-    _whiteLabels = dict()
+    """
+     * read the list of white labels
+     * @param: path, String
+    """
+    white_labels = {}
     try:
-        f = open(path, 'r')
-        line = f.readline()
-        while line:
-            if line != "" and line[0] != '#' and line != "\n":
-                str_tmp = line.split()
-                ast_node = str_tmp[0]
-                children_set = set()
-                for i in range(1, len(str_tmp)):
-                    children_set.add(str_tmp[i])
-                _whiteLabels[ast_node] = children_set
-            line = f.readline()
-        f.close()
+        with open(path, 'r', encoding='utf-8') as file:
+            line = file.readline()
+            while line:
+                if line != "" and line[0] != '#' and line != "\n":
+                    str_tmp = line.split()
+                    ast_node = str_tmp[0]
+                    children_set = set()
+                    for i in range(1, len(str_tmp)):
+                        children_set.add(str_tmp[i])
+                    white_labels[ast_node] = children_set
+                line = file.readline()
+        file.close()
     except:
-        e = sys.exc_info()[0]
-        print("Error: reading white list " + str(e))
+        print("Error: reading white list " + str(sys.exc_info()[0]))
         print(traceback.format_exc())
 
-    return _whiteLabels
+    return white_labels
 
 
 def read_root_label(path):
@@ -163,38 +169,37 @@ def read_root_label(path):
     """
     root_labels_set = set()
     try:
-        with open(path) as f:
-            line = f.readline()
+        with open(path, 'r', encoding='utf-8') as file:
+            line = file.readline()
             while line:
                 if len(line) != 0 and line[0] != '#' and line != "\n":
                     line = line.replace("\n", "")
                     str_tmp = line.split(" ")
                     root_labels_set.add(str_tmp[0])
-                line = f.readline()
+                line = file.readline()
+        file.close()
     except:
-        e = sys.exc_info()[0]
-        print("Error: reading listRootLabel " + str(e) + "\n")
+        print("Error: reading listRootLabel " + str(sys.exc_info()[0]) + "\n")
 
     return root_labels_set
 
 
-def read_XML_character(path):
+def read_xml_character(path):
     """
      * read list of special XML characters
      * @param: path, String
      * @param: listCharacters_dict, dictionary with String as keys and String as values
     """
-    xml_characters = dict()
+    xml_characters = {}
     try:
-        with open(path) as f:
-            line = f.readline()
+        with open(path, 'r', encoding='utf-8') as file:
+            line = file.readline()
             while line:
                 if len(line) != 0 and line[0] != '#':
                     str_tmp = line.split("\t")
                     xml_characters[str_tmp[0]] = str_tmp[1]
-                line = f.readline()
+                line = file.readline()
     except:
-        e = sys.exc_info()[0]
-        print("Error: reading XMLCharacter " + str(e) + "\n")
+        print("Error: reading XMLCharacter " + str(sys.exc_info()[0]) + "\n")
 
     return xml_characters
