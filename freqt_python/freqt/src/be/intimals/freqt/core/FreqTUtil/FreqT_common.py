@@ -193,8 +193,7 @@ class FreqT_common:
                     output_maximal_patterns.printPattern(maximal_patterns_dict[keys])
                     output_common_patterns.write(keys + "\n")
                 output_maximal_patterns.close()
-            output_common_patterns.flush()
-            output_common_patterns.close()
+                output_common_patterns.flush()
         except:
             print("error print maximal patterns " + str(sys.exc_info()[0]) + "\n")
             trace = traceback.format_exc()

@@ -2,13 +2,13 @@
 """
 create grammar for ASTs
 """
-from freqt.src.be.intimals.freqt.input.ReadXMLInt import *
-from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
-
-from xml.dom import minidom
-from xml.dom import Node
+import sys
+import traceback
+from xml.dom import Node, minidom
 import os
 import collections
+
+from freqt.src.be.intimals.freqt.util.Variables import UNICHAR
 
 
 def createGrammar(path, grammar_dict, white_labels):
@@ -21,20 +21,20 @@ def createGrammar(path, grammar_dict, white_labels):
     subdir.sort()
     for i in range(len(subdir)):
         subdir[i] = path + '/' + subdir[i]
-    for fi in subdir:
-        if os.path.isfile(fi):
-            if fi.endswith(".xml"):
-                doc = minidom.parse(fi)
+    for file in subdir:
+        if os.path.isfile(file):
+            if file.endswith(".xml"):
+                doc = minidom.parse(file)
                 doc.documentElement.normalize()
                 # create grammar
                 readGrammarDepthFirst(doc.documentElement, grammar_dict, white_labels)
 
-    directories = [fi for fi in os.listdir(path) if os.path.isdir(os.path.join(path, fi))]
+    directories = [file for file in os.listdir(path) if os.path.isdir(os.path.join(path, file))]
     for i in range(len(directories)):
         directories[i] = path + '/' + directories[i]
-    for dir in directories:
-        if os.path.isdir(dir):
-            createGrammar(dir, grammar_dict, white_labels)
+    for directory in directories:
+        if os.path.isdir(directory):
+            createGrammar(directory, grammar_dict, white_labels)
 
 
 def readGrammarDepthFirst(node, grammar_dict, white_labels):
@@ -53,23 +53,22 @@ def readGrammarDepthFirst(node, grammar_dict, white_labels):
 
             if node.hasChildNodes():
                 # get list of children
-                nodeList = node.childNodes
+                node_list = node.childNodes
                 if node.nodeName in white_labels:
-                    whiteChildren = white_labels[node.nodeName]
+                    white_children = white_labels[node.nodeName]
                     # loop for each child
-                    for i in range(len(nodeList)):
-                        if nodeList[i].nodeType == Node.ELEMENT_NODE:
-                            if nodeList[i].nodeName in whiteChildren:
-                                readGrammarDepthFirst(nodeList[i], grammar_dict, white_labels)
+                    for child in node_list:
+                        if child.nodeType == Node.ELEMENT_NODE:
+                            if child.nodeName in white_children:
+                                readGrammarDepthFirst(child, grammar_dict, white_labels)
                 else:
                     # loop for each child
-                    for i in range(len(nodeList)):
-                        if nodeList[i].nodeType == Node.ELEMENT_NODE:
-                            readGrammarDepthFirst(nodeList[i], grammar_dict, white_labels)
+                    for child in node_list:
+                        if child.nodeType == Node.ELEMENT_NODE:
+                            readGrammarDepthFirst(child, grammar_dict, white_labels)
 
     except:
-        e = sys.exc_info()[0]
-        print("Grammar error: " + str(e))
+        print("Grammar error: " + str(sys.exc_info()[0]))
         trace = traceback.format_exc()
         print(trace)
 
@@ -80,31 +79,29 @@ def addNewNode(node, grammar_dict, white_labels):
      * @param: node, Node
      * @param: grammar_dict, dictionary with String as keys and list of string as values
     """
-    nbChildren = count_children(node)
-    childrenList = node.childNodes
-    tmp_list = list()
-    if nbChildren == 0:  # add leaf node
+    tmp_list = []
+    if count_children(node) == 0:  # add leaf node
         if node.nodeType == Node.ELEMENT_NODE:
             tmp_list.append("ordered")
             tmp_list.append("1")
             # keep leaf node in grammar if necessary
             tmp_list.append("leaf-node" + UNICHAR + "false")
-    else: # add internal node
+    else:  # add internal node
         # 1 - find children
-        childrenTemp_dict = collections.OrderedDict()  # ordered dictionary with Strong as keys and values
+        children_temp_dict = collections.OrderedDict()  # ordered dictionary with Strong as keys and values
         # find children of the current node
-        repeatedChild = isRepeatedChild(node, childrenList, childrenTemp_dict, white_labels)
+        repeated_child = isRepeatedChild(node, node.childNodes, children_temp_dict, white_labels)
 
-        if repeatedChild:
+        if repeated_child:
             tmp_list.append("unordered")
             tmp_list.append("1..*")
-            for key in childrenTemp_dict:
+            for key in children_temp_dict:
                 tmp_list.append(key + UNICHAR + "false")
         else:
             tmp_list.append("ordered")
-            tmp_list.append(str(len(childrenTemp_dict)))
-            for key in childrenTemp_dict:
-                tmp_list.append(key + UNICHAR + childrenTemp_dict[key])
+            tmp_list.append(str(len(children_temp_dict)))
+            for key in children_temp_dict:
+                tmp_list.append(key + UNICHAR + children_temp_dict[key])
     grammar_dict[node.nodeName] = tmp_list
 
 
@@ -114,8 +111,7 @@ def updateNode(node, grammar_dict, white_labels):
      * @param: node, Node
      * @param: grammar_dict, dictionary with String as keys and list of string as values
     """
-    nbChildren = count_children(node)
-    if nbChildren == 0:  # leaf node
+    if count_children(node) == 0:  # leaf node
         updateLeafNode(node, grammar_dict)
     else:  # internal node
         updateInternalNode(node, grammar_dict, white_labels)
@@ -128,53 +124,53 @@ def updateInternalNode(node, grammar_dict, white_labels):
      * @param: grammar_dict, dictionary with String as keys and list of string as values
     """
     # find grammar of this current node
-    oldGrammar_list = grammar_dict[node.nodeName]
-    oldDegree = oldGrammar_list[1]
+    old_grammar_list = grammar_dict[node.nodeName]
+    old_degree = old_grammar_list[1]
     # find children of the current node in grammar
-    oldChildren_dict = collections.OrderedDict()  # dictionary with String as keys and values
-    for i in range(2, len(oldGrammar_list)):
-        temp_list = oldGrammar_list[i].split(UNICHAR)
-        oldChildren_dict[temp_list[0]] = temp_list[1]
+    old_children_dict = collections.OrderedDict()  # dictionary with String as keys and values
+    for i in range(2, len(old_grammar_list)):
+        temp_list = old_grammar_list[i].split(UNICHAR)
+        old_children_dict[temp_list[0]] = temp_list[1]
     # find children of the current node
-    childrenList_list = node.childNodes  # list of Node
-    newChildren_dict = collections.OrderedDict()  # dictionary with String as keys and values
-    repeatedChild = isRepeatedChild(node, childrenList_list, newChildren_dict, white_labels)
+    children_list = node.childNodes  # list of Node
+    new_children_dict = collections.OrderedDict()  # dictionary with String as keys and values
+    repeated_child = isRepeatedChild(node, children_list, new_children_dict, white_labels)
 
-    tmp_list = list()  # list of String
-    if repeatedChild:
+    tmp_list = []  # list of String
+    if repeated_child:
         tmp_list.append("unordered")
         tmp_list.append("1..*")
-        newChildren_dict.update(oldChildren_dict)
-        for key in newChildren_dict:
+        new_children_dict.update(old_children_dict)
+        for key in new_children_dict:
             tmp_list.append(key + UNICHAR + "false")
     else:
-        if len(newChildren_dict) == 1 and oldDegree == "1":
+        if len(new_children_dict) == 1 and old_degree == "1":
             tmp_list.append("ordered")
             tmp_list.append("1")
-            newChildren_dict.update(oldChildren_dict)
-            if len(newChildren_dict) > 1:
-                for key in newChildren_dict:
+            new_children_dict.update(old_children_dict)
+            if len(new_children_dict) > 1:
+                for key in new_children_dict:
                     tmp_list.append(key + UNICHAR + "false")
             else:
-                for key in newChildren_dict:
+                for key in new_children_dict:
                     tmp_list.append(key + UNICHAR + "true")
         else:
-            if oldDegree == "1..*":
+            if old_degree == "1..*":
                 tmp_list.append("unordered")
                 tmp_list.append("1..*")
-                newChildren_dict.update(oldChildren_dict)
-                for key in newChildren_dict:
+                new_children_dict.update(old_children_dict)
+                for key in new_children_dict:
                     tmp_list.append(key + UNICHAR + "false")
             else:  # update grammar [unordered, N..M, list of children]
                 # calculate intersection of old and new children
-                inter = _inter(oldChildren_dict, newChildren_dict)  # dictionary with String as keys and values
+                inter = _inter(old_children_dict, new_children_dict)  # dictionary with String as keys and values
                 # calculate union of old and new children
-                newChildren_dict.update(oldChildren_dict)
+                new_children_dict.update(old_children_dict)
                 tmp_list.append("ordered")
-                if len(inter) != len(newChildren_dict):
-                    tmp_list.append(str(len(inter)) + ".." + str(len(newChildren_dict)))
+                if len(inter) != len(new_children_dict):
+                    tmp_list.append(str(len(inter)) + ".." + str(len(new_children_dict)))
                     # update children
-                    for key in newChildren_dict:
+                    for key in new_children_dict:
                         if key in inter:
                             tmp_list.append(key + UNICHAR + "true")
                         else:
@@ -183,39 +179,39 @@ def updateInternalNode(node, grammar_dict, white_labels):
                     # update degree
                     tmp_list.append(str(len(inter)))
                     # update children
-                    for key in newChildren_dict:
-                        tmp_list.append(key + UNICHAR + newChildren_dict[key])
+                    for key in new_children_dict:
+                        tmp_list.append(key + UNICHAR + new_children_dict[key])
     grammar_dict[node.nodeName] = tmp_list
 
 
-def isRepeatedChild(node, childrenList_list, childrenTemp_dict, white_labels):
+def isRepeatedChild(node, children_list, children_temp_dict, white_labels):
     """
      * find children of a node
      * @param: node, Node
      * @param: childrenList_list, a list of Node
      * @param: childrenTemp_dict, dictionary with String as keys and values
     """
-    repeatedChild = False
+    repeated_child = False
     if node.nodeName in white_labels:
-        tmpChild_list = white_labels[node.nodeName]
-        for i in range(len(childrenList_list)):
-            if childrenList_list[i].nodeType == Node.ELEMENT_NODE:
-                if childrenList_list[i].nodeName in tmpChild_list:
-                    if childrenList_list[i].nodeName in childrenTemp_dict:
-                        childrenTemp_dict[childrenList_list[i].nodeName] = "false"
-                        repeatedChild = True
+        tmp_child_list = white_labels[node.nodeName]
+        for child in children_list:
+            if child.nodeType == Node.ELEMENT_NODE:
+                if child.nodeName in tmp_child_list:
+                    if child.nodeName in children_temp_dict:
+                        children_temp_dict[child.nodeName] = "false"
+                        repeated_child = True
                     else:
-                        childrenTemp_dict[childrenList_list[i].nodeName] = "true"
+                        children_temp_dict[child.nodeName] = "true"
 
     else:
-        for i in range(len(childrenList_list)):
-            if childrenList_list[i].nodeType == Node.ELEMENT_NODE:
-                if childrenList_list[i].nodeName in childrenTemp_dict:
-                    childrenTemp_dict[childrenList_list[i].nodeName] = "false"
-                    repeatedChild = True
+        for child in children_list:
+            if child.nodeType == Node.ELEMENT_NODE:
+                if child.nodeName in children_temp_dict:
+                    children_temp_dict[child.nodeName] = "false"
+                    repeated_child = True
                 else:
-                    childrenTemp_dict[childrenList_list[i].nodeName] = "true"
-    return repeatedChild
+                    children_temp_dict[child.nodeName] = "true"
+    return repeated_child
 
 
 def updateLeafNode(node, grammar_dict):
@@ -224,23 +220,23 @@ def updateLeafNode(node, grammar_dict):
      * @param: node, Node
      * @param: grammar_dict, dictionary with String as keys and list of string as values
     """
-    tmp_list = list()  # list of String
+    tmp_list = []  # list of String
     tmp_list.append("ordered")
     tmp_list.append("1")
     tmp_list.append("leaf-node" + UNICHAR + "false")
     grammar_dict[node.nodeName] = tmp_list
 
 
-def _inter(oldChildren_dict, newChildren_dict):
+def _inter(old_children_dict, new_children_dict):
     """
      * find intersection elements of two children lists
-     * @param: oldChildren_dict, dictionary with String as keys and values
-     * @param: newChildren_dict, dictionary with String as keys and values
+     * @param: old_children_dict, dictionary with String as keys and values
+     * @param: new_children_dict, dictionary with String as keys and values
     """
     inter = collections.OrderedDict()
-    for key in oldChildren_dict:
-        if key in newChildren_dict and oldChildren_dict[key] == "true":
-            inter[key] = oldChildren_dict[key]
+    for key in old_children_dict:
+        if key in new_children_dict and old_children_dict[key] == "true":
+            inter[key] = old_children_dict[key]
     return inter
 
 
@@ -253,7 +249,7 @@ def count_children(node):
      * return the number of children of a given node
     """
     nb_children = 0
-    for n in node.childNodes:
-        if n.nodeType != Node.TEXT_NODE and n.nodeType == Node.ELEMENT_NODE:
+    for child in node.childNodes:
+        if child.nodeType != Node.TEXT_NODE and child.nodeType == Node.ELEMENT_NODE:
             nb_children += 1
     return nb_children
